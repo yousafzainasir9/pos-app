@@ -332,6 +332,12 @@ const POSPage: React.FC = () => {
                         SKU: {product.sku}
                       </div>
                     )}
+                    {product.barcode && (
+                      <div className="text-muted small">
+                        <FaBarcode className="me-1" size={10} />
+                        {product.barcode}
+                      </div>
+                    )}
                   </div>
                 </Card.Body>
               </Card>
@@ -382,6 +388,13 @@ const POSPage: React.FC = () => {
                   <small className="text-muted">
                     {product.categoryName} / {product.subcategoryName}
                     {product.sku && ` • SKU: ${product.sku}`}
+                    {product.barcode && (
+                      <>
+                        <br />
+                        <FaBarcode className="me-1" size={10} />
+                        {product.barcode}
+                      </>
+                    )}
                   </small>
                 </div>
                 <div className="text-end">

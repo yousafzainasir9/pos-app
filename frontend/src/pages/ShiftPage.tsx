@@ -173,7 +173,10 @@ const ShiftPage: React.FC = () => {
                     >
                       {isLoading ? (
                         <>
-                          <span className="spinner-border spinner-border-sm me-2" />
+                          <span 
+                            className="spinner-border spinner-border-sm me-2" 
+                            style={{ width: '1rem', height: '1rem' }}
+                          />
                           Opening Shift...
                         </>
                       ) : (
@@ -317,7 +320,10 @@ const ShiftPage: React.FC = () => {
                     >
                       {isLoading ? (
                         <>
-                          <span className="spinner-border spinner-border-sm me-2" />
+                          <span 
+                            className="spinner-border spinner-border-sm me-2" 
+                            style={{ width: '1rem', height: '1rem' }}
+                          />
                           Closing...
                         </>
                       ) : (

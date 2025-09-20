@@ -130,6 +130,18 @@ body {
   height: 200px;
 }
 
+/* Ensure all Bootstrap spinners are consistently sized */
+.spinner-border-sm {
+  width: 1rem !important;
+  height: 1rem !important;
+  border-width: 0.2em !important;
+}
+
+/* Button spinner specific styles */
+.btn .spinner-border-sm {
+  vertical-align: middle;
+}
+
 /* Responsive Tables */
 .table-responsive {
   overflow-x: auto;

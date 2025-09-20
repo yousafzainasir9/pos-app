@@ -130,7 +130,10 @@ const LoginPage: React.FC = () => {
                     >
                       {isLoading ? (
                         <>
-                          <span className="spinner-border spinner-border-sm me-2" />
+                          <span 
+                            className="spinner-border spinner-border-sm me-2" 
+                            style={{ width: '1.2rem', height: '1.2rem' }}
+                          />
                           Signing in...
                         </>
                       ) : (
@@ -200,7 +203,10 @@ const LoginPage: React.FC = () => {
                     >
                       {isLoading ? (
                         <>
-                          <span className="spinner-border spinner-border-sm me-2" />
+                          <span 
+                            className="spinner-border spinner-border-sm me-2" 
+                            style={{ width: '1rem', height: '1rem' }}
+                          />
                           Signing in...
                         </>
                       ) : (

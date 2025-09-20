@@ -216,7 +216,10 @@ const CartPage: React.FC = () => {
                 >
                   {isProcessing ? (
                     <>
-                      <span className="spinner-border spinner-border-sm me-2" />
+                      <span 
+                        className="spinner-border spinner-border-sm me-2" 
+                        style={{ width: '1rem', height: '1rem' }}
+                      />
                       Processing...
                     </>
                   ) : (
@@ -347,7 +350,10 @@ const CartPage: React.FC = () => {
               >
                 {isProcessing ? (
                   <>
-                    <span className="spinner-border spinner-border-sm me-2" />
+                    <span 
+                      className="spinner-border spinner-border-sm me-2" 
+                      style={{ width: '1rem', height: '1rem' }}
+                    />
                     Processing...
                   </>
                 ) : (

@@ -14,9 +14,7 @@ import {
   Tab,
   InputGroup,
   Pagination,
-  Spinner,
-  Toast,
-  ToastContainer
+  Spinner
 } from 'react-bootstrap';
 import { 
   FaPlus, 
@@ -61,16 +59,16 @@ interface Product {
   id: number;
   name: string;
   slug: string;
-  sku: string;
-  barcode: string;
-  description: string;
+  sku?: string;
+  barcode?: string;
+  description?: string;
   priceExGst: number;
   gstAmount: number;
   priceIncGst: number;
-  cost: number;
-  packNotes: string;
-  packSize: number;
-  imageUrl: string;
+  cost?: number;
+  packNotes?: string;
+  packSize?: number;
+  imageUrl?: string;
   isActive: boolean;
   trackInventory: boolean;
   stockQuantity: number;
@@ -79,8 +77,26 @@ interface Product {
   subcategoryId: number;
   subcategory?: Subcategory;
   category?: Category;
-  supplierId: number;
+  supplierId?: number;
   supplier?: Supplier;
+}
+
+interface FormData {
+  name: string;
+  sku?: string;
+  barcode?: string;
+  description?: string;
+  priceExGst: number;
+  cost?: number;
+  packSize?: number;
+  imageUrl?: string;
+  isActive: boolean;
+  trackInventory: boolean;
+  stockQuantity: number;
+  lowStockThreshold: number;
+  displayOrder: number;
+  subcategoryId: number;
+  supplierId?: number;
 }
 
 const ProductsPage: React.FC = () => {
@@ -98,21 +114,26 @@ const ProductsPage: React.FC = () => {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<number | ''>('');
   const [activeTab, setActiveTab] = useState('all');
+  const [validated, setValidated] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
-  const [formData, setFormData] = useState<Partial<Product>>({
+  const [formData, setFormData] = useState<FormData>({
     name: '',
-    sku: '',
-    barcode: '',
-    description: '',
+    sku: undefined,
+    barcode: undefined,
+    description: undefined,
     priceExGst: 0,
-    cost: 0,
+    cost: undefined,
     packSize: 1,
+    imageUrl: undefined,
     isActive: true,
     trackInventory: true,
     stockQuantity: 0,
     lowStockThreshold: 10,
+    displayOrder: 0,
     subcategoryId: 0,
-    supplierId: 0,
+    supplierId: undefined,
   });
 
   useEffect(() => {
@@ -179,9 +200,28 @@ const ProductsPage: React.FC = () => {
   };
 
   const handleOpenModal = (product: Product | null = null) => {
+    setFormErrors({});
+    setValidated(false);
+    
     if (product) {
       setEditingProduct(product);
-      setFormData(product);
+      setFormData({
+        name: product.name,
+        sku: product.sku,
+        barcode: product.barcode,
+        description: product.description,
+        priceExGst: product.priceExGst,
+        cost: product.cost,
+        packSize: product.packSize || 1,
+        imageUrl: product.imageUrl,
+        isActive: product.isActive,
+        trackInventory: product.trackInventory,
+        stockQuantity: product.stockQuantity,
+        lowStockThreshold: product.lowStockThreshold,
+        displayOrder: product.displayOrder || 0,
+        subcategoryId: product.subcategoryId,
+        supplierId: product.supplierId
+      });
       if (product.subcategory) {
         setSelectedCategory(product.subcategory.categoryId);
         fetchSubcategories(product.subcategory.categoryId);
@@ -190,18 +230,20 @@ const ProductsPage: React.FC = () => {
       setEditingProduct(null);
       setFormData({
         name: '',
-        sku: '',
-        barcode: '',
-        description: '',
+        sku: undefined,
+        barcode: undefined,
+        description: undefined,
         priceExGst: 0,
-        cost: 0,
+        cost: undefined,
         packSize: 1,
+        imageUrl: undefined,
         isActive: true,
         trackInventory: true,
         stockQuantity: 0,
         lowStockThreshold: 10,
+        displayOrder: 0,
         subcategoryId: 0,
-        supplierId: 0,
+        supplierId: undefined,
       });
       setSelectedCategory('');
       setSubcategories([]);
@@ -214,6 +256,8 @@ const ProductsPage: React.FC = () => {
     setEditingProduct(null);
     setSelectedCategory('');
     setSubcategories([]);
+    setFormErrors({});
+    setValidated(false);
   };
 
   const calculateGST = (priceExGst: number) => {
@@ -225,15 +269,76 @@ const ProductsPage: React.FC = () => {
     };
   };
 
-  const handleSaveProduct = async () => {
+  const validateForm = () => {
+    const errors: Record<string, string> = {};
+
+    if (!formData.name || formData.name.trim() === '') {
+      errors.name = 'Product name is required';
+    }
+
+    if (formData.priceExGst < 0) {
+      errors.priceExGst = 'Price must be greater than or equal to 0';
+    }
+
+    if (!formData.subcategoryId || formData.subcategoryId === 0) {
+      errors.subcategoryId = 'Subcategory is required';
+    }
+
+    if (formData.trackInventory) {
+      if (formData.stockQuantity < 0) {
+        errors.stockQuantity = 'Stock quantity cannot be negative';
+      }
+      if (formData.lowStockThreshold < 0) {
+        errors.lowStockThreshold = 'Low stock threshold cannot be negative';
+      }
+    }
+
+    if (formData.packSize && formData.packSize < 1) {
+      errors.packSize = 'Pack size must be at least 1';
+    }
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const handleSaveProduct = async (event?: React.FormEvent) => {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+
+    setValidated(true);
+
+    if (!validateForm()) {
+      toast.error('Please correct the form errors');
+      return;
+    }
+
+    setSaving(true);
+
     try {
       const { gstAmount, priceIncGst } = calculateGST(formData.priceExGst || 0);
       
       const productData = {
-        ...formData,
+        name: formData.name.trim(),
+        slug: formData.name?.toLowerCase().replace(/\s+/g, '-') || '',
+        sku: formData.sku?.trim() || null,
+        barcode: formData.barcode?.trim() || null,
+        description: formData.description?.trim() || null,
+        priceExGst: formData.priceExGst,
         gstAmount,
         priceIncGst,
-        slug: formData.name?.toLowerCase().replace(/\s+/g, '-') || '',
+        cost: formData.cost || null,
+        packSize: formData.packSize || 1,
+        packNotes: null,
+        imageUrl: formData.imageUrl?.trim() || null,
+        isActive: formData.isActive,
+        trackInventory: formData.trackInventory,
+        stockQuantity: formData.stockQuantity,
+        lowStockThreshold: formData.lowStockThreshold,
+        displayOrder: formData.displayOrder || 0,
+        subcategoryId: formData.subcategoryId,
+        supplierId: formData.supplierId || null,
       };
 
       if (editingProduct) {
@@ -250,9 +355,15 @@ const ProductsPage: React.FC = () => {
       console.error('Error saving product:', error);
       if (error.response?.status === 401) {
         navigate('/login');
+      } else if (error.response?.data?.message) {
+        toast.error(error.response.data.message);
+      } else if (error.response?.data?.errors && error.response.data.errors.length > 0) {
+        error.response.data.errors.forEach((err: string) => toast.error(err));
       } else {
-        toast.error('Error saving product');
+        toast.error('Error saving product. Please check all fields and try again.');
       }
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -286,7 +397,7 @@ const ProductsPage: React.FC = () => {
 
   const filteredProducts = products.filter(product => 
     product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    product.sku.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    product.sku?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     product.barcode?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -402,7 +513,7 @@ const ProductsPage: React.FC = () => {
                           <tr key={product.id}>
                             <td>
                               <div>
-                                <div>{product.sku}</div>
+                                <div>{product.sku || '-'}</div>
                                 {product.barcode && (
                                   <small className="text-muted">
                                     <FaBarcode className="me-1" size={10} />
@@ -414,7 +525,7 @@ const ProductsPage: React.FC = () => {
                             <td>
                               <div>
                                 <strong>{product.name}</strong>
-                                {product.packSize > 1 && (
+                                {product.packSize && product.packSize > 1 && (
                                   <div><small className="text-muted">Pack of {product.packSize}</small></div>
                                 )}
                               </div>
@@ -505,7 +616,7 @@ const ProductsPage: React.FC = () => {
                 <tbody>
                   {lowStockProducts.map(product => (
                     <tr key={product.id}>
-                      <td>{product.sku}</td>
+                      <td>{product.sku || '-'}</td>
                       <td>{product.name}</td>
                       <td>{product.supplier?.name || '-'}</td>
                       <td className="text-end text-danger fw-bold">{product.stockQuantity}</td>
@@ -547,28 +658,31 @@ const ProductsPage: React.FC = () => {
         <Modal.Header closeButton>
           <Modal.Title>{editingProduct ? 'Edit Product' : 'Add New Product'}</Modal.Title>
         </Modal.Header>
-        <Modal.Body>
-          <Form>
+        <Form noValidate validated={validated} onSubmit={handleSaveProduct}>
+          <Modal.Body>
             <Row>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Product Name *</Form.Label>
+                  <Form.Label>Product Name <span className="text-danger">*</span></Form.Label>
                   <Form.Control
                     type="text"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     required
+                    isInvalid={!!formErrors.name}
                   />
+                  <Form.Control.Feedback type="invalid">
+                    {formErrors.name}
+                  </Form.Control.Feedback>
                 </Form.Group>
               </Col>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label>SKU *</Form.Label>
+                  <Form.Label>SKU</Form.Label>
                   <Form.Control
                     type="text"
-                    value={formData.sku}
-                    onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
-                    required
+                    value={formData.sku || ''}
+                    onChange={(e) => setFormData({ ...formData, sku: e.target.value || undefined })}
                   />
                 </Form.Group>
               </Col>
@@ -580,8 +694,8 @@ const ProductsPage: React.FC = () => {
                   <Form.Label>Barcode</Form.Label>
                   <Form.Control
                     type="text"
-                    value={formData.barcode}
-                    onChange={(e) => setFormData({ ...formData, barcode: e.target.value })}
+                    value={formData.barcode || ''}
+                    onChange={(e) => setFormData({ ...formData, barcode: e.target.value || undefined })}
                   />
                 </Form.Group>
               </Col>
@@ -590,9 +704,14 @@ const ProductsPage: React.FC = () => {
                   <Form.Label>Pack Size</Form.Label>
                   <Form.Control
                     type="number"
-                    value={formData.packSize}
-                    onChange={(e) => setFormData({ ...formData, packSize: parseInt(e.target.value) })}
+                    value={formData.packSize || 1}
+                    onChange={(e) => setFormData({ ...formData, packSize: parseInt(e.target.value) || 1 })}
+                    min={1}
+                    isInvalid={!!formErrors.packSize}
                   />
+                  <Form.Control.Feedback type="invalid">
+                    {formErrors.packSize}
+                  </Form.Control.Feedback>
                 </Form.Group>
               </Col>
             </Row>
@@ -602,18 +721,19 @@ const ProductsPage: React.FC = () => {
               <Form.Control
                 as="textarea"
                 rows={3}
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                value={formData.description || ''}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value || undefined })}
               />
             </Form.Group>
 
             <Row>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Category</Form.Label>
+                  <Form.Label>Category <span className="text-danger">*</span></Form.Label>
                   <Form.Select
                     value={selectedCategory}
                     onChange={(e) => handleCategoryChange(e.target.value)}
+                    isInvalid={!!formErrors.subcategoryId && !selectedCategory}
                   >
                     <option value="">Select Category</option>
                     {categories.map(cat => (
@@ -624,17 +744,22 @@ const ProductsPage: React.FC = () => {
               </Col>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Subcategory</Form.Label>
+                  <Form.Label>Subcategory <span className="text-danger">*</span></Form.Label>
                   <Form.Select
                     value={formData.subcategoryId}
-                    onChange={(e) => setFormData({ ...formData, subcategoryId: parseInt(e.target.value) })}
+                    onChange={(e) => setFormData({ ...formData, subcategoryId: parseInt(e.target.value) || 0 })}
                     disabled={!selectedCategory}
+                    required
+                    isInvalid={!!formErrors.subcategoryId}
                   >
                     <option value={0}>Select Subcategory</option>
                     {subcategories.map(sub => (
                       <option key={sub.id} value={sub.id}>{sub.name}</option>
                     ))}
                   </Form.Select>
+                  <Form.Control.Feedback type="invalid">
+                    {formErrors.subcategoryId}
+                  </Form.Control.Feedback>
                 </Form.Group>
               </Col>
             </Row>
@@ -646,21 +771,27 @@ const ProductsPage: React.FC = () => {
                   <Form.Control
                     type="number"
                     step="0.01"
-                    value={formData.cost}
-                    onChange={(e) => setFormData({ ...formData, cost: parseFloat(e.target.value) })}
+                    value={formData.cost || ''}
+                    onChange={(e) => setFormData({ ...formData, cost: parseFloat(e.target.value) || undefined })}
+                    min={0}
                   />
                 </Form.Group>
               </Col>
               <Col md={4}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Price (ex GST) * ($)</Form.Label>
+                  <Form.Label>Price (ex GST) <span className="text-danger">*</span> ($)</Form.Label>
                   <Form.Control
                     type="number"
                     step="0.01"
                     value={formData.priceExGst}
-                    onChange={(e) => setFormData({ ...formData, priceExGst: parseFloat(e.target.value) })}
+                    onChange={(e) => setFormData({ ...formData, priceExGst: parseFloat(e.target.value) || 0 })}
                     required
+                    min={0}
+                    isInvalid={!!formErrors.priceExGst}
                   />
+                  <Form.Control.Feedback type="invalid">
+                    {formErrors.priceExGst}
+                  </Form.Control.Feedback>
                 </Form.Group>
               </Col>
               <Col md={4}>
@@ -681,8 +812,8 @@ const ProductsPage: React.FC = () => {
                 <Form.Group className="mb-3">
                   <Form.Label>Supplier</Form.Label>
                   <Form.Select
-                    value={formData.supplierId}
-                    onChange={(e) => setFormData({ ...formData, supplierId: parseInt(e.target.value) })}
+                    value={formData.supplierId || 0}
+                    onChange={(e) => setFormData({ ...formData, supplierId: parseInt(e.target.value) || undefined })}
                   >
                     <option value={0}>No Supplier</option>
                     {suppliers.map(sup => (
@@ -692,6 +823,20 @@ const ProductsPage: React.FC = () => {
                 </Form.Group>
               </Col>
               <Col md={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label>Image URL</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={formData.imageUrl || ''}
+                    onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value || undefined })}
+                    placeholder="https://example.com/image.jpg"
+                  />
+                </Form.Group>
+              </Col>
+            </Row>
+
+            <Row>
+              <Col md={12}>
                 <Form.Group className="mb-3">
                   <Form.Check
                     type="switch"
@@ -711,8 +856,13 @@ const ProductsPage: React.FC = () => {
                     <Form.Control
                       type="number"
                       value={formData.stockQuantity}
-                      onChange={(e) => setFormData({ ...formData, stockQuantity: parseInt(e.target.value) })}
+                      onChange={(e) => setFormData({ ...formData, stockQuantity: parseInt(e.target.value) || 0 })}
+                      min={0}
+                      isInvalid={!!formErrors.stockQuantity}
                     />
+                    <Form.Control.Feedback type="invalid">
+                      {formErrors.stockQuantity}
+                    </Form.Control.Feedback>
                   </Form.Group>
                 </Col>
                 <Col md={6}>
@@ -721,31 +871,59 @@ const ProductsPage: React.FC = () => {
                     <Form.Control
                       type="number"
                       value={formData.lowStockThreshold}
-                      onChange={(e) => setFormData({ ...formData, lowStockThreshold: parseInt(e.target.value) })}
+                      onChange={(e) => setFormData({ ...formData, lowStockThreshold: parseInt(e.target.value) || 0 })}
+                      min={0}
+                      isInvalid={!!formErrors.lowStockThreshold}
                     />
+                    <Form.Control.Feedback type="invalid">
+                      {formErrors.lowStockThreshold}
+                    </Form.Control.Feedback>
                   </Form.Group>
                 </Col>
               </Row>
             )}
 
-            <Form.Group className="mb-3">
-              <Form.Check
-                type="switch"
-                label="Active"
-                checked={formData.isActive}
-                onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
-              />
-            </Form.Group>
-          </Form>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={handleCloseModal}>
-            Cancel
-          </Button>
-          <Button variant="primary" onClick={handleSaveProduct}>
-            {editingProduct ? 'Update' : 'Save'}
-          </Button>
-        </Modal.Footer>
+            <Row>
+              <Col md={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label>Display Order</Form.Label>
+                  <Form.Control
+                    type="number"
+                    value={formData.displayOrder}
+                    onChange={(e) => setFormData({ ...formData, displayOrder: parseInt(e.target.value) || 0 })}
+                    min={0}
+                  />
+                  <Form.Text className="text-muted">
+                    Lower numbers appear first
+                  </Form.Text>
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group className="mb-3 d-flex align-items-center h-100">
+                  <Form.Check
+                    type="switch"
+                    label="Active"
+                    checked={formData.isActive}
+                    onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+                  />
+                </Form.Group>
+              </Col>
+            </Row>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={handleCloseModal} disabled={saving}>
+              Cancel
+            </Button>
+            <Button 
+              variant="primary" 
+              type="submit"
+              disabled={saving}
+              style={{ minWidth: '80px' }}
+            >
+              {saving ? 'Saving...' : (editingProduct ? 'Update' : 'Save')}
+            </Button>
+          </Modal.Footer>
+        </Form>
       </Modal>
     </Container>
   );

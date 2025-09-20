@@ -21,6 +21,16 @@
   transform: translateY(-2px);
 }
 
+/* Barcode display styles */
+.product-card .text-muted {
+  font-size: 0.75rem;
+  line-height: 1.2;
+}
+
+.product-card .fa-barcode {
+  opacity: 0.7;
+}
+
 /* Disabled state for products when shift is not open */
 .product-card[style*="not-allowed"] {
   opacity: 0.6;
