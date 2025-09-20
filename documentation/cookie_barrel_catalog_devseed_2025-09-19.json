@@ -1,0 +1,1379 @@
+{
+  "vendor": "Cookie Barrel",
+  "version": "dev-seed-v1",
+  "generated_at": "2025-09-19T00:54:21Z",
+  "currency": "AUD",
+  "gst": {
+    "rate": 0.1,
+    "exclusive_pricing": true
+  },
+  "categories": [
+    {
+      "id": "banana-breads",
+      "name": "Banana Breads",
+      "slug": "banana-breads",
+      "subcategories": [
+        {
+          "id": "banana-breads__large-loaves",
+          "name": "Large Loaves",
+          "slug": "large-loaves",
+          "products": [
+            {
+              "id": "banana-breads__large-loaves__apple-date-large-loaves",
+              "name": "Apple & Date Large Loaves",
+              "slug": "apple-date-large-loaves",
+              "price_ex_gst_aud": 26.6,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/banana-breads"
+            },
+            {
+              "id": "banana-breads__large-loaves__banana-bread-gluten-free-large-loaves",
+              "name": "Banana Bread Gluten Free Large Loaves",
+              "slug": "banana-bread-gluten-free-large-loaves",
+              "price_ex_gst_aud": 29.9,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/banana-breads"
+            },
+            {
+              "id": "banana-breads__large-loaves__banana-bread-large-loaves",
+              "name": "Banana Bread Large Loaves",
+              "slug": "banana-bread-large-loaves",
+              "price_ex_gst_aud": 26.6,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/banana-breads"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bite-sized",
+      "name": "Bite Sized",
+      "slug": "bite-sized",
+      "subcategories": [
+        {
+          "id": "bite-sized__bite-sized",
+          "name": "Bite Sized",
+          "slug": "bite-sized",
+          "products": [
+            {
+              "id": "bite-sized__bite-sized__cacao-almond-raw-balls-pack-of-12",
+              "name": "Cacao Almond Raw Balls - pack of 12",
+              "slug": "cacao-almond-raw-balls-pack-of-12",
+              "price_ex_gst_aud": 25.3,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/bite-sized"
+            },
+            {
+              "id": "bite-sized__bite-sized__choc-cherry-raw-balls-pack-of-12",
+              "name": "Choc Cherry Raw Balls - pack of 12",
+              "slug": "choc-cherry-raw-balls-pack-of-12",
+              "price_ex_gst_aud": 25.3,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/bite-sized"
+            },
+            {
+              "id": "bite-sized__bite-sized__coconut-chia-raw-balls-pack-of-12",
+              "name": "Coconut Chia Raw Balls - pack of 12",
+              "slug": "coconut-chia-raw-balls-pack-of-12",
+              "price_ex_gst_aud": 25.3,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/bite-sized"
+            },
+            {
+              "id": "bite-sized__bite-sized__mixed-pack-brownie-bites-pack-of-12",
+              "name": "Mixed Pack Brownie Bites - pack of 12",
+              "slug": "mixed-pack-brownie-bites-pack-of-12",
+              "price_ex_gst_aud": 27.5,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/bite-sized"
+            },
+            {
+              "id": "bite-sized__bite-sized__mixed-pack-raw-balls-gluten-free-pack-of-12",
+              "name": "Mixed Pack Raw Balls Gluten Free - pack of 12",
+              "slug": "mixed-pack-raw-balls-gluten-free-pack-of-12",
+              "price_ex_gst_aud": 25.3,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/bite-sized"
+            },
+            {
+              "id": "bite-sized__bite-sized__peanut-butter-brownie-bites-pack-of-12",
+              "name": "Peanut Butter Brownie Bites - pack of 12",
+              "slug": "peanut-butter-brownie-bites-pack-of-12",
+              "price_ex_gst_aud": 27.5,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/bite-sized"
+            },
+            {
+              "id": "bite-sized__bite-sized__peppermint-brownie-bites-pack-of-12",
+              "name": "Peppermint Brownie Bites - pack of 12",
+              "slug": "peppermint-brownie-bites-pack-of-12",
+              "price_ex_gst_aud": 27.5,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/bite-sized"
+            },
+            {
+              "id": "bite-sized__bite-sized__salted-caramel-brownie-bites-pack-of-12",
+              "name": "Salted Caramel Brownie Bites - pack of 12",
+              "slug": "salted-caramel-brownie-bites-pack-of-12",
+              "price_ex_gst_aud": 27.5,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/bite-sized"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cakes",
+      "name": "Cakes",
+      "slug": "cakes",
+      "subcategories": [
+        {
+          "id": "cakes__cakes-pies",
+          "name": "Cakes & Pies",
+          "slug": "cakes-pies",
+          "products": [
+            {
+              "id": "cakes__cakes-pies__apple-pie",
+              "name": "Apple Pie",
+              "slug": "apple-pie",
+              "price_ex_gst_aud": 46.2,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/cakes"
+            },
+            {
+              "id": "cakes__cakes-pies__caramelised-fig-date-gluten-free-cake",
+              "name": "Caramelised Fig & Date Gluten Free Cake",
+              "slug": "caramelised-fig-date-gluten-free-cake",
+              "price_ex_gst_aud": 48.5,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/cakes"
+            },
+            {
+              "id": "cakes__cakes-pies__carrot-cardamom-honey-cake",
+              "name": "Carrot Cardamom & Honey Cake",
+              "slug": "carrot-cardamom-honey-cake",
+              "price_ex_gst_aud": 46.1,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/cakes"
+            },
+            {
+              "id": "cakes__cakes-pies__decadent-chocolate-banana-cake",
+              "name": "Decadent Chocolate Banana Cake",
+              "slug": "decadent-chocolate-banana-cake",
+              "price_ex_gst_aud": 46.1,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/cakes"
+            },
+            {
+              "id": "cakes__cakes-pies__key-lime-pie",
+              "name": "Key Lime Pie",
+              "slug": "key-lime-pie",
+              "price_ex_gst_aud": 48.5,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/cakes"
+            },
+            {
+              "id": "cakes__cakes-pies__lemon-meringue-pie",
+              "name": "Lemon Meringue Pie",
+              "slug": "lemon-meringue-pie",
+              "price_ex_gst_aud": 45.0,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/cakes"
+            },
+            {
+              "id": "cakes__cakes-pies__new-york-baked-cheesecake",
+              "name": "New York Baked Cheesecake",
+              "slug": "new-york-baked-cheesecake",
+              "price_ex_gst_aud": 48.5,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/cakes"
+            },
+            {
+              "id": "cakes__cakes-pies__orange-almond-gluten-free-cake",
+              "name": "Orange & Almond Gluten Free Cake",
+              "slug": "orange-almond-gluten-free-cake",
+              "price_ex_gst_aud": 48.5,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/cakes"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cookies",
+      "name": "Cookies",
+      "slug": "cookies",
+      "subcategories": [
+        {
+          "id": "cookies__cafe-cookies",
+          "name": "Cafe Cookies",
+          "slug": "cafe-cookies",
+          "products": [
+            {
+              "id": "cookies__cafe-cookies__anzac-biscuit-cafe-cookies-pack-of-12",
+              "name": "ANZAC Biscuit Cafe Cookies - pack of 12",
+              "slug": "anzac-biscuit-cafe-cookies-pack-of-12",
+              "price_ex_gst_aud": 20.48,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/cafe-cookies"
+            },
+            {
+              "id": "cookies__cafe-cookies__afghan-cafe-cookies-pack-of-12",
+              "name": "Afghan Cafe Cookies - pack of 12",
+              "slug": "afghan-cafe-cookies-pack-of-12",
+              "price_ex_gst_aud": 20.48,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/cafe-cookies"
+            },
+            {
+              "id": "cookies__cafe-cookies__american-chocolate-chip-cafe-cookies-pack-of-12",
+              "name": "American Chocolate Chip Cafe Cookies - pack of 12",
+              "slug": "american-chocolate-chip-cafe-cookies-pack-of-12",
+              "price_ex_gst_aud": 20.48,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/product-page/american-chocolate-chip-cafe-cookies-pack-of-12"
+            },
+            {
+              "id": "cookies__cafe-cookies__apricot-white-choc-macadamia-cafe-cookies-pack-of-12",
+              "name": "Apricot White Choc & Macadamia Cafe Cookies - pack of 12",
+              "slug": "apricot-white-choc-macadamia-cafe-cookies-pack-of-12",
+              "price_ex_gst_aud": 20.48,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/cafe-cookies"
+            },
+            {
+              "id": "cookies__cafe-cookies__cookie-jars",
+              "name": "Cookie Jars",
+              "slug": "cookie-jars",
+              "price_ex_gst_aud": 29.3,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/cafe-cookies"
+            },
+            {
+              "id": "cookies__cafe-cookies__dulce-de-leche-pack-of-6",
+              "name": "Dulce de Leche - pack of 6",
+              "slug": "dulce-de-leche-pack-of-6",
+              "price_ex_gst_aud": 16.5,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/cafe-cookies"
+            },
+            {
+              "id": "cookies__cafe-cookies__energy-cafe-cookies-low-fat-pack-of-12",
+              "name": "Energy Cafe Cookies (Low Fat) - pack of 12",
+              "slug": "energy-cafe-cookies-low-fat-pack-of-12",
+              "price_ex_gst_aud": 20.48,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/cafe-cookies"
+            },
+            {
+              "id": "cookies__cafe-cookies__florentine-gluten-free-cafe-cookies-pack-of-12",
+              "name": "Florentine Gluten Free Cafe Cookies - pack of 12",
+              "slug": "florentine-gluten-free-cafe-cookies-pack-of-12",
+              "price_ex_gst_aud": 23.3,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/product-page/florentine-gluten-free-cafe-cookies-pack-of-12"
+            },
+            {
+              "id": "cookies__cafe-cookies__ginger-kisses-cafe-cookies-pack-of-12",
+              "name": "Ginger Kisses Cafe Cookies - pack of 12",
+              "slug": "ginger-kisses-cafe-cookies-pack-of-12",
+              "price_ex_gst_aud": 20.68,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/cafe-cookies"
+            },
+            {
+              "id": "cookies__cafe-cookies__macadamia-white-chocolate-cafe-cookies-pack-of-12",
+              "name": "Macadamia & White Chocolate Cafe Cookies - pack of 12",
+              "slug": "macadamia-white-chocolate-cafe-cookies-pack-of-12",
+              "price_ex_gst_aud": 20.48,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/product-page/macadamia-white-chocolate-cafe-cookies-pack-of-12"
+            },
+            {
+              "id": "cookies__cafe-cookies__marble-melting-moments-cafe-cookies-pack-of-12",
+              "name": "Marble Melting Moments Cafe Cookies - pack of 12",
+              "slug": "marble-melting-moments-cafe-cookies-pack-of-12",
+              "price_ex_gst_aud": 20.9,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/product-page/marble-melting-moments-cafe-cookies-pack-of-12"
+            },
+            {
+              "id": "cookies__cafe-cookies__mixed-melting-moments-cafe-cookies-pack-of-12",
+              "name": "Mixed Melting Moments Cafe Cookies - pack of 12",
+              "slug": "mixed-melting-moments-cafe-cookies-pack-of-12",
+              "price_ex_gst_aud": 20.9,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/cafe-cookies"
+            },
+            {
+              "id": "cookies__cafe-cookies__muesli-cafe-cookies-pack-of-12",
+              "name": "Muesli Cafe Cookies - pack of 12",
+              "slug": "muesli-cafe-cookies-pack-of-12",
+              "price_ex_gst_aud": 20.6,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/product-page/muesli-cafe-cookies-pack-of-12"
+            },
+            {
+              "id": "cookies__cafe-cookies__passionfruit-melting-moments-cafe-cookies-pack-of-12",
+              "name": "Passionfruit Melting Moments Cafe Cookies - pack of 12",
+              "slug": "passionfruit-melting-moments-cafe-cookies-pack-of-12",
+              "price_ex_gst_aud": 20.9,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/cafe-cookies"
+            },
+            {
+              "id": "cookies__cafe-cookies__roasted-hazelnut-chocolate-cafe-cookies-pack-of-12",
+              "name": "Roasted Hazelnut & Chocolate Cafe Cookies - pack of 12",
+              "slug": "roasted-hazelnut-chocolate-cafe-cookies-pack-of-12",
+              "price_ex_gst_aud": 20.48,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/product-page/roasted-hazelnut-chocolate-cafe-cookies-pack-of-12"
+            },
+            {
+              "id": "cookies__cafe-cookies__scottish-shortbread-cafe-cookies-pack-of-12",
+              "name": "Scottish Shortbread Cafe Cookies - pack of 12",
+              "slug": "scottish-shortbread-cafe-cookies-pack-of-12",
+              "price_ex_gst_aud": 20.48,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/product-page/scottish-shortbread-cafe-cookies-pack-of-12"
+            },
+            {
+              "id": "cookies__cafe-cookies__spiced-date-almond-cafe-cookies-pack-of-12",
+              "name": "Spiced Date & Almond Cafe Cookies - pack of 12",
+              "slug": "spiced-date-almond-cafe-cookies-pack-of-12",
+              "price_ex_gst_aud": 20.48,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/cafe-cookies"
+            },
+            {
+              "id": "cookies__cafe-cookies__triple-choc-cafe-cookies-pack-of-12",
+              "name": "Triple Choc Cafe Cookies - pack of 12",
+              "slug": "triple-choc-cafe-cookies-pack-of-12",
+              "price_ex_gst_aud": 20.48,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/product-page/triple-choc-cafe-cookies-pack-of-12"
+            },
+            {
+              "id": "cookies__cafe-cookies__vanilla-melting-moments-cafe-cookies-pack-of-12",
+              "name": "Vanilla Melting Moments Cafe Cookies - pack of 12",
+              "slug": "vanilla-melting-moments-cafe-cookies-pack-of-12",
+              "price_ex_gst_aud": 20.9,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/cafe-cookies"
+            }
+          ]
+        },
+        {
+          "id": "cookies__classic-cookies",
+          "name": "Classic Cookies",
+          "slug": "classic-cookies",
+          "products": [
+            {
+              "id": "cookies__classic-cookies__date-ginger-choc-classic-cookies-pack-of-6",
+              "name": "Date Ginger Choc Classic Cookies - pack of 6",
+              "slug": "date-ginger-choc-classic-cookies-pack-of-6",
+              "price_ex_gst_aud": 8.48,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/cafe-cookies"
+            },
+            {
+              "id": "cookies__classic-cookies__lemon-myrtle-shortbread-classic-cookies-pack-of-6",
+              "name": "Lemon Myrtle Shortbread Classic Cookies - pack of 6",
+              "slug": "lemon-myrtle-shortbread-classic-cookies-pack-of-6",
+              "price_ex_gst_aud": 7.1,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/cafe-cookies"
+            },
+            {
+              "id": "cookies__classic-cookies__pistachio-cranberry-shortbread-classic-cookies-pack-of-6",
+              "name": "Pistachio Cranberry Shortbread Classic Cookies - pack of 6",
+              "slug": "pistachio-cranberry-shortbread-classic-cookies-pack-of-6",
+              "price_ex_gst_aud": 7.4,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/cafe-cookies"
+            },
+            {
+              "id": "cookies__classic-cookies__yoghurt-muesli-button-classic-cookies-pack-of-6",
+              "name": "Yoghurt Muesli Button Classic Cookies - pack of 6",
+              "slug": "yoghurt-muesli-button-classic-cookies-pack-of-6",
+              "price_ex_gst_aud": 7.1,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/cafe-cookies"
+            }
+          ]
+        },
+        {
+          "id": "cookies__grab-n-go-cookies",
+          "name": "Grab N Go Cookies",
+          "slug": "grab-n-go-cookies",
+          "products": [
+            {
+              "id": "cookies__grab-n-go-cookies__anzac-biscuit-grab-n-go-cookies-pack-of-10",
+              "name": "ANZAC Biscuit Grab N Go Cookies - pack of 10",
+              "slug": "anzac-biscuit-grab-n-go-cookies-pack-of-10",
+              "price_ex_gst_aud": 20.0,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/grab-n-go-cookies"
+            },
+            {
+              "id": "cookies__grab-n-go-cookies__american-chocolate-chip-grab-n-go-cookies-pack-of-10",
+              "name": "American Chocolate Chip Grab N Go Cookies - pack of 10",
+              "slug": "american-chocolate-chip-grab-n-go-cookies-pack-of-10",
+              "price_ex_gst_aud": 20.0,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/grab-n-go-cookies"
+            },
+            {
+              "id": "cookies__grab-n-go-cookies__florentine-gluten-free-grab-n-go-cookies-pack-of-12",
+              "name": "Florentine Gluten Free Grab N Go Cookies - pack of 12",
+              "slug": "florentine-gluten-free-grab-n-go-cookies-pack-of-12",
+              "price_ex_gst_aud": 26.1,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/grab-n-go-cookies"
+            },
+            {
+              "id": "cookies__grab-n-go-cookies__macadamia-white-choc-grab-n-go-cookies-pack-of-10",
+              "name": "Macadamia & White Choc Grab N Go Cookies - pack of 10",
+              "slug": "macadamia-white-choc-grab-n-go-cookies-pack-of-10",
+              "price_ex_gst_aud": 20.0,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/grab-n-go-cookies"
+            },
+            {
+              "id": "cookies__grab-n-go-cookies__muesli-grab-n-go-cookie-pack-of-10",
+              "name": "Muesli Grab N Go Cookie - pack of 10",
+              "slug": "muesli-grab-n-go-cookie-pack-of-10",
+              "price_ex_gst_aud": 20.0,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/grab-n-go-cookies"
+            },
+            {
+              "id": "cookies__grab-n-go-cookies__roasted-hazelnut-choc-grab-n-go-cookies-pack-of-10",
+              "name": "Roasted Hazelnut & Choc Grab N Go Cookies - pack of 10",
+              "slug": "roasted-hazelnut-choc-grab-n-go-cookies-pack-of-10",
+              "price_ex_gst_aud": 20.0,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/grab-n-go-cookies"
+            },
+            {
+              "id": "cookies__grab-n-go-cookies__scottish-shortbread-grab-n-go-cookies-pack-of-10",
+              "name": "Scottish Shortbread Grab N Go Cookies - pack of 10",
+              "slug": "scottish-shortbread-grab-n-go-cookies-pack-of-10",
+              "price_ex_gst_aud": 20.0,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/grab-n-go-cookies"
+            },
+            {
+              "id": "cookies__grab-n-go-cookies__spottie-cookie-grab-n-go-pack-of-10",
+              "name": "Spottie Cookie Grab N Go - pack of 10",
+              "slug": "spottie-cookie-grab-n-go-pack-of-10",
+              "price_ex_gst_aud": 20.0,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/grab-n-go-cookies"
+            },
+            {
+              "id": "cookies__grab-n-go-cookies__triple-choc-grab-n-go-cookies-pack-of-10",
+              "name": "Triple Choc Grab N Go Cookies - pack of 10",
+              "slug": "triple-choc-grab-n-go-cookies-pack-of-10",
+              "price_ex_gst_aud": 20.0,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/grab-n-go-cookies"
+            }
+          ]
+        },
+        {
+          "id": "cookies__kids-cookies",
+          "name": "Kids Cookies",
+          "slug": "kids-cookies",
+          "products": [
+            {
+              "id": "cookies__kids-cookies__freckle-kids-cookies-pack-of-12",
+              "name": "Freckle Kids Cookies - pack of 12",
+              "slug": "freckle-kids-cookies-pack-of-12",
+              "price_ex_gst_aud": 13.95,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/cafe-cookies"
+            },
+            {
+              "id": "cookies__kids-cookies__mixed-pack-kids-cookies-pack-of-12",
+              "name": "Mixed Pack - Kids Cookies - pack of 12",
+              "slug": "mixed-pack-kids-cookies-pack-of-12",
+              "price_ex_gst_aud": 13.95,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/cafe-cookies"
+            },
+            {
+              "id": "cookies__kids-cookies__monster-kids-cookies-pack-of-6",
+              "name": "Monster Kids Cookies - pack of 6",
+              "slug": "monster-kids-cookies-pack-of-6",
+              "price_ex_gst_aud": 7.0,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/cafe-cookies"
+            },
+            {
+              "id": "cookies__kids-cookies__smartie-kids-cookies-pack-of-12",
+              "name": "Smartie Kids Cookies - pack of 12",
+              "slug": "smartie-kids-cookies-pack-of-12",
+              "price_ex_gst_aud": 20.48,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/cafe-cookies"
+            },
+            {
+              "id": "cookies__kids-cookies__spottie-dottie-kids-cookies-pack-of-12",
+              "name": "Spottie Dottie Kids Cookies - pack of 12",
+              "slug": "spottie-dottie-kids-cookies-pack-of-12",
+              "price_ex_gst_aud": 20.48,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/cafe-cookies"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "individuals",
+      "name": "Individuals",
+      "slug": "individuals",
+      "subcategories": [
+        {
+          "id": "individuals__keto-tartlets",
+          "name": "Keto Tartlets",
+          "slug": "keto-tartlets",
+          "products": [
+            {
+              "id": "individuals__keto-tartlets__lemon-curd-tartlets-pack-of-6",
+              "name": "Lemon Curd Tartlets - pack of 6",
+              "slug": "lemon-curd-tartlets-pack-of-6",
+              "price_ex_gst_aud": 15.1,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/individuals"
+            },
+            {
+              "id": "individuals__keto-tartlets__mixed-curd-tartlets-pack-of-6",
+              "name": "Mixed Curd Tartlets - pack of 6",
+              "slug": "mixed-curd-tartlets-pack-of-6",
+              "price_ex_gst_aud": 15.1,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/individuals"
+            },
+            {
+              "id": "individuals__keto-tartlets__passionfruit-curd-tartlets-pack-of-6",
+              "name": "Passionfruit Curd Tartlets - pack of 6",
+              "slug": "passionfruit-curd-tartlets-pack-of-6",
+              "price_ex_gst_aud": 15.1,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/individuals"
+            },
+            {
+              "id": "individuals__keto-tartlets__raspberry-lemon-curd-tartlets-pack-of-6",
+              "name": "Raspberry & Lemon Curd Tartlets - pack of 6",
+              "slug": "raspberry-lemon-curd-tartlets-pack-of-6",
+              "price_ex_gst_aud": 15.1,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/individuals"
+            }
+          ]
+        },
+        {
+          "id": "individuals__little-loaves",
+          "name": "Little Loaves",
+          "slug": "little-loaves",
+          "products": [
+            {
+              "id": "individuals__little-loaves__caramelised-fig-date-gluten-free-little-loaves-pack-of-3",
+              "name": "Caramelised Fig & Date Gluten Free Little Loaves - pack of 3",
+              "slug": "caramelised-fig-date-gluten-free-little-loaves-pack-of-3",
+              "price_ex_gst_aud": 10.9,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/individuals"
+            },
+            {
+              "id": "individuals__little-loaves__carrot-little-loaves-pack-of-3",
+              "name": "Carrot Little Loaves - pack of 3",
+              "slug": "carrot-little-loaves-pack-of-3",
+              "price_ex_gst_aud": 10.9,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/individuals"
+            },
+            {
+              "id": "individuals__little-loaves__chocolate-gluten-free-little-loaves-pack-of-3",
+              "name": "Chocolate Gluten Free Little Loaves - pack of 3",
+              "slug": "chocolate-gluten-free-little-loaves-pack-of-3",
+              "price_ex_gst_aud": 10.9,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/individuals"
+            },
+            {
+              "id": "individuals__little-loaves__orange-almond-gluten-free-little-loaves-pack-of-3",
+              "name": "Orange & Almond Gluten Free Little Loaves - pack of 3",
+              "slug": "orange-almond-gluten-free-little-loaves-pack-of-3",
+              "price_ex_gst_aud": 10.9,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/individuals"
+            }
+          ]
+        },
+        {
+          "id": "individuals__tartlets",
+          "name": "Tartlets",
+          "slug": "tartlets",
+          "products": [
+            {
+              "id": "individuals__tartlets__lemon-meringue-tartlets-pack-of-9",
+              "name": "Lemon Meringue Tartlets - pack of 9",
+              "slug": "lemon-meringue-tartlets-pack-of-9",
+              "price_ex_gst_aud": 35.3,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/individuals"
+            },
+            {
+              "id": "individuals__tartlets__lemon-pomegranate-tartlets-pack-of-9",
+              "name": "Lemon Pomegranate Tartlets - pack of 9",
+              "slug": "lemon-pomegranate-tartlets-pack-of-9",
+              "price_ex_gst_aud": 35.3,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/individuals"
+            },
+            {
+              "id": "individuals__tartlets__mixed-tartlet-box-pack-of-9",
+              "name": "Mixed Tartlet Box - pack of 9",
+              "slug": "mixed-tartlet-box-pack-of-9",
+              "price_ex_gst_aud": 35.3,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/individuals"
+            },
+            {
+              "id": "individuals__tartlets__pina-colada-tartlets-pack-of-9",
+              "name": "Pina Colada Tartlets - pack of 9",
+              "slug": "pina-colada-tartlets-pack-of-9",
+              "price_ex_gst_aud": 35.3,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/individuals"
+            }
+          ]
+        },
+        {
+          "id": "individuals__warm-puddings",
+          "name": "Warm Puddings",
+          "slug": "warm-puddings",
+          "products": [
+            {
+              "id": "individuals__warm-puddings__chocolate-brownie-fudge-warm-puddings-pack-of-6",
+              "name": "Chocolate Brownie Fudge Warm Puddings - pack of 6",
+              "slug": "chocolate-brownie-fudge-warm-puddings-pack-of-6",
+              "price_ex_gst_aud": 21.1,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/individuals"
+            },
+            {
+              "id": "individuals__warm-puddings__sticky-date-warm-puddings-pack-of-6",
+              "name": "Sticky Date Warm Puddings - pack of 6",
+              "slug": "sticky-date-warm-puddings-pack-of-6",
+              "price_ex_gst_aud": 21.1,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/individuals"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "muffins",
+      "name": "Muffins",
+      "slug": "muffins",
+      "subcategories": [
+        {
+          "id": "muffins__premium-muffins",
+          "name": "Premium Muffins",
+          "slug": "premium-muffins",
+          "products": [
+            {
+              "id": "muffins__premium-muffins__blueberry-premium-muffins-pack-of-3",
+              "name": "Blueberry Premium Muffins - pack of 3",
+              "slug": "blueberry-premium-muffins-pack-of-3",
+              "price_ex_gst_aud": 7.66,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/muffins"
+            },
+            {
+              "id": "muffins__premium-muffins__choc-banana-premium-muffins-pack-of-3",
+              "name": "Choc Banana Premium Muffins - pack of 3",
+              "slug": "choc-banana-premium-muffins-pack-of-3",
+              "price_ex_gst_aud": 7.66,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/muffins"
+            },
+            {
+              "id": "muffins__premium-muffins__raspberry-white-chocolate-premium-muffins-pack-of-3",
+              "name": "Raspberry & White Chocolate Premium Muffins - pack of 3",
+              "slug": "raspberry-white-chocolate-premium-muffins-pack-of-3",
+              "price_ex_gst_aud": 7.66,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/muffins"
+            }
+          ]
+        },
+        {
+          "id": "muffins__savoury-muffins",
+          "name": "Savoury Muffins",
+          "slug": "savoury-muffins",
+          "products": [
+            {
+              "id": "muffins__savoury-muffins__bacon-cheese-keto-muffins-pack-of-3",
+              "name": "Bacon & Cheese Keto Muffins - pack of 3",
+              "slug": "bacon-cheese-keto-muffins-pack-of-3",
+              "price_ex_gst_aud": 15.6,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/muffins"
+            },
+            {
+              "id": "muffins__savoury-muffins__cheese-onion-herbs-savoury-muffins-pack-of-3",
+              "name": "Cheese Onion & Herbs Savoury Muffins - pack of 3",
+              "slug": "cheese-onion-herbs-savoury-muffins-pack-of-3",
+              "price_ex_gst_aud": 8.76,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/muffins"
+            },
+            {
+              "id": "muffins__savoury-muffins__jalape-o-cream-cheese-keto-muffins-pack-of-3",
+              "name": "Jalapeño & Cream Cheese Keto Muffins - pack of 3",
+              "slug": "jalape-o-cream-cheese-keto-muffins-pack-of-3",
+              "price_ex_gst_aud": 15.6,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/muffins"
+            },
+            {
+              "id": "muffins__savoury-muffins__mediterranean-savoury-muffins-pack-of-3",
+              "name": "Mediterranean Savoury Muffins - pack of 3",
+              "slug": "mediterranean-savoury-muffins-pack-of-3",
+              "price_ex_gst_aud": 8.76,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/muffins"
+            },
+            {
+              "id": "muffins__savoury-muffins__spinach-feta-pumpkin-savoury-muffins-pack-of-3",
+              "name": "Spinach Feta & Pumpkin Savoury Muffins - pack of 3",
+              "slug": "spinach-feta-pumpkin-savoury-muffins-pack-of-3",
+              "price_ex_gst_aud": 8.76,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/muffins"
+            }
+          ]
+        },
+        {
+          "id": "muffins__sweet-muffins",
+          "name": "Sweet Muffins",
+          "slug": "sweet-muffins",
+          "products": [
+            {
+              "id": "muffins__sweet-muffins__apple-crumble-sweet-muffins-pack-of-3",
+              "name": "Apple Crumble Sweet Muffins - pack of 3",
+              "slug": "apple-crumble-sweet-muffins-pack-of-3",
+              "price_ex_gst_aud": 7.35,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/muffins"
+            },
+            {
+              "id": "muffins__sweet-muffins__banana-honey-sweet-muffins-pack-of-3",
+              "name": "Banana & Honey Sweet Muffins - pack of 3",
+              "slug": "banana-honey-sweet-muffins-pack-of-3",
+              "price_ex_gst_aud": 7.35,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/muffins"
+            },
+            {
+              "id": "muffins__sweet-muffins__berry-gluten-free-muffins-pack-of-3",
+              "name": "Berry Gluten Free Muffins - pack of 3",
+              "slug": "berry-gluten-free-muffins-pack-of-3",
+              "price_ex_gst_aud": 7.96,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/muffins"
+            },
+            {
+              "id": "muffins__sweet-muffins__blood-orange-chocolate-sweet-muffins-pack-of-3",
+              "name": "Blood Orange & Chocolate Sweet Muffins - pack of 3",
+              "slug": "blood-orange-chocolate-sweet-muffins-pack-of-3",
+              "price_ex_gst_aud": 7.35,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/muffins"
+            },
+            {
+              "id": "muffins__sweet-muffins__blueberry-lemon-keto-muffins-pack-of-3",
+              "name": "Blueberry & Lemon Keto Muffins - pack of 3",
+              "slug": "blueberry-lemon-keto-muffins-pack-of-3",
+              "price_ex_gst_aud": 15.6,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/muffins"
+            },
+            {
+              "id": "muffins__sweet-muffins__choc-chip-sweet-muffins-pack-of-3",
+              "name": "Choc Chip Sweet Muffins - pack of 3",
+              "slug": "choc-chip-sweet-muffins-pack-of-3",
+              "price_ex_gst_aud": 7.35,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/muffins"
+            },
+            {
+              "id": "muffins__sweet-muffins__chocolate-gluten-free-muffins-pack-of-3",
+              "name": "Chocolate Gluten Free Muffins - pack of 3",
+              "slug": "chocolate-gluten-free-muffins-pack-of-3",
+              "price_ex_gst_aud": 7.96,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/muffins"
+            },
+            {
+              "id": "muffins__sweet-muffins__classic-chocolate-sweet-muffins-pack-of-3",
+              "name": "Classic Chocolate Sweet Muffins - pack of 3",
+              "slug": "classic-chocolate-sweet-muffins-pack-of-3",
+              "price_ex_gst_aud": 7.35,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/muffins"
+            },
+            {
+              "id": "muffins__sweet-muffins__mango-coconut-sweet-muffins-pack-of-3",
+              "name": "Mango & Coconut Sweet Muffins - pack of 3",
+              "slug": "mango-coconut-sweet-muffins-pack-of-3",
+              "price_ex_gst_aud": 7.35,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/muffins"
+            },
+            {
+              "id": "muffins__sweet-muffins__peppermint-choc-keto-muffins-pack-of-3",
+              "name": "Peppermint Choc Keto Muffins - pack of 3",
+              "slug": "peppermint-choc-keto-muffins-pack-of-3",
+              "price_ex_gst_aud": 15.6,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/muffins"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "savouries",
+      "name": "Savouries",
+      "slug": "savouries",
+      "subcategories": [
+        {
+          "id": "savouries__large-savouries",
+          "name": "Large Savouries",
+          "slug": "large-savouries",
+          "products": [
+            {
+              "id": "savouries__large-savouries__caramelised-onion-mushroom-spinach-tart-large-savouries",
+              "name": "Caramelised Onion Mushroom & Spinach Tart Large Savouries",
+              "slug": "caramelised-onion-mushroom-spinach-tart-large-savouries",
+              "price_ex_gst_aud": 23.4,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/savouries"
+            },
+            {
+              "id": "savouries__large-savouries__creamy-chicken-leek-layered-stack-large-savouries",
+              "name": "Creamy Chicken & Leek Layered Stack Large Savouries",
+              "slug": "creamy-chicken-leek-layered-stack-large-savouries",
+              "price_ex_gst_aud": 36.8,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/savouries"
+            },
+            {
+              "id": "savouries__large-savouries__potato-leek-layered-stack-large-savouries",
+              "name": "Potato & Leek Layered Stack Large Savouries",
+              "slug": "potato-leek-layered-stack-large-savouries",
+              "price_ex_gst_aud": 32.7,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/savouries"
+            },
+            {
+              "id": "savouries__large-savouries__roasted-vegetable-layered-stack-large-savouries",
+              "name": "Roasted Vegetable Layered Stack Large Savouries",
+              "slug": "roasted-vegetable-layered-stack-large-savouries",
+              "price_ex_gst_aud": 29.2,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/savouries"
+            }
+          ]
+        },
+        {
+          "id": "savouries__pies",
+          "name": "Pies",
+          "slug": "pies",
+          "products": [
+            {
+              "id": "savouries__pies__beef-forrest-mushroom-pies-pack-of-6",
+              "name": "Beef & Forrest Mushroom Pies - pack of 6",
+              "slug": "beef-forrest-mushroom-pies-pack-of-6",
+              "price_ex_gst_aud": 21.1,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/savouries"
+            },
+            {
+              "id": "savouries__pies__classic-mince-pies-pack-of-6",
+              "name": "Classic Mince Pies - pack of 6",
+              "slug": "classic-mince-pies-pack-of-6",
+              "price_ex_gst_aud": 21.1,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/savouries"
+            },
+            {
+              "id": "savouries__pies__creamy-chicken-veg-pies-pack-of-6",
+              "name": "Creamy Chicken & Veg Pies - pack of 6",
+              "slug": "creamy-chicken-veg-pies-pack-of-6",
+              "price_ex_gst_aud": 21.1,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/savouries"
+            },
+            {
+              "id": "savouries__pies__open-pumpkin-pies-pack-of-6",
+              "name": "Open Pumpkin Pies - pack of 6",
+              "slug": "open-pumpkin-pies-pack-of-6",
+              "price_ex_gst_aud": 21.1,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/savouries"
+            }
+          ]
+        },
+        {
+          "id": "savouries__sausage-rolls-more",
+          "name": "Sausage Rolls & More",
+          "slug": "sausage-rolls-more",
+          "products": [
+            {
+              "id": "savouries__sausage-rolls-more__gourmet-breakfast-quiche-pack-of-6",
+              "name": "Gourmet Breakfast Quiche - pack of 6",
+              "slug": "gourmet-breakfast-quiche-pack-of-6",
+              "price_ex_gst_aud": 24.5,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/savouries"
+            },
+            {
+              "id": "savouries__sausage-rolls-more__kransky-pack-of-6",
+              "name": "Kransky - pack of 6",
+              "slug": "kransky-pack-of-6",
+              "price_ex_gst_aud": 21.7,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/savouries"
+            },
+            {
+              "id": "savouries__sausage-rolls-more__quiche-lorraines-pack-of-6",
+              "name": "Quiche Lorraines - pack of 6",
+              "slug": "quiche-lorraines-pack-of-6",
+              "price_ex_gst_aud": 21.7,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/savouries"
+            },
+            {
+              "id": "savouries__sausage-rolls-more__roasted-pumpkin-spinach-and-feta-quiche-pack-of-6",
+              "name": "Roasted Pumpkin, Spinach and Feta Quiche - pack of 6",
+              "slug": "roasted-pumpkin-spinach-and-feta-quiche-pack-of-6",
+              "price_ex_gst_aud": 24.5,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/savouries"
+            },
+            {
+              "id": "savouries__sausage-rolls-more__roasted-vegetable-frittata-gluten-free-pack-of-6",
+              "name": "Roasted Vegetable Frittata Gluten Free - pack of 6",
+              "slug": "roasted-vegetable-frittata-gluten-free-pack-of-6",
+              "price_ex_gst_aud": 24.5,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/savouries"
+            },
+            {
+              "id": "savouries__sausage-rolls-more__smoky-bacon-3-cheese-sausage-rolls-pack-of-6",
+              "name": "Smoky Bacon & 3 Cheese Sausage Rolls - pack of 6",
+              "slug": "smoky-bacon-3-cheese-sausage-rolls-pack-of-6",
+              "price_ex_gst_aud": 18.8,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/savouries"
+            },
+            {
+              "id": "savouries__sausage-rolls-more__spinach-ricotta-quiches-pack-of-6",
+              "name": "Spinach & Ricotta Quiches - pack of 6",
+              "slug": "spinach-ricotta-quiches-pack-of-6",
+              "price_ex_gst_aud": 21.7,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/savouries"
+            },
+            {
+              "id": "savouries__sausage-rolls-more__spinach-sundried-tomato-ricotta-sausage-rolls-pack-of-6",
+              "name": "Spinach Sundried Tomato & Ricotta Sausage Rolls - pack of 6",
+              "slug": "spinach-sundried-tomato-ricotta-sausage-rolls-pack-of-6",
+              "price_ex_gst_aud": 18.8,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/savouries"
+            },
+            {
+              "id": "savouries__sausage-rolls-more__the-sausage-roll-traditional-pack-of-6",
+              "name": "The Sausage Roll (Traditional) - pack of 6",
+              "slug": "the-sausage-roll-traditional-pack-of-6",
+              "price_ex_gst_aud": 17.4,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/savouries"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "slices",
+      "name": "Slices",
+      "slug": "slices",
+      "subcategories": [
+        {
+          "id": "slices__cake-squares",
+          "name": "Cake Squares",
+          "slug": "cake-squares",
+          "products": [
+            {
+              "id": "slices__cake-squares__cake-squares-gluten-free-mixed-pack-pack-of-12",
+              "name": "Cake Squares Gluten Free Mixed Pack - pack of 12",
+              "slug": "cake-squares-gluten-free-mixed-pack-pack-of-12",
+              "price_ex_gst_aud": 23.9,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/slices"
+            },
+            {
+              "id": "slices__cake-squares__carrot-gluten-free-cake-squares-pack-of-12",
+              "name": "Carrot Gluten Free Cake Squares - pack of 12",
+              "slug": "carrot-gluten-free-cake-squares-pack-of-12",
+              "price_ex_gst_aud": 23.9,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/slices"
+            },
+            {
+              "id": "slices__cake-squares__decadent-chocolate-gluten-free-cake-squares-pack-of-12",
+              "name": "Decadent Chocolate Gluten Free Cake Squares - pack of 12",
+              "slug": "decadent-chocolate-gluten-free-cake-squares-pack-of-12",
+              "price_ex_gst_aud": 23.9,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/slices"
+            }
+          ]
+        },
+        {
+          "id": "slices__grab-n-go-slices",
+          "name": "Grab N Go Slices",
+          "slug": "grab-n-go-slices",
+          "products": [
+            {
+              "id": "slices__grab-n-go-slices__apricot-white-chocolate-slice-grab-n-go-pack-of-12",
+              "name": "Apricot & White Chocolate Slice Grab N Go - pack of 12",
+              "slug": "apricot-white-chocolate-slice-grab-n-go-pack-of-12",
+              "price_ex_gst_aud": 29.2,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/grab-n-go-slices"
+            },
+            {
+              "id": "slices__grab-n-go-slices__brownie-slice-grab-n-go-pack-of-12",
+              "name": "Brownie Slice Grab N Go - pack of 12",
+              "slug": "brownie-slice-grab-n-go-pack-of-12",
+              "price_ex_gst_aud": 29.2,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/grab-n-go-slices"
+            },
+            {
+              "id": "slices__grab-n-go-slices__caramel-slice-grab-n-go-pack-of-12",
+              "name": "Caramel Slice Grab N Go - pack of 12",
+              "slug": "caramel-slice-grab-n-go-pack-of-12",
+              "price_ex_gst_aud": 29.2,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/grab-n-go-slices"
+            },
+            {
+              "id": "slices__grab-n-go-slices__date-ginger-chocolate-gluten-free-slice-grab-n-go-pack-of-12",
+              "name": "Date Ginger & Chocolate Gluten Free Slice Grab N Go - pack of 12",
+              "slug": "date-ginger-chocolate-gluten-free-slice-grab-n-go-pack-of-12",
+              "price_ex_gst_aud": 29.2,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/grab-n-go-slices"
+            },
+            {
+              "id": "slices__grab-n-go-slices__health-nut-gluten-free-slice-grab-n-go-pack-of-12",
+              "name": "Health Nut Gluten Free Slice Grab N Go - pack of 12",
+              "slug": "health-nut-gluten-free-slice-grab-n-go-pack-of-12",
+              "price_ex_gst_aud": 31.0,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/grab-n-go-slices"
+            },
+            {
+              "id": "slices__grab-n-go-slices__hedgehog-slice-grab-n-go-pack-of-12",
+              "name": "Hedgehog Slice Grab N Go - pack of 12",
+              "slug": "hedgehog-slice-grab-n-go-pack-of-12",
+              "price_ex_gst_aud": 29.2,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/grab-n-go-slices"
+            },
+            {
+              "id": "slices__grab-n-go-slices__lemon-coconut-slice-grab-n-go-pack-of-12",
+              "name": "Lemon & Coconut Slice Grab N Go - pack of 12",
+              "slug": "lemon-coconut-slice-grab-n-go-pack-of-12",
+              "price_ex_gst_aud": 29.2,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/grab-n-go-slices"
+            },
+            {
+              "id": "slices__grab-n-go-slices__lime-brulee-slice-grab-n-go-pack-of-12",
+              "name": "Lime Brulee Slice Grab N Go - pack of 12",
+              "slug": "lime-brulee-slice-grab-n-go-pack-of-12",
+              "price_ex_gst_aud": 29.2,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/grab-n-go-slices"
+            },
+            {
+              "id": "slices__grab-n-go-slices__mixed-nut-honey-slice-grab-n-go-pack-of-12",
+              "name": "Mixed Nut & Honey Slice Grab N Go - pack of 12",
+              "slug": "mixed-nut-honey-slice-grab-n-go-pack-of-12",
+              "price_ex_gst_aud": 31.0,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/grab-n-go-slices"
+            },
+            {
+              "id": "slices__grab-n-go-slices__raspberry-custard-crumble-slice-grab-n-go-pack-of-12",
+              "name": "Raspberry & Custard Crumble Slice Grab N Go - pack of 12",
+              "slug": "raspberry-custard-crumble-slice-grab-n-go-pack-of-12",
+              "price_ex_gst_aud": 29.2,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/grab-n-go-slices"
+            }
+          ]
+        },
+        {
+          "id": "slices__keto-fudgey-brownie",
+          "name": "Keto Fudgey Brownie",
+          "slug": "keto-fudgey-brownie",
+          "products": [
+            {
+              "id": "slices__keto-fudgey-brownie__choc-cheesecake-keto-slice-pack-of-12",
+              "name": "Choc Cheesecake Keto Slice - pack of 12",
+              "slug": "choc-cheesecake-keto-slice-pack-of-12",
+              "price_ex_gst_aud": 29.9,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/slices"
+            },
+            {
+              "id": "slices__keto-fudgey-brownie__choc-chip-avocado-keto-brownie-slice-pack-of-12",
+              "name": "Choc Chip Avocado Keto Brownie Slice - pack of 12",
+              "slug": "choc-chip-avocado-keto-brownie-slice-pack-of-12",
+              "price_ex_gst_aud": 29.9,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/slices"
+            },
+            {
+              "id": "slices__keto-fudgey-brownie__keto-mixed-pack-slices-pack-of-12",
+              "name": "Keto Mixed Pack Slices - pack of 12",
+              "slug": "keto-mixed-pack-slices-pack-of-12",
+              "price_ex_gst_aud": 32.1,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/slices"
+            },
+            {
+              "id": "slices__keto-fudgey-brownie__raspberry-pistachio-keto-slice-pack-of-12",
+              "name": "Raspberry & Pistachio Keto Slice - pack of 12",
+              "slug": "raspberry-pistachio-keto-slice-pack-of-12",
+              "price_ex_gst_aud": 34.4,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/slices"
+            }
+          ]
+        },
+        {
+          "id": "slices__slices",
+          "name": "Slices",
+          "slug": "slices",
+          "products": [
+            {
+              "id": "slices__slices__apricot-white-chocolate-slice-pack-of-12",
+              "name": "Apricot & White Chocolate Slice - pack of 12",
+              "slug": "apricot-white-chocolate-slice-pack-of-12",
+              "price_ex_gst_aud": 23.7,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/slices"
+            },
+            {
+              "id": "slices__slices__brownie-slice-pack-of-12",
+              "name": "Brownie Slice - pack of 12",
+              "slug": "brownie-slice-pack-of-12",
+              "price_ex_gst_aud": 23.7,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/slices"
+            },
+            {
+              "id": "slices__slices__caramel-slice-pack-of-12",
+              "name": "Caramel Slice - pack of 12",
+              "slug": "caramel-slice-pack-of-12",
+              "price_ex_gst_aud": 23.7,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/slices"
+            },
+            {
+              "id": "slices__slices__date-ginger-chocolate-gluten-free-slice-pack-of-12",
+              "name": "Date Ginger & Chocolate Gluten Free Slice - pack of 12",
+              "slug": "date-ginger-chocolate-gluten-free-slice-pack-of-12",
+              "price_ex_gst_aud": 23.7,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/slices"
+            },
+            {
+              "id": "slices__slices__gluten-free-caramel-slice-pack-of-12",
+              "name": "Gluten Free Caramel Slice - pack of 12",
+              "slug": "gluten-free-caramel-slice-pack-of-12",
+              "price_ex_gst_aud": 27.7,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/slices"
+            },
+            {
+              "id": "slices__slices__granola-bar-keto-pack-of-12",
+              "name": "Granola Bar Keto - pack of 12",
+              "slug": "granola-bar-keto-pack-of-12",
+              "price_ex_gst_aud": 37.9,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/slices"
+            },
+            {
+              "id": "slices__slices__health-nut-gluten-free-slice-pack-of-12",
+              "name": "Health Nut Gluten Free Slice - pack of 12",
+              "slug": "health-nut-gluten-free-slice-pack-of-12",
+              "price_ex_gst_aud": 25.5,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/slices"
+            },
+            {
+              "id": "slices__slices__hedgehog-slice-pack-of-12",
+              "name": "Hedgehog Slice - pack of 12",
+              "slug": "hedgehog-slice-pack-of-12",
+              "price_ex_gst_aud": 23.7,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/slices"
+            },
+            {
+              "id": "slices__slices__lemon-coconut-slice-pack-of-12",
+              "name": "Lemon & Coconut Slice - pack of 12",
+              "slug": "lemon-coconut-slice-pack-of-12",
+              "price_ex_gst_aud": 23.7,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/slices"
+            },
+            {
+              "id": "slices__slices__lime-brulee-slice-pack-of-12",
+              "name": "Lime Brulee Slice - pack of 12",
+              "slug": "lime-brulee-slice-pack-of-12",
+              "price_ex_gst_aud": 23.7,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/slices"
+            },
+            {
+              "id": "slices__slices__mixed-nut-honey-slice-pack-of-12",
+              "name": "Mixed Nut & Honey Slice - pack of 12",
+              "slug": "mixed-nut-honey-slice-pack-of-12",
+              "price_ex_gst_aud": 25.5,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/slices"
+            },
+            {
+              "id": "slices__slices__raspberry-custard-crumble-slice-pack-of-12",
+              "name": "Raspberry & Custard Crumble Slice - pack of 12",
+              "slug": "raspberry-custard-crumble-slice-pack-of-12",
+              "price_ex_gst_aud": 23.7,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/slices"
+            },
+            {
+              "id": "slices__slices__rocky-road-slice-pack-of-12",
+              "name": "Rocky Road Slice - pack of 12",
+              "slug": "rocky-road-slice-pack-of-12",
+              "price_ex_gst_aud": 25.5,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/slices"
+            },
+            {
+              "id": "slices__slices__salted-chewy-cashew-finger-slice",
+              "name": "Salted Chewy Cashew Finger Slice",
+              "slug": "salted-chewy-cashew-finger-slice",
+              "price_ex_gst_aud": 25.5,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/slices"
+            },
+            {
+              "id": "slices__slices__slices-mixed-pack-pack-of-12",
+              "name": "Slices Mixed Pack - pack of 12",
+              "slug": "slices-mixed-pack-pack-of-12",
+              "price_ex_gst_aud": 23.7,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/slices"
+            }
+          ]
+        },
+        {
+          "id": "slices__uncut-slabs",
+          "name": "Uncut Slabs",
+          "slug": "uncut-slabs",
+          "products": [
+            {
+              "id": "slices__uncut-slabs__brownie-slab-slice",
+              "name": "Brownie Slab Slice",
+              "slug": "brownie-slab-slice",
+              "price_ex_gst_aud": 23.7,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/slices"
+            }
+          ]
+        },
+        {
+          "id": "slices__vanilla-slice",
+          "name": "Vanilla Slice",
+          "slug": "vanilla-slice",
+          "products": [
+            {
+              "id": "slices__vanilla-slice__passionfruit-vanilla-slices-pack-of-6",
+              "name": "Passionfruit Vanilla Slices - pack of 6",
+              "slug": "passionfruit-vanilla-slices-pack-of-6",
+              "price_ex_gst_aud": 20.9,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/slices"
+            },
+            {
+              "id": "slices__vanilla-slice__vanilla-slices-pack-of-6",
+              "name": "Vanilla Slices - pack of 6",
+              "slug": "vanilla-slices-pack-of-6",
+              "price_ex_gst_aud": 20.9,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/slices"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "soups",
+      "name": "Soups",
+      "slug": "soups",
+      "subcategories": [
+        {
+          "id": "soups__soups",
+          "name": "Soups",
+          "slug": "soups",
+          "products": [
+            {
+              "id": "soups__soups__broccoli-cheddar-soup",
+              "name": "Broccoli & Cheddar Soup",
+              "slug": "broccoli-cheddar-soup",
+              "price_ex_gst_aud": 17.2,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/soups"
+            },
+            {
+              "id": "soups__soups__sweet-potato-coconut-chilli-soup",
+              "name": "Sweet Potato, Coconut & Chilli Soup",
+              "slug": "sweet-potato-coconut-chilli-soup",
+              "price_ex_gst_aud": 17.2,
+              "pack_notes": null,
+              "source_url": "https://www.cookiebarrel.com.au/soups"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

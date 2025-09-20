@@ -1,0 +1,203 @@
+/* Global Styles */
+:root {
+  --primary-color: #007bff;
+  --secondary-color: #6c757d;
+  --success-color: #28a745;
+  --danger-color: #dc3545;
+  --warning-color: #ffc107;
+  --info-color: #17a2b8;
+  --light-color: #f8f9fa;
+  --dark-color: #343a40;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* POS Page Styles */
+.product-card {
+  transition: transform 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+}
+
+.product-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.product-card.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Cart Styles */
+.cart-item {
+  border-bottom: 1px solid #dee2e6;
+  padding: 1rem 0;
+}
+
+.cart-item:last-child {
+  border-bottom: none;
+}
+
+.quantity-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.quantity-controls button {
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Order Status Badges */
+.badge-pending {
+  background-color: #ffc107;
+  color: #000;
+}
+
+.badge-processing {
+  background-color: #17a2b8;
+}
+
+.badge-completed {
+  background-color: #28a745;
+}
+
+.badge-cancelled {
+  background-color: #dc3545;
+}
+
+/* Receipt Styles */
+.receipt {
+  font-family: 'Courier New', monospace;
+  background: white;
+  padding: 2rem;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.receipt-header {
+  text-align: center;
+  border-bottom: 2px dashed #000;
+  padding-bottom: 1rem;
+  margin-bottom: 1rem;
+}
+
+.receipt-items {
+  border-bottom: 2px dashed #000;
+  padding-bottom: 1rem;
+  margin-bottom: 1rem;
+}
+
+.receipt-footer {
+  text-align: center;
+  margin-top: 1rem;
+  font-size: 0.9rem;
+}
+
+/* Shift Management */
+.shift-status {
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.shift-status.open {
+  background-color: #d4edda;
+  border: 1px solid #c3e6cb;
+}
+
+.shift-status.closed {
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+}
+
+/* Loading Spinner */
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+}
+
+/* Responsive Tables */
+.table-responsive {
+  overflow-x: auto;
+}
+
+@media (max-width: 768px) {
+  .product-card {
+    font-size: 0.9rem;
+  }
+  
+  .receipt {
+    padding: 1rem;
+  }
+}
+
+/* Print Styles */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  
+  .receipt-container,
+  .receipt-container * {
+    visibility: visible;
+  }
+  
+  .receipt-container {
+    position: absolute;
+    left: 0;
+    top: 0;
+  }
+  
+  .no-print {
+    display: none !important;
+  }
+}
+
+/* Animation */
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.slide-in {
+  animation: slideIn 0.3s ease-out;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}

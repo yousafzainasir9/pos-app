@@ -1,0 +1,298 @@
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using POS.Application.Common.Interfaces;
+using POS.Domain.Entities;
+using POS.Domain.Enums;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
+
+namespace POS.WebAPI.Controllers;
+
+[Route("api/[controller]")]
+[ApiController]
+public class AuthController : ControllerBase
+{
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly IConfiguration _configuration;
+    private readonly ILogger<AuthController> _logger;
+
+    public AuthController(
+        IUnitOfWork unitOfWork,
+        IConfiguration configuration,
+        ILogger<AuthController> logger)
+    {
+        _unitOfWork = unitOfWork;
+        _configuration = configuration;
+        _logger = logger;
+    }
+
+    [HttpPost("login")]
+    public async Task<ActionResult<LoginResponseDto>> Login([FromBody] LoginRequestDto request)
+    {
+        try
+        {
+            var user = await _unitOfWork.Repository<User>().Query()
+                .Include(u => u.Store)
+                .FirstOrDefaultAsync(u => u.Username == request.Username && u.IsActive);
+
+            if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
+            {
+                return Unauthorized("Invalid username or password");
+            }
+
+            var token = GenerateJwtToken(user);
+            var refreshToken = GenerateRefreshToken();
+
+            // Update user with refresh token
+            user.RefreshToken = refreshToken;
+            user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
+            user.LastLoginAt = DateTime.UtcNow;
+
+            _unitOfWork.Repository<User>().Update(user);
+            await _unitOfWork.SaveChangesAsync();
+
+            return Ok(new LoginResponseDto
+            {
+                Token = token,
+                RefreshToken = refreshToken,
+                ExpiresIn = 3600,
+                User = new UserDto
+                {
+                    Id = user.Id,
+                    Username = user.Username,
+                    Email = user.Email,
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
+                    Role = user.Role.ToString(),
+                    StoreId = user.StoreId,
+                    StoreName = user.Store?.Name
+                }
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error during login for user {Username}", request.Username);
+            return StatusCode(500, "An error occurred during login");
+        }
+    }
+
+    [HttpPost("pin-login")]
+    public async Task<ActionResult<LoginResponseDto>> PinLogin([FromBody] PinLoginRequestDto request)
+    {
+        try
+        {
+            var user = await _unitOfWork.Repository<User>().Query()
+                .Include(u => u.Store)
+                .FirstOrDefaultAsync(u => u.Pin == request.Pin && u.IsActive && u.StoreId == request.StoreId);
+
+            if (user == null)
+            {
+                return Unauthorized("Invalid PIN");
+            }
+
+            var token = GenerateJwtToken(user);
+            var refreshToken = GenerateRefreshToken();
+
+            // Update user with refresh token
+            user.RefreshToken = refreshToken;
+            user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
+            user.LastLoginAt = DateTime.UtcNow;
+
+            _unitOfWork.Repository<User>().Update(user);
+            await _unitOfWork.SaveChangesAsync();
+
+            // Check for active shift
+            var activeShift = await _unitOfWork.Repository<Shift>().Query()
+                .FirstOrDefaultAsync(s => s.UserId == user.Id && s.Status == ShiftStatus.Open);
+
+            return Ok(new LoginResponseDto
+            {
+                Token = token,
+                RefreshToken = refreshToken,
+                ExpiresIn = 3600,
+                User = new UserDto
+                {
+                    Id = user.Id,
+                    Username = user.Username,
+                    Email = user.Email,
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
+                    Role = user.Role.ToString(),
+                    StoreId = user.StoreId,
+                    StoreName = user.Store?.Name,
+                    HasActiveShift = activeShift != null,
+                    ActiveShiftId = activeShift?.Id
+                }
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error during PIN login");
+            return StatusCode(500, "An error occurred during login");
+        }
+    }
+
+    [HttpPost("refresh")]
+    public async Task<ActionResult<LoginResponseDto>> RefreshToken([FromBody] RefreshTokenRequestDto request)
+    {
+        try
+        {
+            var user = await _unitOfWork.Repository<User>().Query()
+                .Include(u => u.Store)
+                .FirstOrDefaultAsync(u => u.RefreshToken == request.RefreshToken);
+
+            if (user == null || user.RefreshTokenExpiryTime <= DateTime.UtcNow)
+            {
+                return Unauthorized("Invalid or expired refresh token");
+            }
+
+            var token = GenerateJwtToken(user);
+            var refreshToken = GenerateRefreshToken();
+
+            // Update user with new refresh token
+            user.RefreshToken = refreshToken;
+            user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
+
+            _unitOfWork.Repository<User>().Update(user);
+            await _unitOfWork.SaveChangesAsync();
+
+            return Ok(new LoginResponseDto
+            {
+                Token = token,
+                RefreshToken = refreshToken,
+                ExpiresIn = 3600,
+                User = new UserDto
+                {
+                    Id = user.Id,
+                    Username = user.Username,
+                    Email = user.Email,
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
+                    Role = user.Role.ToString(),
+                    StoreId = user.StoreId,
+                    StoreName = user.Store?.Name
+                }
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error refreshing token");
+            return StatusCode(500, "An error occurred while refreshing token");
+        }
+    }
+
+    [HttpPost("logout")]
+    [Authorize]
+    public async Task<ActionResult> Logout()
+    {
+        try
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!string.IsNullOrEmpty(userIdClaim) && long.TryParse(userIdClaim, out var userId))
+            {
+                var user = await _unitOfWork.Repository<User>().GetByIdAsync(userId);
+                if (user != null)
+                {
+                    user.RefreshToken = null;
+                    user.RefreshTokenExpiryTime = null;
+
+                    _unitOfWork.Repository<User>().Update(user);
+                    await _unitOfWork.SaveChangesAsync();
+                }
+            }
+
+            return Ok(new { message = "Logged out successfully" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error during logout");
+            return StatusCode(500, "An error occurred during logout");
+        }
+    }
+
+    private string GenerateJwtToken(User user)
+    {
+        var jwtSettings = _configuration.GetSection("JwtSettings");
+        var key = Encoding.ASCII.GetBytes(jwtSettings["Secret"] ?? throw new InvalidOperationException("JWT Secret not configured"));
+
+        var claims = new List<Claim>
+        {
+            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new Claim(ClaimTypes.Name, user.Username),
+            new Claim(ClaimTypes.Email, user.Email),
+            new Claim(ClaimTypes.GivenName, user.FirstName),
+            new Claim(ClaimTypes.Surname, user.LastName),
+            new Claim(ClaimTypes.Role, user.Role.ToString()),
+        };
+
+        if (user.StoreId.HasValue)
+        {
+            claims.Add(new Claim("StoreId", user.StoreId.Value.ToString()));
+        }
+
+        var tokenDescriptor = new SecurityTokenDescriptor
+        {
+            Subject = new ClaimsIdentity(claims),
+            Expires = DateTime.UtcNow.AddMinutes(Convert.ToDouble(jwtSettings["ExpirationInMinutes"])),
+            SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature),
+            Issuer = jwtSettings["Issuer"],
+            Audience = jwtSettings["Audience"]
+        };
+
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var token = tokenHandler.CreateToken(tokenDescriptor);
+        return tokenHandler.WriteToken(token);
+    }
+
+    private string GenerateRefreshToken()
+    {
+        var randomBytes = new byte[32];
+        using (var rng = System.Security.Cryptography.RandomNumberGenerator.Create())
+        {
+            rng.GetBytes(randomBytes);
+            return Convert.ToBase64String(randomBytes);
+        }
+    }
+}
+
+public class LoginRequestDto
+{
+    public required string Username { get; set; }
+    public required string Password { get; set; }
+}
+
+public class PinLoginRequestDto
+{
+    public required string Pin { get; set; }
+    public long StoreId { get; set; }
+}
+
+public class RefreshTokenRequestDto
+{
+    public required string RefreshToken { get; set; }
+}
+
+public class LoginResponseDto
+{
+    public required string Token { get; set; }
+    public required string RefreshToken { get; set; }
+    public int ExpiresIn { get; set; }
+    public required UserDto User { get; set; }
+}
+
+public class UserDto
+{
+    public long Id { get; set; }
+    public required string Username { get; set; }
+    public required string Email { get; set; }
+    public required string FirstName { get; set; }
+    public required string LastName { get; set; }
+    public required string Role { get; set; }
+    public long? StoreId { get; set; }
+    public string? StoreName { get; set; }
+    public bool HasActiveShift { get; set; }
+    public long? ActiveShiftId { get; set; }
+}
