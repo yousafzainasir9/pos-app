@@ -8,6 +8,24 @@ public class ShiftConfiguration : IEntityTypeConfiguration<Shift>
 {
     public void Configure(EntityTypeBuilder<Shift> builder)
     {
+        builder.Property(e => e.StartingCash)
+            .HasPrecision(18, 2);
+
+        builder.Property(e => e.EndingCash)
+            .HasPrecision(18, 2);
+
+        builder.Property(e => e.CashSales)
+            .HasPrecision(18, 2);
+
+        builder.Property(e => e.CardSales)
+            .HasPrecision(18, 2);
+
+        builder.Property(e => e.OtherSales)
+            .HasPrecision(18, 2);
+
+        builder.Property(e => e.TotalSales)
+            .HasPrecision(18, 2);
+
         builder.HasOne(s => s.User)
             .WithMany(u => u.Shifts)
             .HasForeignKey(s => s.UserId)
