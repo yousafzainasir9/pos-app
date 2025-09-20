@@ -14,12 +14,18 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "POS.Infrastructure", "src\P
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "POS.WebAPI", "src\POS.WebAPI\POS.WebAPI.csproj", "{BBF31BD3-0DFD-4D2D-A217-D6F2DEA80997}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "POS.Migrator", "src\POS.Migrator\POS.Migrator.csproj", "{F9D5A3ED-DC43-48F5-9B57-28722E8F495A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F9D5A3ED-DC43-48F5-9B57-28722E8F495A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F9D5A3ED-DC43-48F5-9B57-28722E8F495A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F9D5A3ED-DC43-48F5-9B57-28722E8F495A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F9D5A3ED-DC43-48F5-9B57-28722E8F495A}.Release|Any CPU.Build.0 = Release|Any CPU
 		{B37C7C76-8A5A-4741-9CBF-C4CAC496708E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{B37C7C76-8A5A-4741-9CBF-C4CAC496708E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B37C7C76-8A5A-4741-9CBF-C4CAC496708E}.Release|Any CPU.ActiveCfg = Release|Any CPU

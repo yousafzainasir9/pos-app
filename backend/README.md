@@ -189,3 +189,12 @@ Proprietary - Cookie Barrel Pty Ltd
 
 ## Contact
 For support, contact: support@cookiebarrel.com.au
+
+### Running Database Migrations via Console
+```bash
+cd backend/src/POS.Migrator
+# Update the connection string in appsettings.json if needed
+dotnet run
+```
+
+This console application applies pending Entity Framework Core migrations and seeds default data using the same configuration as the API.
