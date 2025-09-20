@@ -156,6 +156,31 @@ namespace POS.WebAPI.Controllers
             }
         }
 
+        [HttpGet("test")]
+        [AllowAnonymous]
+        public async Task<IActionResult> TestReport()
+        {
+            try
+            {
+                var today = DateTime.Today;
+                var report = await _reportService.GetSalesReportAsync(today, today);
+                return Ok(new { 
+                    message = "Test successful",
+                    date = today.ToString("yyyy-MM-dd"),
+                    data = report 
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in test report");
+                return StatusCode(500, new { 
+                    message = "Test failed", 
+                    error = ex.Message,
+                    innerError = ex.InnerException?.Message 
+                });
+            }
+        }
+
         private int GetCurrentUserId()
         {
             var userIdClaim = User.FindFirst("UserId")?.Value;
