@@ -4,7 +4,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using POS.Infrastructure.Data;
+using POS.Infrastructure.Data.Interceptors;
 using POS.Infrastructure.Data.Seeders;
+using POS.Infrastructure.Services;
+using POS.Migrator.Services;
 using System.IO;
 
 var webApiProjectPath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory,
@@ -42,6 +45,9 @@ builder.Services.AddDbContext<POSDbContext>(options =>
         connectionString,
         b => b.MigrationsAssembly(typeof(POSDbContext).Assembly.FullName)));
 
+builder.Services.AddScoped<ICurrentUserService, MigratorCurrentUserService>();
+builder.Services.AddScoped<IDateTimeService, DateTimeService>();
+builder.Services.AddScoped<AuditableEntitySaveChangesInterceptor>();
 builder.Services.AddScoped<DatabaseSeeder>();
 
 await using var host = builder.Build();
