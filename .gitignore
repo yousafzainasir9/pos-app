@@ -40,6 +40,8 @@ artifacts/
 *.ldf
 *.ndf
 Migrations/
+!backend/src/POS.Infrastructure/Data/Migrations/
+!backend/src/POS.Infrastructure/Data/Migrations/**
 
 ## SQL Server files
 *.mdf
