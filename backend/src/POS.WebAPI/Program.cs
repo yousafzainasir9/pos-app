@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using POS.Application.Common.Interfaces;
+using POS.Application.Interfaces;
 using POS.Infrastructure.Data;
 using POS.Infrastructure.Data.Interceptors;
 using POS.Infrastructure.Repositories;
@@ -114,6 +115,7 @@ builder.Services.AddScoped<IApplicationDbContext>(provider => provider.GetRequir
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 builder.Services.AddScoped<IDateTimeService, DateTimeService>();
+builder.Services.AddScoped<IReportService, ReportService>();
 builder.Services.AddHttpContextAccessor();
 
 // Configure AutoMapper

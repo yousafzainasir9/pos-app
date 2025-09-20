@@ -1,0 +1,321 @@
+/* Reports Page Styles */
+
+.reports-page {
+  padding-bottom: 2rem;
+}
+
+/* Report Cards */
+.report-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.report-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.report-card .card-body {
+  padding: 2rem;
+}
+
+.report-card .report-icon {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.report-card h4 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.report-card p {
+  font-size: 0.95rem;
+  color: #6c757d;
+  margin-bottom: 1.5rem;
+}
+
+.report-card .btn {
+  min-width: 140px;
+  font-weight: 500;
+  padding: 0.5rem 1.5rem;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.report-card .btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+}
+
+/* Chart Container Styles */
+.recharts-wrapper {
+  font-size: 14px;
+}
+
+.recharts-cartesian-axis-tick {
+  font-size: 12px;
+}
+
+.recharts-legend-wrapper {
+  padding-top: 10px;
+}
+
+/* Summary Cards */
+.summary-card {
+  transition: transform 0.2s, box-shadow 0.2s;
+  border: none;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.summary-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.summary-card .card-body {
+  padding: 1.5rem;
+}
+
+.summary-card h3 {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.summary-card .icon {
+  opacity: 0.8;
+}
+
+/* Date Range Selector */
+.date-range-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 10px;
+}
+
+.date-range-card .form-label {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.date-range-card .form-control {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+.date-range-card .form-control:focus {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: white;
+  box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.1);
+}
+
+.date-range-card .btn-outline-secondary {
+  color: white;
+  border-color: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.date-range-card .btn-outline-secondary:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.5);
+  color: white;
+}
+
+/* Top Products Table */
+.top-products-table {
+  font-size: 0.9rem;
+}
+
+.top-products-table .badge {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+}
+
+/* Shift Report Styles */
+.shift-summary {
+  background: #f8f9fa;
+  border-radius: 10px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.cash-reconciliation {
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  border-radius: 10px;
+  padding: 1.5rem;
+  margin-top: 1rem;
+}
+
+.cash-reconciliation h5 {
+  font-weight: 600;
+}
+
+.cash-reconciliation .text-success {
+  color: #28a745 !important;
+}
+
+/* Transaction Table */
+.transactions-table {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.transactions-table::-webkit-scrollbar {
+  width: 6px;
+}
+
+.transactions-table::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.transactions-table::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 3px;
+}
+
+/* Export Button Animation */
+.export-button {
+  position: relative;
+  overflow: hidden;
+}
+
+.export-button::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.export-button:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+/* Tab Navigation */
+.nav-tabs .nav-link {
+  color: #6c757d;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  font-weight: 500;
+  transition: all 0.3s;
+}
+
+.nav-tabs .nav-link:hover {
+  color: #0d6efd;
+  background: rgba(13, 110, 253, 0.05);
+  border-radius: 10px 10px 0 0;
+}
+
+.nav-tabs .nav-link.active {
+  color: #0d6efd;
+  background: white;
+  border: 1px solid #dee2e6;
+  border-bottom: 1px solid white;
+  border-radius: 10px 10px 0 0;
+}
+
+/* Loading State */
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  border-radius: 10px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .summary-card .card-body {
+    padding: 1rem;
+  }
+  
+  .summary-card h3 {
+    font-size: 1.5rem;
+  }
+  
+  .date-range-card .btn-outline-secondary {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+  }
+  
+  .recharts-wrapper {
+    font-size: 12px;
+  }
+  
+  .top-products-table {
+    font-size: 0.8rem;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  .card {
+    border: 1px solid #dee2e6 !important;
+    page-break-inside: avoid;
+  }
+  
+  .nav-tabs {
+    display: none !important;
+  }
+}
+
+/* Animation for refresh button */
+.fa-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Gradient backgrounds for metric cards */
+.metric-card-success {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.metric-card-info {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
+}
+
+.metric-card-warning {
+  background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+  color: white;
+}
+
+.metric-card-primary {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  color: white;
+}
