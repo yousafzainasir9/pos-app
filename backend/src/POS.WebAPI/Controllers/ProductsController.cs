@@ -2,8 +2,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using POS.Application.Common.Interfaces;
-using POS.Application.DTOs;
 using POS.Domain.Entities;
+using POS.WebAPI.DTOs;
 
 namespace POS.WebAPI.Controllers;
 
@@ -22,7 +22,7 @@ public class ProductsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<ProductListDto>>> GetProducts(
+    public async Task<ActionResult<ApiResponse<List<ProductListDto>>>> GetProducts(
         [FromQuery] string? search,
         [FromQuery] long? categoryId,
         [FromQuery] long? subcategoryId,
@@ -33,6 +33,7 @@ public class ProductsController : ControllerBase
             var query = _unitOfWork.Repository<Product>().Query()
                 .Include(p => p.Subcategory)
                     .ThenInclude(s => s.Category)
+                .Include(p => p.Supplier)
                 .AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(search))
@@ -61,217 +62,386 @@ public class ProductsController : ControllerBase
             {
                 Id = p.Id,
                 Name = p.Name,
+                Slug = p.Slug,
                 SKU = p.SKU,
+                Barcode = p.Barcode,
+                Description = p.Description,
+                PriceExGst = p.PriceExGst,
+                GstAmount = p.GstAmount,
                 PriceIncGst = p.PriceIncGst,
-                StockQuantity = p.StockQuantity,
-                IsActive = p.IsActive,
+                Cost = p.Cost ?? 0,
+                PackSize = p.PackSize,
                 ImageUrl = p.ImageUrl,
-                CategoryName = p.Subcategory.Category.Name,
-                SubcategoryName = p.Subcategory.Name
+                IsActive = p.IsActive,
+                TrackInventory = p.TrackInventory,
+                StockQuantity = p.StockQuantity,
+                LowStockThreshold = p.LowStockThreshold,
+                SubcategoryId = p.SubcategoryId,
+                Subcategory = p.Subcategory != null ? new SubcategoryDto
+                {
+                    Id = p.Subcategory.Id,
+                    Name = p.Subcategory.Name,
+                    Slug = p.Subcategory.Slug,
+                    CategoryId = p.Subcategory.CategoryId,
+                    IsActive = p.Subcategory.IsActive,
+                    DisplayOrder = p.Subcategory.DisplayOrder,
+                    ProductCount = 0
+                } : null,
+                Category = p.Subcategory != null && p.Subcategory.Category != null ? new CategoryDto
+                {
+                    Id = p.Subcategory.Category.Id,
+                    Name = p.Subcategory.Category.Name,
+                    Slug = p.Subcategory.Category.Slug,
+                    IsActive = p.Subcategory.Category.IsActive,
+                    DisplayOrder = p.Subcategory.Category.DisplayOrder,
+                    SubcategoryCount = 0,
+                    ProductCount = 0
+                } : null,
+                SupplierId = p.SupplierId,
+                Supplier = p.Supplier != null ? new SupplierDto
+                {
+                    Id = p.Supplier.Id,
+                    Name = p.Supplier.Name,
+                    IsActive = p.Supplier.IsActive
+                } : null
             }).ToListAsync();
 
-            return Ok(products);
+            return Ok(new ApiResponse<List<ProductListDto>>
+            {
+                Success = true,
+                Data = products
+            });
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error retrieving products");
-            return StatusCode(500, "An error occurred while retrieving products");
+            return StatusCode(500, new ApiResponse<List<ProductListDto>>
+            {
+                Success = false,
+                Message = "An error occurred while retrieving products"
+            });
         }
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<ProductDto>> GetProduct(long id)
+    public async Task<ActionResult<ApiResponse<ProductDto>>> GetProduct(long id)
     {
         try
         {
             var product = await _unitOfWork.Repository<Product>().Query()
                 .Include(p => p.Subcategory)
                     .ThenInclude(s => s.Category)
+                .Include(p => p.Supplier)
                 .Where(p => p.Id == id)
-                .Select(p => new ProductDto
-                {
-                    Id = p.Id,
-                    Name = p.Name,
-                    Slug = p.Slug,
-                    SKU = p.SKU,
-                    Barcode = p.Barcode,
-                    Description = p.Description,
-                    PriceExGst = p.PriceExGst,
-                    GstAmount = p.GstAmount,
-                    PriceIncGst = p.PriceIncGst,
-                    Cost = p.Cost,
-                    PackNotes = p.PackNotes,
-                    PackSize = p.PackSize,
-                    ImageUrl = p.ImageUrl,
-                    IsActive = p.IsActive,
-                    TrackInventory = p.TrackInventory,
-                    StockQuantity = p.StockQuantity,
-                    LowStockThreshold = p.LowStockThreshold,
-                    SubcategoryId = p.SubcategoryId,
-                    SubcategoryName = p.Subcategory.Name,
-                    CategoryId = p.Subcategory.CategoryId,
-                    CategoryName = p.Subcategory.Category.Name
-                })
                 .FirstOrDefaultAsync();
 
             if (product == null)
             {
-                return NotFound();
+                return NotFound(new ApiResponse<ProductDto>
+                {
+                    Success = false,
+                    Message = "Product not found"
+                });
             }
 
-            return Ok(product);
+            var dto = new ProductDto
+            {
+                Id = product.Id,
+                Name = product.Name,
+                Slug = product.Slug,
+                SKU = product.SKU,
+                Barcode = product.Barcode,
+                Description = product.Description,
+                PriceExGst = product.PriceExGst,
+                GstAmount = product.GstAmount,
+                PriceIncGst = product.PriceIncGst,
+                Cost = product.Cost ?? 0,
+                PackNotes = product.PackNotes,
+                PackSize = product.PackSize,
+                ImageUrl = product.ImageUrl,
+                IsActive = product.IsActive,
+                TrackInventory = product.TrackInventory,
+                StockQuantity = product.StockQuantity,
+                LowStockThreshold = product.LowStockThreshold,
+                DisplayOrder = product.DisplayOrder,
+                SubcategoryId = product.SubcategoryId,
+                SubcategoryName = product.Subcategory?.Name,
+                CategoryId = product.Subcategory?.CategoryId,
+                CategoryName = product.Subcategory?.Category?.Name,
+                SupplierId = product.SupplierId,
+                SupplierName = product.Supplier?.Name
+            };
+
+            return Ok(new ApiResponse<ProductDto>
+            {
+                Success = true,
+                Data = dto
+            });
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error retrieving product {ProductId}", id);
-            return StatusCode(500, "An error occurred while retrieving the product");
+            return StatusCode(500, new ApiResponse<ProductDto>
+            {
+                Success = false,
+                Message = "An error occurred while retrieving the product"
+            });
         }
     }
 
     [HttpPost]
-    public async Task<ActionResult<ProductDto>> CreateProduct([FromBody] ProductDto productDto)
+    [Authorize(Roles = "Admin,Manager")]
+    public async Task<ActionResult<ApiResponse<ProductDto>>> CreateProduct([FromBody] CreateProductDto dto)
     {
         try
         {
             var product = new Product
             {
-                Name = productDto.Name,
-                Slug = productDto.Slug,
-                SKU = productDto.SKU,
-                Barcode = productDto.Barcode,
-                Description = productDto.Description,
-                PriceExGst = productDto.PriceExGst,
-                GstAmount = productDto.GstAmount,
-                PriceIncGst = productDto.PriceIncGst,
-                Cost = productDto.Cost,
-                PackNotes = productDto.PackNotes,
-                PackSize = productDto.PackSize,
-                ImageUrl = productDto.ImageUrl,
-                IsActive = productDto.IsActive,
-                TrackInventory = productDto.TrackInventory,
-                StockQuantity = productDto.StockQuantity,
-                LowStockThreshold = productDto.LowStockThreshold,
-                SubcategoryId = productDto.SubcategoryId
+                Name = dto.Name,
+                Slug = dto.Slug ?? dto.Name.ToLower().Replace(" ", "-"),
+                SKU = dto.SKU,
+                Barcode = dto.Barcode,
+                Description = dto.Description,
+                PriceExGst = dto.PriceExGst,
+                GstAmount = dto.GstAmount,
+                PriceIncGst = dto.PriceIncGst,
+                Cost = dto.Cost,
+                PackNotes = dto.PackNotes,
+                PackSize = dto.PackSize,
+                ImageUrl = dto.ImageUrl,
+                IsActive = dto.IsActive,
+                TrackInventory = dto.TrackInventory,
+                StockQuantity = dto.StockQuantity,
+                LowStockThreshold = dto.LowStockThreshold,
+                DisplayOrder = dto.DisplayOrder,
+                SubcategoryId = dto.SubcategoryId,
+                SupplierId = dto.SupplierId
             };
 
             await _unitOfWork.Repository<Product>().AddAsync(product);
             await _unitOfWork.SaveChangesAsync();
 
-            productDto.Id = product.Id;
-            return CreatedAtAction(nameof(GetProduct), new { id = product.Id }, productDto);
+            var result = new ProductDto
+            {
+                Id = product.Id,
+                Name = product.Name,
+                Slug = product.Slug,
+                SKU = product.SKU,
+                Barcode = product.Barcode,
+                Description = product.Description,
+                PriceExGst = product.PriceExGst,
+                GstAmount = product.GstAmount,
+                PriceIncGst = product.PriceIncGst,
+                Cost = product.Cost ?? 0,
+                PackNotes = product.PackNotes,
+                PackSize = product.PackSize,
+                ImageUrl = product.ImageUrl,
+                IsActive = product.IsActive,
+                TrackInventory = product.TrackInventory,
+                StockQuantity = product.StockQuantity,
+                LowStockThreshold = product.LowStockThreshold,
+                DisplayOrder = product.DisplayOrder,
+                SubcategoryId = product.SubcategoryId,
+                SupplierId = product.SupplierId
+            };
+
+            return CreatedAtAction(nameof(GetProduct), new { id = product.Id }, new ApiResponse<ProductDto>
+            {
+                Success = true,
+                Data = result
+            });
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error creating product");
-            return StatusCode(500, "An error occurred while creating the product");
+            return StatusCode(500, new ApiResponse<ProductDto>
+            {
+                Success = false,
+                Message = "An error occurred while creating the product"
+            });
         }
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateProduct(long id, [FromBody] ProductDto productDto)
+    [Authorize(Roles = "Admin,Manager")]
+    public async Task<ActionResult<ApiResponse<ProductDto>>> UpdateProduct(long id, [FromBody] UpdateProductDto dto)
     {
         try
         {
-            if (id != productDto.Id)
-            {
-                return BadRequest("ID mismatch");
-            }
-
             var product = await _unitOfWork.Repository<Product>().GetByIdAsync(id);
             if (product == null)
             {
-                return NotFound();
+                return NotFound(new ApiResponse<ProductDto>
+                {
+                    Success = false,
+                    Message = "Product not found"
+                });
             }
 
-            product.Name = productDto.Name;
-            product.Slug = productDto.Slug;
-            product.SKU = productDto.SKU;
-            product.Barcode = productDto.Barcode;
-            product.Description = productDto.Description;
-            product.PriceExGst = productDto.PriceExGst;
-            product.GstAmount = productDto.GstAmount;
-            product.PriceIncGst = productDto.PriceIncGst;
-            product.Cost = productDto.Cost;
-            product.PackNotes = productDto.PackNotes;
-            product.PackSize = productDto.PackSize;
-            product.ImageUrl = productDto.ImageUrl;
-            product.IsActive = productDto.IsActive;
-            product.TrackInventory = productDto.TrackInventory;
-            product.StockQuantity = productDto.StockQuantity;
-            product.LowStockThreshold = productDto.LowStockThreshold;
-            product.SubcategoryId = productDto.SubcategoryId;
+            product.Name = dto.Name;
+            product.Slug = dto.Slug ?? dto.Name.ToLower().Replace(" ", "-");
+            product.SKU = dto.SKU;
+            product.Barcode = dto.Barcode;
+            product.Description = dto.Description;
+            product.PriceExGst = dto.PriceExGst;
+            product.GstAmount = dto.GstAmount;
+            product.PriceIncGst = dto.PriceIncGst;
+            product.Cost = dto.Cost;
+            product.PackNotes = dto.PackNotes;
+            product.PackSize = dto.PackSize;
+            product.ImageUrl = dto.ImageUrl;
+            product.IsActive = dto.IsActive;
+            product.TrackInventory = dto.TrackInventory;
+            product.StockQuantity = dto.StockQuantity;
+            product.LowStockThreshold = dto.LowStockThreshold;
+            product.DisplayOrder = dto.DisplayOrder;
+            product.SubcategoryId = dto.SubcategoryId;
+            product.SupplierId = dto.SupplierId;
 
             _unitOfWork.Repository<Product>().Update(product);
             await _unitOfWork.SaveChangesAsync();
 
-            return NoContent();
+            var result = new ProductDto
+            {
+                Id = product.Id,
+                Name = product.Name,
+                Slug = product.Slug,
+                SKU = product.SKU,
+                Barcode = product.Barcode,
+                Description = product.Description,
+                PriceExGst = product.PriceExGst,
+                GstAmount = product.GstAmount,
+                PriceIncGst = product.PriceIncGst,
+                Cost = product.Cost ?? 0,
+                PackNotes = product.PackNotes,
+                PackSize = product.PackSize,
+                ImageUrl = product.ImageUrl,
+                IsActive = product.IsActive,
+                TrackInventory = product.TrackInventory,
+                StockQuantity = product.StockQuantity,
+                LowStockThreshold = product.LowStockThreshold,
+                DisplayOrder = product.DisplayOrder,
+                SubcategoryId = product.SubcategoryId,
+                SupplierId = product.SupplierId
+            };
+
+            return Ok(new ApiResponse<ProductDto>
+            {
+                Success = true,
+                Data = result
+            });
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error updating product {ProductId}", id);
-            return StatusCode(500, "An error occurred while updating the product");
+            return StatusCode(500, new ApiResponse<ProductDto>
+            {
+                Success = false,
+                Message = "An error occurred while updating the product"
+            });
         }
     }
 
     [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteProduct(long id)
+    [Authorize(Roles = "Admin")]
+    public async Task<ActionResult<ApiResponse<bool>>> DeleteProduct(long id)
     {
         try
         {
             var product = await _unitOfWork.Repository<Product>().GetByIdAsync(id);
             if (product == null)
             {
-                return NotFound();
+                return NotFound(new ApiResponse<bool>
+                {
+                    Success = false,
+                    Message = "Product not found"
+                });
             }
 
             _unitOfWork.Repository<Product>().Remove(product);
             await _unitOfWork.SaveChangesAsync();
 
-            return NoContent();
+            return Ok(new ApiResponse<bool>
+            {
+                Success = true,
+                Data = true,
+                Message = "Product deleted successfully"
+            });
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error deleting product {ProductId}", id);
-            return StatusCode(500, "An error occurred while deleting the product");
+            return StatusCode(500, new ApiResponse<bool>
+            {
+                Success = false,
+                Message = "An error occurred while deleting the product"
+            });
         }
     }
 
     [HttpGet("by-barcode/{barcode}")]
-    public async Task<ActionResult<ProductDto>> GetProductByBarcode(string barcode)
+    public async Task<ActionResult<ApiResponse<ProductDto>>> GetProductByBarcode(string barcode)
     {
         try
         {
             var product = await _unitOfWork.Repository<Product>().Query()
                 .Include(p => p.Subcategory)
                     .ThenInclude(s => s.Category)
+                .Include(p => p.Supplier)
                 .Where(p => p.Barcode == barcode)
-                .Select(p => new ProductDto
-                {
-                    Id = p.Id,
-                    Name = p.Name,
-                    Slug = p.Slug,
-                    SKU = p.SKU,
-                    Barcode = p.Barcode,
-                    PriceIncGst = p.PriceIncGst,
-                    StockQuantity = p.StockQuantity,
-                    IsActive = p.IsActive,
-                    ImageUrl = p.ImageUrl,
-                    SubcategoryName = p.Subcategory.Name,
-                    CategoryName = p.Subcategory.Category.Name
-                })
                 .FirstOrDefaultAsync();
 
             if (product == null)
             {
-                return NotFound();
+                return NotFound(new ApiResponse<ProductDto>
+                {
+                    Success = false,
+                    Message = "Product not found"
+                });
             }
 
-            return Ok(product);
+            var dto = new ProductDto
+            {
+                Id = product.Id,
+                Name = product.Name,
+                Slug = product.Slug,
+                SKU = product.SKU,
+                Barcode = product.Barcode,
+                Description = product.Description,
+                PriceExGst = product.PriceExGst,
+                GstAmount = product.GstAmount,
+                PriceIncGst = product.PriceIncGst,
+                Cost = product.Cost,
+                PackNotes = product.PackNotes,
+                PackSize = product.PackSize,
+                ImageUrl = product.ImageUrl,
+                IsActive = product.IsActive,
+                TrackInventory = product.TrackInventory,
+                StockQuantity = product.StockQuantity,
+                LowStockThreshold = product.LowStockThreshold,
+                DisplayOrder = product.DisplayOrder,
+                SubcategoryId = product.SubcategoryId,
+                SubcategoryName = product.Subcategory?.Name,
+                CategoryId = product.Subcategory?.CategoryId,
+                CategoryName = product.Subcategory?.Category?.Name,
+                SupplierId = product.SupplierId,
+                SupplierName = product.Supplier?.Name
+            };
+
+            return Ok(new ApiResponse<ProductDto>
+            {
+                Success = true,
+                Data = dto
+            });
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error retrieving product by barcode {Barcode}", barcode);
-            return StatusCode(500, "An error occurred while retrieving the product");
+            return StatusCode(500, new ApiResponse<ProductDto>
+            {
+                Success = false,
+                Message = "An error occurred while retrieving the product"
+            });
         }
     }
 }

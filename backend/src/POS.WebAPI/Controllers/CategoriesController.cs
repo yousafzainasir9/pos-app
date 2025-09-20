@@ -2,8 +2,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using POS.Application.Common.Interfaces;
-using POS.Application.DTOs;
 using POS.Domain.Entities;
+using POS.WebAPI.DTOs;
 
 namespace POS.WebAPI.Controllers;
 
@@ -15,171 +15,258 @@ public class CategoriesController : ControllerBase
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<CategoriesController> _logger;
 
-    public CategoriesController(IUnitOfWork unitOfWork, ILogger<CategoriesController> logger)
+    public CategoriesController(
+        IUnitOfWork unitOfWork,
+        ILogger<CategoriesController> logger)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<CategoryDto>>> GetCategories([FromQuery] bool includeSubcategories = false)
+    public async Task<ActionResult<ApiResponse<List<CategoryDto>>>> GetAll()
     {
         try
         {
-            IQueryable<Category> query = _unitOfWork.Repository<Category>().Query()
-                .Where(c => c.IsActive);
-
-            if (includeSubcategories)
-            {
-                query = query.Include(c => c.Subcategories);
-            }
-
-            var categories = await query
+            var categories = await _unitOfWork.Repository<Category>().Query()
+                .Include(c => c.Subcategories)
                 .OrderBy(c => c.DisplayOrder)
+                .ThenBy(c => c.Name)
                 .Select(c => new CategoryDto
                 {
                     Id = c.Id,
                     Name = c.Name,
                     Slug = c.Slug,
                     Description = c.Description,
+                    ImageUrl = c.ImageUrl,
                     DisplayOrder = c.DisplayOrder,
                     IsActive = c.IsActive,
-                    Subcategories = includeSubcategories 
-                        ? c.Subcategories
-                            .Where(s => s.IsActive)
-                            .OrderBy(s => s.DisplayOrder)
-                            .Select(s => new SubcategoryDto
-                            {
-                                Id = s.Id,
-                                Name = s.Name,
-                                Slug = s.Slug,
-                                Description = s.Description,
-                                DisplayOrder = s.DisplayOrder,
-                                IsActive = s.IsActive,
-                                CategoryId = c.Id,
-                                CategoryName = c.Name
-                            }).ToList()
-                        : new List<SubcategoryDto>()
+                    SubcategoryCount = c.Subcategories.Count,
+                    ProductCount = c.Subcategories.SelectMany(s => s.Products).Count()
                 })
                 .ToListAsync();
 
-            return Ok(categories);
+            return Ok(new ApiResponse<List<CategoryDto>>
+            {
+                Success = true,
+                Data = categories
+            });
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error retrieving categories");
-            return StatusCode(500, "An error occurred while retrieving categories");
+            _logger.LogError(ex, "Error getting categories");
+            return StatusCode(500, new ApiResponse<List<CategoryDto>>
+            {
+                Success = false,
+                Message = "An error occurred while retrieving categories"
+            });
         }
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<CategoryDto>> GetCategory(long id)
+    public async Task<ActionResult<ApiResponse<CategoryDetailDto>>> GetById(long id)
     {
         try
         {
             var category = await _unitOfWork.Repository<Category>().Query()
                 .Include(c => c.Subcategories)
-                .Where(c => c.Id == id)
-                .Select(c => new CategoryDto
-                {
-                    Id = c.Id,
-                    Name = c.Name,
-                    Slug = c.Slug,
-                    Description = c.Description,
-                    DisplayOrder = c.DisplayOrder,
-                    IsActive = c.IsActive,
-                    Subcategories = c.Subcategories
-                        .Where(s => s.IsActive)
-                        .OrderBy(s => s.DisplayOrder)
-                        .Select(s => new SubcategoryDto
-                        {
-                            Id = s.Id,
-                            Name = s.Name,
-                            Slug = s.Slug,
-                            Description = s.Description,
-                            DisplayOrder = s.DisplayOrder,
-                            IsActive = s.IsActive,
-                            CategoryId = c.Id,
-                            CategoryName = c.Name
-                        }).ToList()
-                })
-                .FirstOrDefaultAsync();
-
+                .FirstOrDefaultAsync(c => c.Id == id);
+            
             if (category == null)
             {
-                return NotFound();
+                return NotFound(new ApiResponse<CategoryDetailDto>
+                {
+                    Success = false,
+                    Message = "Category not found"
+                });
             }
 
-            return Ok(category);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error retrieving category {CategoryId}", id);
-            return StatusCode(500, "An error occurred while retrieving the category");
-        }
-    }
-
-    [HttpGet("{categoryId}/subcategories")]
-    public async Task<ActionResult<IEnumerable<SubcategoryDto>>> GetSubcategories(long categoryId)
-    {
-        try
-        {
-            var subcategories = await _unitOfWork.Repository<Subcategory>().Query()
-                .Include(s => s.Category)
-                .Where(s => s.CategoryId == categoryId && s.IsActive)
-                .OrderBy(s => s.DisplayOrder)
-                .Select(s => new SubcategoryDto
+            var dto = new CategoryDetailDto
+            {
+                Id = category.Id,
+                Name = category.Name,
+                Slug = category.Slug,
+                Description = category.Description,
+                ImageUrl = category.ImageUrl,
+                DisplayOrder = category.DisplayOrder,
+                IsActive = category.IsActive,
+                Subcategories = category.Subcategories.Select(s => new SubcategoryDto
                 {
                     Id = s.Id,
                     Name = s.Name,
                     Slug = s.Slug,
                     Description = s.Description,
-                    DisplayOrder = s.DisplayOrder,
-                    IsActive = s.IsActive,
                     CategoryId = s.CategoryId,
-                    CategoryName = s.Category.Name
-                })
-                .ToListAsync();
+                    DisplayOrder = s.DisplayOrder,
+                    IsActive = s.IsActive
+                }).ToList()
+            };
 
-            return Ok(subcategories);
+            return Ok(new ApiResponse<CategoryDetailDto>
+            {
+                Success = true,
+                Data = dto
+            });
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error retrieving subcategories for category {CategoryId}", categoryId);
-            return StatusCode(500, "An error occurred while retrieving subcategories");
+            _logger.LogError(ex, "Error getting category {Id}", id);
+            return StatusCode(500, new ApiResponse<CategoryDetailDto>
+            {
+                Success = false,
+                Message = "An error occurred while retrieving the category"
+            });
         }
     }
 
-    [HttpGet("subcategories/{subcategoryId}/products")]
-    public async Task<ActionResult<IEnumerable<ProductListDto>>> GetSubcategoryProducts(long subcategoryId)
+    [HttpPost]
+    [Authorize(Roles = "Admin,Manager")]
+    public async Task<ActionResult<ApiResponse<CategoryDto>>> Create([FromBody] CreateCategoryDto dto)
     {
         try
         {
-            var products = await _unitOfWork.Repository<Product>().Query()
-                .Include(p => p.Subcategory)
-                    .ThenInclude(s => s.Category)
-                .Where(p => p.SubcategoryId == subcategoryId && p.IsActive)
-                .OrderBy(p => p.DisplayOrder)
-                .Select(p => new ProductListDto
-                {
-                    Id = p.Id,
-                    Name = p.Name,
-                    SKU = p.SKU,
-                    PriceIncGst = p.PriceIncGst,
-                    StockQuantity = p.StockQuantity,
-                    IsActive = p.IsActive,
-                    ImageUrl = p.ImageUrl,
-                    CategoryName = p.Subcategory.Category.Name,
-                    SubcategoryName = p.Subcategory.Name
-                })
-                .ToListAsync();
+            var category = new Category
+            {
+                Name = dto.Name,
+                Slug = dto.Slug ?? dto.Name.ToLower().Replace(" ", "-"),
+                Description = dto.Description,
+                ImageUrl = dto.ImageUrl,
+                DisplayOrder = dto.DisplayOrder,
+                IsActive = dto.IsActive
+            };
 
-            return Ok(products);
+            await _unitOfWork.Repository<Category>().AddAsync(category);
+            await _unitOfWork.SaveChangesAsync();
+
+            var result = new CategoryDto
+            {
+                Id = category.Id,
+                Name = category.Name,
+                Slug = category.Slug,
+                Description = category.Description,
+                ImageUrl = category.ImageUrl,
+                DisplayOrder = category.DisplayOrder,
+                IsActive = category.IsActive
+            };
+
+            return CreatedAtAction(nameof(GetById), new { id = category.Id }, new ApiResponse<CategoryDto>
+            {
+                Success = true,
+                Data = result
+            });
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error retrieving products for subcategory {SubcategoryId}", subcategoryId);
-            return StatusCode(500, "An error occurred while retrieving products");
+            _logger.LogError(ex, "Error creating category");
+            return StatusCode(500, new ApiResponse<CategoryDto>
+            {
+                Success = false,
+                Message = "An error occurred while creating the category"
+            });
+        }
+    }
+
+    [HttpPut("{id}")]
+    [Authorize(Roles = "Admin,Manager")]
+    public async Task<ActionResult<ApiResponse<CategoryDto>>> Update(long id, [FromBody] UpdateCategoryDto dto)
+    {
+        try
+        {
+            var category = await _unitOfWork.Repository<Category>().GetByIdAsync(id);
+            
+            if (category == null)
+            {
+                return NotFound(new ApiResponse<CategoryDto>
+                {
+                    Success = false,
+                    Message = "Category not found"
+                });
+            }
+
+            category.Name = dto.Name;
+            category.Slug = dto.Slug ?? dto.Name.ToLower().Replace(" ", "-");
+            category.Description = dto.Description;
+            category.ImageUrl = dto.ImageUrl;
+            category.DisplayOrder = dto.DisplayOrder;
+            category.IsActive = dto.IsActive;
+
+            _unitOfWork.Repository<Category>().Update(category);
+            await _unitOfWork.SaveChangesAsync();
+
+            var result = new CategoryDto
+            {
+                Id = category.Id,
+                Name = category.Name,
+                Slug = category.Slug,
+                Description = category.Description,
+                ImageUrl = category.ImageUrl,
+                DisplayOrder = category.DisplayOrder,
+                IsActive = category.IsActive
+            };
+
+            return Ok(new ApiResponse<CategoryDto>
+            {
+                Success = true,
+                Data = result
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating category {Id}", id);
+            return StatusCode(500, new ApiResponse<CategoryDto>
+            {
+                Success = false,
+                Message = "An error occurred while updating the category"
+            });
+        }
+    }
+
+    [HttpDelete("{id}")]
+    [Authorize(Roles = "Admin")]
+    public async Task<ActionResult<ApiResponse<bool>>> Delete(long id)
+    {
+        try
+        {
+            var category = await _unitOfWork.Repository<Category>().Query()
+                .Include(c => c.Subcategories)
+                .FirstOrDefaultAsync(c => c.Id == id);
+            
+            if (category == null)
+            {
+                return NotFound(new ApiResponse<bool>
+                {
+                    Success = false,
+                    Message = "Category not found"
+                });
+            }
+
+            if (category.Subcategories.Any())
+            {
+                return BadRequest(new ApiResponse<bool>
+                {
+                    Success = false,
+                    Message = "Cannot delete category with existing subcategories"
+                });
+            }
+
+            _unitOfWork.Repository<Category>().Remove(category);
+            await _unitOfWork.SaveChangesAsync();
+
+            return Ok(new ApiResponse<bool>
+            {
+                Success = true,
+                Data = true,
+                Message = "Category deleted successfully"
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deleting category {Id}", id);
+            return StatusCode(500, new ApiResponse<bool>
+            {
+                Success = false,
+                Message = "An error occurred while deleting the category"
+            });
         }
     }
 }

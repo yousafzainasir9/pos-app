@@ -128,8 +128,8 @@ const ProductsPage: React.FC = () => {
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const response = await productService.getProducts();
-      setProducts(response.data || []);
+      const data = await productService.getProducts();
+      setProducts(data || []);
     } catch (error: any) {
       console.error('Error fetching products:', error);
       if (error.response?.status === 401) {
@@ -144,8 +144,8 @@ const ProductsPage: React.FC = () => {
 
   const fetchCategories = async () => {
     try {
-      const response = await productService.getCategories();
-      setCategories(response.data || []);
+      const data = await productService.getCategories();
+      setCategories(data || []);
     } catch (error: any) {
       console.error('Error fetching categories:', error);
       if (error.response?.status === 401) {
@@ -156,8 +156,8 @@ const ProductsPage: React.FC = () => {
 
   const fetchSubcategories = async (categoryId: number) => {
     try {
-      const response = await productService.getSubcategoriesByCategory(categoryId);
-      setSubcategories(response.data || []);
+      const data = await productService.getSubcategoriesByCategory(categoryId);
+      setSubcategories(data || []);
     } catch (error: any) {
       console.error('Error fetching subcategories:', error);
       if (error.response?.status === 401) {
@@ -168,8 +168,8 @@ const ProductsPage: React.FC = () => {
 
   const fetchSuppliers = async () => {
     try {
-      const response = await productService.getSuppliers();
-      setSuppliers(response.data || []);
+      const data = await productService.getSuppliers();
+      setSuppliers(data || []);
     } catch (error: any) {
       console.error('Error fetching suppliers:', error);
       if (error.response?.status === 401) {

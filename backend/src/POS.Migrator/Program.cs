@@ -1,198 +1,179 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using POS.Infrastructure.Data;
 using POS.Infrastructure.Data.Interceptors;
 using POS.Infrastructure.Data.Seeders;
-using POS.Infrastructure.Services;
-using POS.Migrator.Services;
-using System.IO;
+using System.Diagnostics;
 
-Console.WriteLine("========================================");
-Console.WriteLine("   Cookie Barrel POS - Database Setup");
-Console.WriteLine("========================================");
-Console.WriteLine();
-
-var webApiProjectPath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory,
-    "..", "..", "..", "..", "..", "src", "POS.WebAPI"));
-
-if (Directory.Exists(webApiProjectPath))
-{
-    Directory.SetCurrentDirectory(webApiProjectPath);
-    Console.WriteLine($"Working directory: {webApiProjectPath}");
-}
-else
-{
-    Console.WriteLine($"Warning: Expected WebAPI project directory not found at {webApiProjectPath}");
-    Console.WriteLine("Relative paths may not resolve correctly.");
-}
-
-var builder = Host.CreateApplicationBuilder(args);
-
-builder.Configuration.AddJsonFile("appsettings.json", optional: true)
-                     .AddJsonFile("appsettings.Development.json", optional: true)
-                     .AddEnvironmentVariables();
-
-builder.Services.AddLogging(logging =>
-{
-    logging.ClearProviders();
-    logging.AddConsole();
-});
-
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-if (string.IsNullOrWhiteSpace(connectionString))
-{
-    throw new InvalidOperationException("The DefaultConnection connection string is not configured.");
-}
-
-Console.WriteLine($"Database Server: {connectionString.Split(';')[0].Replace("Server=", "")}");
-Console.WriteLine();
-
-builder.Services.AddDbContext<POSDbContext>(options =>
-    options.UseSqlServer(
-        connectionString,
-        b => b.MigrationsAssembly(typeof(POSDbContext).Assembly.FullName)));
-
-builder.Services.AddScoped<ICurrentUserService, MigratorCurrentUserService>();
-builder.Services.AddScoped<IDateTimeService, DateTimeService>();
-builder.Services.AddScoped<AuditableEntitySaveChangesInterceptor>();
-builder.Services.AddScoped<DatabaseSeeder>();
-
-using var host = builder.Build();
-
-await using var scope = host.Services.CreateAsyncScope();
-var serviceProvider = scope.ServiceProvider;
-var logger = serviceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("Migrator");
-
-try
-{
-    var dbContext = serviceProvider.GetRequiredService<POSDbContext>();
-    
-    // Check if we should refresh the database (default to true for development)
-    var refreshDatabase = builder.Configuration.GetValue<bool>("RefreshDatabase", true);
-    
-    if (refreshDatabase)
+var host = Host.CreateDefaultBuilder(args)
+    .ConfigureAppConfiguration((context, config) =>
     {
-        logger.LogWarning("RefreshDatabase is enabled. Dropping and recreating the database...");
-        Console.WriteLine("⚠️  Database refresh enabled - all data will be replaced!");
-        Console.WriteLine();
+        config.SetBasePath(Directory.GetCurrentDirectory());
+        config.AddJsonFile("appsettings.json", optional: false);
+        config.AddJsonFile($"appsettings.{context.HostingEnvironment.EnvironmentName}.json", optional: true);
+        config.AddEnvironmentVariables();
+    })
+    .ConfigureServices((context, services) =>
+    {
+        var connectionString = context.Configuration.GetConnectionString("DefaultConnection");
         
-        // Drop the database if it exists
-        logger.LogInformation("Checking if database exists...");
-        if (await dbContext.Database.CanConnectAsync())
+        // Register the interceptor and its dependencies
+        services.AddScoped<AuditableEntitySaveChangesInterceptor>();
+        services.AddScoped<ICurrentUserService, MigratorUserService>();
+        services.AddScoped<IDateTimeService, MigratorDateTimeService>();
+        
+        services.AddDbContext<POSDbContext>(options =>
+            options.UseSqlServer(connectionString));
+        
+        services.AddScoped<DatabaseSeeder>();
+        
+        services.AddLogging(builder =>
         {
-            logger.LogWarning("Dropping existing database...");
-            Console.WriteLine("Dropping existing database...");
-            await dbContext.Database.EnsureDeletedAsync();
-            logger.LogInformation("Database dropped successfully.");
+            builder.AddConsole();
+            builder.SetMinimumLevel(LogLevel.Information);
+        });
+    })
+    .Build();
+
+using (var scope = host.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var logger = services.GetRequiredService<ILogger<Program>>();
+    var context = services.GetRequiredService<POSDbContext>();
+    var configuration = services.GetRequiredService<IConfiguration>();
+    var seeder = services.GetRequiredService<DatabaseSeeder>();
+
+    try
+    {
+        Console.WriteLine("========================================");
+        Console.WriteLine("   POS DATABASE MIGRATOR & SEEDER");
+        Console.WriteLine("========================================");
+        Console.WriteLine();
+
+        // Check if we should drop and recreate
+        var refreshDatabase = configuration.GetValue<bool>("RefreshDatabase", false);
+        
+        if (refreshDatabase)
+        {
+            Console.WriteLine("⚠️  RefreshDatabase is enabled - This will DROP and recreate the database!");
+            Console.Write("Are you sure you want to continue? (y/n): ");
+            var confirm = Console.ReadLine();
+            
+            if (confirm?.ToLower() != "y")
+            {
+                Console.WriteLine("Migration cancelled.");
+                return;
+            }
+            
+            Console.WriteLine("📦 Dropping existing database...");
+            await context.Database.EnsureDeletedAsync();
+            Console.WriteLine("✅ Database dropped");
+        }
+
+        // Ensure database exists
+        Console.WriteLine("📦 Ensuring database exists...");
+        await context.Database.EnsureCreatedAsync();
+        
+        // Check for pending migrations
+        var pendingMigrations = await context.Database.GetPendingMigrationsAsync();
+        var pendingCount = pendingMigrations.Count();
+        
+        if (pendingCount > 0)
+        {
+            Console.WriteLine($"📝 Found {pendingCount} pending migration(s):");
+            foreach (var migration in pendingMigrations)
+            {
+                Console.WriteLine($"   - {migration}");
+            }
+            
+            Console.WriteLine("📦 Applying migrations...");
+            await context.Database.MigrateAsync();
+            Console.WriteLine("✅ Migrations applied successfully");
         }
         else
         {
-            logger.LogInformation("Database does not exist.");
+            Console.WriteLine("✅ Database is up to date - no pending migrations");
+            
+            // Check if model has changes that need migration
+            Console.WriteLine("\n🔍 Checking for model changes...");
+            Console.WriteLine("   To generate a new migration if models have changed, run:");
+            Console.WriteLine("   cd src\\POS.Infrastructure");
+            Console.WriteLine("   dotnet ef migrations add YourMigrationName -s ..\\POS.WebAPI");
+            Console.WriteLine();
+        }
+
+        // Seed data
+        var seedData = configuration.GetValue<bool>("SeedData", true);
+        if (seedData)
+        {
+            Console.WriteLine("🌱 Seeding database...");
+            await seeder.SeedAsync(refreshDatabase);
+            Console.WriteLine("✅ Seed data inserted successfully");
+        }
+
+        // Display statistics
+        Console.WriteLine("\n📊 Database Statistics:");
+        Console.WriteLine($"  • Stores:        {await context.Stores.CountAsync()}");
+        Console.WriteLine($"  • Users:         {await context.Users.CountAsync()}");
+        Console.WriteLine($"  • Categories:    {await context.Categories.CountAsync()}");
+        Console.WriteLine($"  • Subcategories: {await context.Subcategories.CountAsync()}");
+        Console.WriteLine($"  • Products:      {await context.Products.CountAsync()}");
+        Console.WriteLine($"  • Customers:     {await context.Customers.CountAsync()}");
+        Console.WriteLine($"  • Suppliers:     {await context.Suppliers.CountAsync()}");
+        Console.WriteLine($"  • Orders:        {await context.Orders.CountAsync()}");
+        Console.WriteLine($"  • Payments:      {await context.Payments.CountAsync()}");
+        Console.WriteLine($"  • Inventory:     {await context.InventoryTransactions.CountAsync()} transactions");
+
+        Console.WriteLine("\n========================================");
+        Console.WriteLine("   DATABASE SETUP COMPLETED ✅");
+        Console.WriteLine("========================================");
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "An error occurred while migrating the database");
+        Console.WriteLine($"\n❌ ERROR: {ex.Message}");
+        
+        if (ex.InnerException != null)
+        {
+            Console.WriteLine($"   Inner: {ex.InnerException.Message}");
         }
         
-        // Create the database
-        logger.LogInformation("Creating new database...");
-        Console.WriteLine("Creating new database...");
-        await dbContext.Database.EnsureCreatedAsync();
-        logger.LogInformation("Database created successfully.");
+        Console.WriteLine("\n💡 Troubleshooting Tips:");
+        Console.WriteLine("1. Check your connection string in appsettings.json");
+        Console.WriteLine("2. Ensure SQL Server is running");
+        Console.WriteLine("3. Verify you have proper permissions");
+        Console.WriteLine("4. If models changed, generate migration first:");
+        Console.WriteLine("   cd src\\POS.Infrastructure");
+        Console.WriteLine("   dotnet ef migrations add YourMigrationName -s ..\\POS.WebAPI");
         
-        // Apply migrations
-        logger.LogInformation("Applying migrations...");
-        Console.WriteLine("Applying migrations...");
-        await dbContext.Database.MigrateAsync();
-        logger.LogInformation("Migrations applied successfully.");
+        Environment.Exit(1);
     }
-    else
-    {
-        logger.LogInformation("RefreshDatabase is disabled. Applying migrations only...");
-        Console.WriteLine("Update mode - keeping existing data");
-        
-        // Just apply migrations without dropping the database
-        logger.LogInformation("Starting database migration...");
-        Console.WriteLine("Applying migrations...");
-        await dbContext.Database.MigrateAsync();
-        logger.LogInformation("Database migrated successfully.");
-    }
-    
-    // Always seed the database
-    var seeder = serviceProvider.GetRequiredService<DatabaseSeeder>();
-    logger.LogInformation("Starting database seeding...");
-    Console.WriteLine();
-    Console.WriteLine("Seeding database with initial data:");
-    Console.WriteLine("  • Stores and Users");
-    Console.WriteLine("  • Suppliers and Customers");
-    Console.WriteLine("  • Categories and Products from JSON catalog");
-    Console.WriteLine("  • Additional data from Excel files (if present)");
-    Console.WriteLine("  • Custom data files from /data directory");
-    Console.WriteLine();
-    
-    await seeder.SeedAsync(refreshDatabase);
-    logger.LogInformation("Database seeded successfully.");
-    
-    // Get statistics
-    var stats = new
-    {
-        Stores = await dbContext.Stores.CountAsync(),
-        Users = await dbContext.Users.CountAsync(),
-        Categories = await dbContext.Categories.CountAsync(),
-        Subcategories = await dbContext.Subcategories.CountAsync(),
-        Products = await dbContext.Products.CountAsync(),
-        Customers = await dbContext.Customers.CountAsync(),
-        Suppliers = await dbContext.Suppliers.CountAsync()
-    };
-    
-    // Display summary
-    Console.WriteLine();
-    Console.WriteLine("========================================");
-    Console.WriteLine("   DATABASE SETUP COMPLETED ✅");
-    Console.WriteLine("========================================");
-    if (refreshDatabase)
-    {
-        Console.WriteLine("✅ Database dropped and recreated");
-    }
-    Console.WriteLine("✅ Migrations applied");
-    Console.WriteLine("✅ Seed data inserted");
-    Console.WriteLine();
-    Console.WriteLine("Database Statistics:");
-    Console.WriteLine($"  • Stores:       {stats.Stores}");
-    Console.WriteLine($"  • Users:        {stats.Users}");
-    Console.WriteLine($"  • Categories:   {stats.Categories}");
-    Console.WriteLine($"  • Subcategories: {stats.Subcategories}");
-    Console.WriteLine($"  • Products:     {stats.Products}");
-    Console.WriteLine($"  • Customers:    {stats.Customers}");
-    Console.WriteLine($"  • Suppliers:    {stats.Suppliers}");
-    Console.WriteLine();
-    Console.WriteLine("Default Users:");
-    Console.WriteLine("  Admin    - Username: admin     | Password: Admin123!    | PIN: 9999");
-    Console.WriteLine("  Manager  - Username: manager   | Password: Manager123!  | PIN: 1234");
-    Console.WriteLine("  Cashier  - Username: cashier1  | Password: Cashier123!  | PIN: 1111");
-    Console.WriteLine("  Cashier  - Username: cashier2  | Password: Cashier123!  | PIN: 2222");
-    Console.WriteLine();
-    Console.WriteLine("Data Import:");
-    Console.WriteLine("  Place additional JSON/XLSX files in: backend\\data\\");
-    Console.WriteLine("  Supported: customers.json, suppliers.json, products.xlsx");
-    Console.WriteLine();
-    Console.WriteLine("You can now run the POS.WebAPI project.");
-    Console.WriteLine("========================================");
-}
-catch (Exception ex)
-{
-    logger.LogError(ex, "An error occurred while setting up the database.");
-    Console.WriteLine();
-    Console.WriteLine("❌ DATABASE SETUP FAILED");
-    Console.WriteLine($"Error: {ex.Message}");
-    
-    if (ex.InnerException != null)
-    {
-        Console.WriteLine($"Inner Exception: {ex.InnerException.Message}");
-    }
-    
-    Environment.ExitCode = 1;
 }
 
-Console.WriteLine();
-Console.WriteLine("Press any key to exit...");
-Console.ReadKey();
+// Helper to create a migration (this won't work at runtime, but shows the command)
+void ShowMigrationHelp()
+{
+    Console.WriteLine("\n📝 To create a new migration:");
+    Console.WriteLine("   1. Open a terminal in the backend folder");
+    Console.WriteLine("   2. Run these commands:");
+    Console.WriteLine("      cd src\\POS.Infrastructure");
+    Console.WriteLine("      dotnet ef migrations add YourMigrationName -s ..\\POS.WebAPI");
+    Console.WriteLine("   3. Then run this migrator again to apply it");
+}
+
+// Simple implementations for the migrator context
+public class MigratorUserService : ICurrentUserService
+{
+    public long? UserId => 1; // System user
+    public string? Username => "System";
+    public string? Email => "system@pos.com";
+}
+
+public class MigratorDateTimeService : IDateTimeService
+{
+    public DateTime Now => DateTime.Now;
+    public DateTime UtcNow => DateTime.UtcNow;
+}

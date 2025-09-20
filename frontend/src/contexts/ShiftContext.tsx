@@ -35,8 +35,8 @@ export const ShiftProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
     try {
       setIsLoading(true);
-      const response = await apiService.get<Shift>('/shifts/current');
-      setCurrentShift(response.data);
+      const response = await apiService.get('/shifts/current');
+      setCurrentShift(response.data.data);
     } catch (error: any) {
       if (error.response?.status !== 404 && error.response?.status !== 401) {
         console.error('Failed to load current shift:', error);
@@ -50,12 +50,19 @@ export const ShiftProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   const openShift = async (request: OpenShiftRequest) => {
     try {
       setIsLoading(true);
-      const response = await apiService.post<Shift>('/shifts/open', request);
-      setCurrentShift(response.data);
+      const response = await apiService.post('/shifts/open', request);
+      setCurrentShift(response.data.data);
       toast.success('Shift opened successfully');
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Failed to open shift');
-      throw error;
+      // Check if shift already exists - backend returns the existing shift in data
+      if (error.response?.status === 400 && error.response?.data?.data) {
+        // Use the existing shift data returned by the server
+        setCurrentShift(error.response.data.data);
+        toast.info('You already have an open shift. Using existing shift.');
+      } else {
+        toast.error(error.response?.data?.message || 'Failed to open shift');
+        throw error;
+      }
     } finally {
       setIsLoading(false);
     }
@@ -69,10 +76,10 @@ export const ShiftProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
     try {
       setIsLoading(true);
-      const response = await apiService.post<any>(`/shifts/${currentShift.id}/close`, request);
+      const response = await apiService.post(`/shifts/${currentShift.id}/close`, request);
       
       // Show shift summary
-      const { cashDifference, totalSales, totalOrders } = response.data;
+      const { cashDifference, totalSales, totalOrders } = response.data.data;
       
       toast.success(
         `Shift closed successfully!\n` +

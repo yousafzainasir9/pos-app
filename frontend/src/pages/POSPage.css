@@ -1,0 +1,181 @@
+/* POSPage Styles */
+
+.pos-page {
+  padding-bottom: 2rem;
+}
+
+/* Product Card Styles */
+.product-card {
+  transition: all 0.3s ease;
+  border: 1px solid #dee2e6;
+  overflow: hidden;
+}
+
+.product-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+  border-color: #0d6efd;
+}
+
+.product-card:active {
+  transform: translateY(-2px);
+}
+
+/* Disabled state for products when shift is not open */
+.product-card[style*="not-allowed"] {
+  opacity: 0.6;
+}
+
+.product-card[style*="not-allowed"]:hover {
+  transform: none;
+  box-shadow: none !important;
+  border-color: #dee2e6;
+}
+
+/* Product Image Container */
+.product-image-container {
+  position: relative;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+.product-image-container img {
+  transition: transform 0.3s ease;
+}
+
+.product-card:hover .product-image-container img {
+  transform: scale(1.05);
+}
+
+/* Product Thumbnail in List View */
+.product-image-thumbnail {
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.product-image-thumbnail img {
+  transition: transform 0.2s ease;
+}
+
+.list-view .card:hover .product-image-thumbnail img {
+  transform: scale(1.1);
+}
+
+/* List View Cards */
+.list-view .card {
+  transition: all 0.2s ease;
+  border-left: 3px solid transparent;
+}
+
+.list-view .card:hover {
+  border-left-color: #0d6efd;
+  background-color: #f8f9fa;
+}
+
+/* Category and Subcategory Buttons */
+.btn-sm {
+  padding: 0.375rem 0.75rem;
+  font-size: 0.875rem;
+  border-radius: 0.25rem;
+  transition: all 0.2s ease;
+}
+
+.btn-outline-primary:hover,
+.btn-outline-secondary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+/* Stock Badge Styles */
+.badge {
+  font-weight: 500;
+  padding: 0.35em 0.65em;
+}
+
+/* Search and Barcode Input Groups */
+.input-group {
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.input-group:focus-within {
+  box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.1);
+}
+
+/* Loading Spinner */
+.spinner-border {
+  width: 3rem;
+  height: 3rem;
+  border-width: 0.3em;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .product-image-container {
+    height: 120px !important;
+  }
+  
+  .product-card .card-body {
+    padding: 0.75rem;
+  }
+  
+  .product-card h6 {
+    font-size: 0.9rem;
+  }
+  
+  .product-card .fs-5 {
+    font-size: 1.1rem !important;
+  }
+}
+
+/* Dark mode support (if you add it later) */
+@media (prefers-color-scheme: dark) {
+  .product-card {
+    background-color: #1a1d23;
+    border-color: #2d3238;
+  }
+  
+  .product-image-container {
+    background: linear-gradient(135deg, #2d3238 0%, #1a1d23 100%);
+  }
+  
+  .list-view .card:hover {
+    background-color: #2d3238;
+  }
+}
+
+/* Animation for adding to cart */
+@keyframes addToCart {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(0.95);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.product-card:active {
+  animation: addToCart 0.3s ease;
+}
+
+/* Custom scrollbar for product list */
+.pos-page::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.pos-page::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.pos-page::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+.pos-page::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}

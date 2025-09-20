@@ -5,6 +5,7 @@ using POS.Application.Common.Interfaces;
 using POS.Domain.Entities;
 using POS.Domain.Enums;
 using POS.Infrastructure.Data.Interceptors;
+using POS.WebAPI.DTOs;
 
 namespace POS.WebAPI.Controllers;
 
@@ -28,7 +29,7 @@ public class ShiftsController : ControllerBase
     }
 
     [HttpPost("open")]
-    public async Task<ActionResult<ShiftDto>> OpenShift([FromBody] OpenShiftDto request)
+    public async Task<ActionResult<ApiResponse<ShiftDto>>> OpenShift([FromBody] OpenShiftDto request)
     {
         try
         {
@@ -37,7 +38,11 @@ public class ShiftsController : ControllerBase
             
             if (user == null || user.StoreId == null)
             {
-                return BadRequest("User not associated with a store");
+                return BadRequest(new ApiResponse<ShiftDto>
+                {
+                    Success = false,
+                    Message = "User not associated with a store"
+                });
             }
 
             // Check for existing open shift
@@ -46,7 +51,19 @@ public class ShiftsController : ControllerBase
 
             if (existingShift != null)
             {
-                return BadRequest("User already has an open shift");
+                return BadRequest(new ApiResponse<ShiftDto>
+                {
+                    Success = false,
+                    Message = "User already has an open shift",
+                    Data = new ShiftDto
+                    {
+                        Id = existingShift.Id,
+                        ShiftNumber = existingShift.ShiftNumber,
+                        StartTime = existingShift.StartTime,
+                        StartingCash = existingShift.StartingCash,
+                        Status = existingShift.Status.ToString()
+                    }
+                });
             }
 
             // Generate shift number
@@ -67,24 +84,32 @@ public class ShiftsController : ControllerBase
             await _unitOfWork.Repository<Shift>().AddAsync(shift);
             await _unitOfWork.SaveChangesAsync();
 
-            return Ok(new ShiftDto
+            return Ok(new ApiResponse<ShiftDto>
             {
-                Id = shift.Id,
-                ShiftNumber = shift.ShiftNumber,
-                StartTime = shift.StartTime,
-                StartingCash = shift.StartingCash,
-                Status = shift.Status.ToString()
+                Success = true,
+                Data = new ShiftDto
+                {
+                    Id = shift.Id,
+                    ShiftNumber = shift.ShiftNumber,
+                    StartTime = shift.StartTime,
+                    StartingCash = shift.StartingCash,
+                    Status = shift.Status.ToString()
+                }
             });
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error opening shift");
-            return StatusCode(500, "An error occurred while opening the shift");
+            return StatusCode(500, new ApiResponse<ShiftDto>
+            {
+                Success = false,
+                Message = "An error occurred while opening the shift"
+            });
         }
     }
 
     [HttpPost("{id}/close")]
-    public async Task<ActionResult<ShiftSummaryDto>> CloseShift(long id, [FromBody] CloseShiftDto request)
+    public async Task<ActionResult<ApiResponse<ShiftSummaryDto>>> CloseShift(long id, [FromBody] CloseShiftDto request)
     {
         try
         {
@@ -97,17 +122,25 @@ public class ShiftsController : ControllerBase
 
             if (shift == null)
             {
-                return NotFound();
+                return NotFound(new ApiResponse<ShiftSummaryDto>
+                {
+                    Success = false,
+                    Message = "Shift not found"
+                });
             }
 
             if (shift.UserId != currentUserId && !User.IsInRole(UserRole.Manager.ToString()))
             {
-                return Forbid("You can only close your own shift");
+                return Forbid();
             }
 
             if (shift.Status != ShiftStatus.Open)
             {
-                return BadRequest("Shift is not open");
+                return BadRequest(new ApiResponse<ShiftSummaryDto>
+                {
+                    Success = false,
+                    Message = "Shift is not open"
+                });
             }
 
             // Calculate shift totals
@@ -152,33 +185,41 @@ public class ShiftsController : ControllerBase
             var expectedCash = shift.StartingCash + shift.CashSales.GetValueOrDefault();
             var cashDifference = shift.EndingCash.GetValueOrDefault() - expectedCash;
 
-            return Ok(new ShiftSummaryDto
+            return Ok(new ApiResponse<ShiftSummaryDto>
             {
-                Id = shift.Id,
-                ShiftNumber = shift.ShiftNumber,
-                StartTime = shift.StartTime,
-                EndTime = shift.EndTime.Value,
-                StartingCash = shift.StartingCash,
-                EndingCash = shift.EndingCash.Value,
-                ExpectedCash = expectedCash,
-                CashDifference = cashDifference,
-                CashSales = shift.CashSales.Value,
-                CardSales = shift.CardSales.Value,
-                OtherSales = shift.OtherSales.Value,
-                TotalSales = shift.TotalSales.Value,
-                TotalOrders = shift.TotalOrders.Value,
-                Status = shift.Status.ToString()
+                Success = true,
+                Data = new ShiftSummaryDto
+                {
+                    Id = shift.Id,
+                    ShiftNumber = shift.ShiftNumber,
+                    StartTime = shift.StartTime,
+                    EndTime = shift.EndTime.Value,
+                    StartingCash = shift.StartingCash,
+                    EndingCash = shift.EndingCash.Value,
+                    ExpectedCash = expectedCash,
+                    CashDifference = cashDifference,
+                    CashSales = shift.CashSales.Value,
+                    CardSales = shift.CardSales.Value,
+                    OtherSales = shift.OtherSales.Value,
+                    TotalSales = shift.TotalSales.Value,
+                    TotalOrders = shift.TotalOrders.Value,
+                    Status = shift.Status.ToString()
+                }
             });
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error closing shift");
-            return StatusCode(500, "An error occurred while closing the shift");
+            return StatusCode(500, new ApiResponse<ShiftSummaryDto>
+            {
+                Success = false,
+                Message = "An error occurred while closing the shift"
+            });
         }
     }
 
     [HttpGet("current")]
-    public async Task<ActionResult<ShiftDto>> GetCurrentShift()
+    public async Task<ActionResult<ApiResponse<ShiftDto>>> GetCurrentShift()
     {
         try
         {
@@ -190,32 +231,44 @@ public class ShiftsController : ControllerBase
 
             if (shift == null)
             {
-                return NotFound("No active shift found");
+                return NotFound(new ApiResponse<ShiftDto>
+                {
+                    Success = false,
+                    Message = "No active shift found"
+                });
             }
 
             var completedOrders = shift.Orders.Where(o => o.Status == OrderStatus.Completed).ToList();
             var totalSales = completedOrders.Sum(o => o.TotalAmount);
 
-            return Ok(new ShiftDto
+            return Ok(new ApiResponse<ShiftDto>
             {
-                Id = shift.Id,
-                ShiftNumber = shift.ShiftNumber,
-                StartTime = shift.StartTime,
-                StartingCash = shift.StartingCash,
-                Status = shift.Status.ToString(),
-                TotalOrders = completedOrders.Count,
-                TotalSales = totalSales
+                Success = true,
+                Data = new ShiftDto
+                {
+                    Id = shift.Id,
+                    ShiftNumber = shift.ShiftNumber,
+                    StartTime = shift.StartTime,
+                    StartingCash = shift.StartingCash,
+                    Status = shift.Status.ToString(),
+                    TotalOrders = completedOrders.Count,
+                    TotalSales = totalSales
+                }
             });
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error retrieving current shift");
-            return StatusCode(500, "An error occurred while retrieving the shift");
+            return StatusCode(500, new ApiResponse<ShiftDto>
+            {
+                Success = false,
+                Message = "An error occurred while retrieving the shift"
+            });
         }
     }
 
     [HttpGet("{id}/report")]
-    public async Task<ActionResult<ShiftReportDto>> GetShiftReport(long id)
+    public async Task<ActionResult<ApiResponse<ShiftReportDto>>> GetShiftReport(long id)
     {
         try
         {
@@ -230,7 +283,11 @@ public class ShiftsController : ControllerBase
 
             if (shift == null)
             {
-                return NotFound();
+                return NotFound(new ApiResponse<ShiftReportDto>
+                {
+                    Success = false,
+                    Message = "Shift not found"
+                });
             }
 
             var report = new ShiftReportDto
@@ -292,80 +349,20 @@ public class ShiftsController : ControllerBase
 
             report.TotalSales = report.CashSales + report.CardSales;
 
-            return Ok(report);
+            return Ok(new ApiResponse<ShiftReportDto>
+            {
+                Success = true,
+                Data = report
+            });
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error generating shift report");
-            return StatusCode(500, "An error occurred while generating the report");
+            return StatusCode(500, new ApiResponse<ShiftReportDto>
+            {
+                Success = false,
+                Message = "An error occurred while generating the report"
+            });
         }
     }
-}
-
-public class OpenShiftDto
-{
-    public decimal StartingCash { get; set; }
-    public string? Notes { get; set; }
-}
-
-public class CloseShiftDto
-{
-    public decimal EndingCash { get; set; }
-    public string? Notes { get; set; }
-}
-
-public class ShiftDto
-{
-    public long Id { get; set; }
-    public string ShiftNumber { get; set; } = string.Empty;
-    public DateTime StartTime { get; set; }
-    public DateTime? EndTime { get; set; }
-    public decimal StartingCash { get; set; }
-    public string Status { get; set; } = string.Empty;
-    public int TotalOrders { get; set; }
-    public decimal TotalSales { get; set; }
-}
-
-public class ShiftSummaryDto : ShiftDto
-{
-    public decimal EndingCash { get; set; }
-    public decimal ExpectedCash { get; set; }
-    public decimal CashDifference { get; set; }
-    public decimal CashSales { get; set; }
-    public decimal CardSales { get; set; }
-    public decimal OtherSales { get; set; }
-}
-
-public class ShiftReportDto
-{
-    public long ShiftId { get; set; }
-    public string ShiftNumber { get; set; } = string.Empty;
-    public string CashierName { get; set; } = string.Empty;
-    public DateTime StartTime { get; set; }
-    public DateTime? EndTime { get; set; }
-    public string Status { get; set; } = string.Empty;
-    public decimal StartingCash { get; set; }
-    public decimal? EndingCash { get; set; }
-    public int TotalOrders { get; set; }
-    public int CompletedOrders { get; set; }
-    public int CancelledOrders { get; set; }
-    public decimal CashSales { get; set; }
-    public decimal CardSales { get; set; }
-    public decimal TotalSales { get; set; }
-    public List<ProductSalesDto> TopProducts { get; set; } = new();
-    public List<HourlySalesDto> HourlySales { get; set; } = new();
-}
-
-public class ProductSalesDto
-{
-    public string ProductName { get; set; } = string.Empty;
-    public int Quantity { get; set; }
-    public decimal TotalSales { get; set; }
-}
-
-public class HourlySalesDto
-{
-    public int Hour { get; set; }
-    public int OrderCount { get; set; }
-    public decimal TotalSales { get; set; }
 }

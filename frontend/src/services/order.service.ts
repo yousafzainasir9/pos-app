@@ -13,18 +13,18 @@ class OrderService {
     status?: OrderStatus;
     customerId?: number;
   }): Promise<Order[]> {
-    const response = await apiService.get<Order[]>('/orders', { params });
-    return response.data;
+    const response = await apiService.get('/orders', { params });
+    return response.data.data || [];
   }
 
   async getOrder(id: number): Promise<Order> {
-    const response = await apiService.get<Order>(`/orders/${id}`);
-    return response.data;
+    const response = await apiService.get(`/orders/${id}`);
+    return response.data.data;
   }
 
   async createOrder(order: CreateOrderRequest): Promise<{ orderId: number; orderNumber: string }> {
-    const response = await apiService.post<{ orderId: number; orderNumber: string }>('/orders', order);
-    return response.data;
+    const response = await apiService.post('/orders', order);
+    return response.data.data;
   }
 
   async processPayment(payment: ProcessPaymentRequest): Promise<{
@@ -34,19 +34,13 @@ class OrderService {
     remainingAmount: number;
     changeAmount: number;
   }> {
-    const response = await apiService.post<{
-      message: string;
-      orderStatus: string;
-      paidAmount: number;
-      remainingAmount: number;
-      changeAmount: number;
-    }>(`/orders/${payment.orderId}/payments`, payment);
-    return response.data;
+    const response = await apiService.post(`/orders/${payment.orderId}/payments`, payment);
+    return response.data.data;
   }
 
   async voidOrder(id: number, reason: string): Promise<{ message: string }> {
-    const response = await apiService.post<{ message: string }>(`/orders/${id}/void`, { reason });
-    return response.data;
+    const response = await apiService.post(`/orders/${id}/void`, { reason });
+    return response.data.data;
   }
 
   async getCurrentShiftOrders(): Promise<{
@@ -65,8 +59,8 @@ class OrderService {
       customerName: string;
     }>;
   }> {
-    const response = await apiService.get<any>('/orders/current-shift');
-    return response.data;
+    const response = await apiService.get('/orders/current-shift');
+    return response.data.data;
   }
 }
 

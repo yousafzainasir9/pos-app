@@ -71,7 +71,36 @@ builder.Services.AddSwaggerGen(c =>
     
     // Add operation filters for better API documentation
     c.OrderActionsBy((apiDesc) => $"{apiDesc.ActionDescriptor.RouteValues["controller"]}_{apiDesc.HttpMethod}");
-    c.CustomSchemaIds(type => type.Name);
+    
+    // Fix for generic type schema conflicts with support for nested generics
+    c.CustomSchemaIds(type =>
+    {
+        string GetTypeName(Type t)
+        {
+            if (!t.IsGenericType)
+            {
+                return t.Name;
+            }
+
+            var typeName = t.Name.Split('`')[0];
+            var genericArgs = t.GetGenericArguments()
+                .Select(arg => GetTypeName(arg))
+                .ToArray();
+            
+            return $"{typeName}Of{string.Join("And", genericArgs)}";
+        }
+
+        var result = GetTypeName(type);
+        
+        // Remove invalid characters that might cause issues
+        result = result.Replace("`", "")
+                      .Replace("[", "")
+                      .Replace("]", "")
+                      .Replace(",", "")
+                      .Replace(" ", "");
+        
+        return result;
+    });
 });
 
 // Configure Database
