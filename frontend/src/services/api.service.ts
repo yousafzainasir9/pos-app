@@ -1,10 +1,12 @@
 import axios, { AxiosInstance, AxiosError, AxiosRequestConfig } from 'axios';
 import { toast } from 'react-toastify';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
+const API_BASE_URL = 'https://localhost:5001/api';
 
 class ApiService {
   private axiosInstance: AxiosInstance;
+  private isRefreshing = false;
+  private failedQueue: any[] = [];
 
   constructor() {
     this.axiosInstance = axios.create({
@@ -17,12 +19,24 @@ class ApiService {
     this.setupInterceptors();
   }
 
+  private processQueue(error: any, token: string | null = null) {
+    this.failedQueue.forEach(prom => {
+      if (error) {
+        prom.reject(error);
+      } else {
+        prom.resolve(token);
+      }
+    });
+    
+    this.failedQueue = [];
+  }
+
   private setupInterceptors() {
     // Request interceptor
     this.axiosInstance.interceptors.request.use(
       (config) => {
         const token = localStorage.getItem('token');
-        if (token) {
+        if (token && config.headers) {
           config.headers.Authorization = `Bearer ${token}`;
         }
         return config;
@@ -38,47 +52,86 @@ class ApiService {
       async (error: AxiosError) => {
         const originalRequest = error.config as AxiosRequestConfig & { _retry?: boolean };
 
+        // Don't retry on login or refresh endpoints
+        if (originalRequest?.url?.includes('/auth/login') || 
+            originalRequest?.url?.includes('/auth/refresh') ||
+            originalRequest?.url?.includes('/auth/pin-login')) {
+          return Promise.reject(error);
+        }
+
         if (error.response?.status === 401 && !originalRequest._retry) {
-          originalRequest._retry = true;
-          
-          try {
-            const refreshToken = localStorage.getItem('refreshToken');
-            if (refreshToken) {
-              const response = await this.post('/auth/refresh', { refreshToken });
-              const { token, refreshToken: newRefreshToken } = response.data;
-              
-              localStorage.setItem('token', token);
-              localStorage.setItem('refreshToken', newRefreshToken);
-              
+          if (this.isRefreshing) {
+            // If already refreshing, queue this request
+            return new Promise((resolve, reject) => {
+              this.failedQueue.push({ resolve, reject });
+            }).then(token => {
               if (originalRequest.headers) {
                 originalRequest.headers.Authorization = `Bearer ${token}`;
               }
-              
               return this.axiosInstance(originalRequest);
+            }).catch(err => {
+              return Promise.reject(err);
+            });
+          }
+
+          originalRequest._retry = true;
+          this.isRefreshing = true;
+          
+          const refreshToken = localStorage.getItem('refreshToken');
+          
+          if (!refreshToken) {
+            this.isRefreshing = false;
+            this.clearAuth();
+            window.location.href = '/login';
+            return Promise.reject(error);
+          }
+
+          try {
+            const response = await axios.post(`${API_BASE_URL}/auth/refresh`, { refreshToken });
+            const { token, refreshToken: newRefreshToken } = response.data;
+            
+            localStorage.setItem('token', token);
+            localStorage.setItem('refreshToken', newRefreshToken);
+            
+            this.isRefreshing = false;
+            this.processQueue(null, token);
+            
+            if (originalRequest.headers) {
+              originalRequest.headers.Authorization = `Bearer ${token}`;
             }
+            
+            return this.axiosInstance(originalRequest);
           } catch (refreshError) {
-            // Refresh failed, redirect to login
-            localStorage.removeItem('token');
-            localStorage.removeItem('refreshToken');
-            localStorage.removeItem('user');
+            this.processQueue(refreshError, null);
+            this.isRefreshing = false;
+            this.clearAuth();
             window.location.href = '/login';
             return Promise.reject(refreshError);
           }
         }
 
-        // Show error message
+        // Handle other errors
         if (error.response?.status === 500) {
-          toast.error('Server error. Please try again later.');
+          console.error('Server error:', error.response);
         } else if (error.response?.status === 404) {
-          toast.error('Resource not found.');
+          // Don't show toast for 404 on shift endpoints
+          if (!originalRequest?.url?.includes('/shifts/current')) {
+            console.log('404 - Resource not found');
+          }
         } else if (error.response?.status === 400) {
-          const message = error.response.data?.message || 'Bad request';
+          const message = (error.response.data as any)?.message || 'Bad request';
           toast.error(message);
         }
 
         return Promise.reject(error);
       }
     );
+  }
+
+  private clearAuth(): void {
+    localStorage.removeItem('token');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('user');
   }
 
   public async get<T>(url: string, config?: AxiosRequestConfig): Promise<{ data: T }> {

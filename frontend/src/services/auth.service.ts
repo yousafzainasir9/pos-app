@@ -1,4 +1,4 @@
-import apiService from './api.service';
+import axios from 'axios';
 import { 
   LoginRequest, 
   LoginResponse, 
@@ -6,35 +6,75 @@ import {
   User 
 } from '@/types';
 
+const API_BASE_URL = 'https://localhost:5001/api';
+
 class AuthService {
   async login(credentials: LoginRequest): Promise<LoginResponse> {
-    const response = await apiService.post<LoginResponse>('/auth/login', credentials);
-    const data = response.data;
-    
-    // Store auth data
-    localStorage.setItem('token', data.token);
-    localStorage.setItem('refreshToken', data.refreshToken);
-    localStorage.setItem('user', JSON.stringify(data.user));
-    
-    return data;
+    try {
+      // Use axios directly for login to avoid token interceptor issues
+      const response = await axios.post<LoginResponse>(`${API_BASE_URL}/auth/login`, credentials, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      const data = response.data;
+      
+      // Store auth data
+      if (data.token) {
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('refreshToken', data.refreshToken);
+        localStorage.setItem('user', JSON.stringify(data.user));
+      }
+      
+      return data;
+    } catch (error: any) {
+      console.error('Login error:', error);
+      throw error;
+    }
   }
 
   async pinLogin(credentials: PinLoginRequest): Promise<LoginResponse> {
-    const response = await apiService.post<LoginResponse>('/auth/pin-login', credentials);
-    const data = response.data;
-    
-    // Store auth data
-    localStorage.setItem('token', data.token);
-    localStorage.setItem('refreshToken', data.refreshToken);
-    localStorage.setItem('user', JSON.stringify(data.user));
-    
-    return data;
+    try {
+      // Use axios directly for PIN login to avoid token interceptor issues
+      const response = await axios.post<LoginResponse>(`${API_BASE_URL}/auth/pin-login`, credentials, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      const data = response.data;
+      
+      // Store auth data
+      if (data.token) {
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('refreshToken', data.refreshToken);
+        localStorage.setItem('user', JSON.stringify(data.user));
+      }
+      
+      return data;
+    } catch (error: any) {
+      console.error('PIN login error:', error);
+      throw error;
+    }
   }
 
   async logout(): Promise<void> {
     try {
-      await apiService.post('/auth/logout');
+      // Try to call logout endpoint but don't fail if it errors
+      const token = localStorage.getItem('token');
+      if (token) {
+        await axios.post(`${API_BASE_URL}/auth/logout`, {}, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+      }
+    } catch (error) {
+      console.error('Logout API error:', error);
     } finally {
+      // Always clear local storage
       this.clearAuth();
     }
   }

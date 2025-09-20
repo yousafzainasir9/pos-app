@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { Shift, OpenShiftRequest, CloseShiftRequest } from '@/types';
 import apiService from '@/services/api.service';
+import authService from '@/services/auth.service';
 import { toast } from 'react-toastify';
 
 interface ShiftContextType {
@@ -19,16 +20,25 @@ export const ShiftProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    loadCurrentShift();
+    // Only load shift if user is authenticated
+    if (authService.isAuthenticated()) {
+      loadCurrentShift();
+    }
   }, []);
 
   const loadCurrentShift = async () => {
+    // Check if user is authenticated before making API call
+    if (!authService.isAuthenticated()) {
+      setCurrentShift(null);
+      return;
+    }
+
     try {
       setIsLoading(true);
       const response = await apiService.get<Shift>('/shifts/current');
       setCurrentShift(response.data);
     } catch (error: any) {
-      if (error.response?.status !== 404) {
+      if (error.response?.status !== 404 && error.response?.status !== 401) {
         console.error('Failed to load current shift:', error);
       }
       setCurrentShift(null);
