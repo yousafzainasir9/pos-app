@@ -17,17 +17,29 @@ public class DatabaseSeeder
         _logger = logger;
     }
 
-    public async Task SeedAsync()
+    public async Task SeedAsync(bool forceRefresh = false)
     {
         try
         {
-            // Seed Store
+            // If not forcing refresh, check if data already exists
+            if (!forceRefresh && await _context.Stores.AnyAsync())
+            {
+                _logger.LogInformation("Database already contains data. Skipping seed.");
+                return;
+            }
+            
+            if (forceRefresh)
+            {
+                _logger.LogInformation("Force refresh enabled - Seeding fresh data...");
+            }
+            
+            // Seed Store - must be first as users depend on it
             if (!await _context.Stores.AnyAsync())
             {
                 await SeedStoresAsync();
             }
 
-            // Seed Users
+            // Seed Users - depends on Store
             if (!await _context.Users.AnyAsync())
             {
                 await SeedUsersAsync();
@@ -39,8 +51,7 @@ public class DatabaseSeeder
                 await SeedCatalogAsync();
             }
 
-            await _context.SaveChangesAsync();
-            _logger.LogInformation("Database seeded successfully");
+            _logger.LogInformation("Database seeding completed successfully");
         }
         catch (Exception ex)
         {
@@ -71,11 +82,18 @@ public class DatabaseSeeder
         };
 
         await _context.Stores.AddAsync(store);
+        await _context.SaveChangesAsync(); // Save immediately to get the ID
+        _logger.LogInformation("Store seeded successfully");
     }
 
     private async Task SeedUsersAsync()
     {
-        var store = await _context.Stores.FirstAsync();
+        var store = await _context.Stores.FirstOrDefaultAsync();
+        if (store == null)
+        {
+            _logger.LogError("No store found to associate users with");
+            throw new InvalidOperationException("Store must be seeded before users");
+        }
 
         var users = new List<User>
         {
@@ -118,6 +136,8 @@ public class DatabaseSeeder
         };
 
         await _context.Users.AddRangeAsync(users);
+        await _context.SaveChangesAsync(); // Save immediately
+        _logger.LogInformation("Users seeded successfully - Admin: admin/Admin123!, Manager: manager/Manager123!, Cashier: cashier1/Cashier123!");
     }
 
     private async Task SeedCatalogAsync()
@@ -130,6 +150,7 @@ public class DatabaseSeeder
             return;
         }
 
+        _logger.LogInformation("Loading catalog from {Path}", jsonPath);
         var jsonContent = await File.ReadAllTextAsync(jsonPath);
         var catalog = JsonSerializer.Deserialize<CatalogData>(jsonContent, new JsonSerializerOptions
         {
@@ -142,6 +163,7 @@ public class DatabaseSeeder
             return;
         }
 
+        int totalProducts = 0;
         int categoryOrder = 0;
         foreach (var categoryData in catalog.Categories)
         {
@@ -212,11 +234,18 @@ public class DatabaseSeeder
                             product.SKU = $"{category.Slug.ToUpper()[..Math.Min(3, category.Slug.Length)]}-{subcategory.Slug.ToUpper()[..Math.Min(3, subcategory.Slug.Length)]}-{productOrder:000}";
 
                             await _context.Products.AddAsync(product);
+                            totalProducts++;
                         }
                     }
                 }
             }
         }
+        
+        await _context.SaveChangesAsync();
+        _logger.LogInformation("Catalog seeded successfully - {CategoryCount} categories, {SubcategoryCount} subcategories, {ProductCount} products",
+            await _context.Categories.CountAsync(),
+            await _context.Subcategories.CountAsync(),
+            totalProducts);
     }
 
     // Classes for deserializing the JSON catalog

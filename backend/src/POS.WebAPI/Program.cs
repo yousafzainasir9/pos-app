@@ -26,22 +26,32 @@ builder.Host.UseSerilog();
 // Add services to the container
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
+
+// Configure Swagger with JWT support
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo 
     { 
-        Title = "POS API", 
+        Title = "Cookie Barrel POS API", 
         Version = "v1",
-        Description = "Cookie Barrel Point of Sale API"
+        Description = "Point of Sale API for Cookie Barrel bakery chain",
+        Contact = new OpenApiContact
+        {
+            Name = "Cookie Barrel IT",
+            Email = "it@cookiebarrel.com.au"
+        }
     });
     
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
-        Description = "JWT Authorization header using the Bearer scheme",
+        Description = @"JWT Authorization header using the Bearer scheme. 
+                        Enter 'Bearer' [space] and then your token in the text input below.
+                        Example: 'Bearer 12345abcdef'",
         Name = "Authorization",
         In = ParameterLocation.Header,
         Type = SecuritySchemeType.ApiKey,
-        Scheme = "Bearer"
+        Scheme = "Bearer",
+        BearerFormat = "JWT"
     });
     
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
@@ -58,6 +68,10 @@ builder.Services.AddSwaggerGen(c =>
             Array.Empty<string>()
         }
     });
+    
+    // Add operation filters for better API documentation
+    c.OrderActionsBy((apiDesc) => $"{apiDesc.ActionDescriptor.RouteValues["controller"]}_{apiDesc.HttpMethod}");
+    c.CustomSchemaIds(type => type.Name);
 });
 
 // Configure Database
@@ -76,9 +90,10 @@ builder.Services.AddHttpContextAccessor();
 // Configure AutoMapper
 builder.Services.AddAutoMapper(typeof(Program).Assembly);
 
-// Configure Authentication
-var jwtSettings = builder.Configuration.GetSection("JwtSettings");
-var key = Encoding.ASCII.GetBytes(jwtSettings["Secret"] ?? "your-256-bit-secret-key-for-jwt-token-generation");
+// Configure JWT Authentication
+var jwtSection = builder.Configuration.GetSection("Jwt");
+var jwtKey = jwtSection["SecretKey"] ?? throw new InvalidOperationException("JWT SecretKey is not configured");
+var key = Encoding.ASCII.GetBytes(jwtKey);
 
 builder.Services.AddAuthentication(options =>
 {
@@ -94,11 +109,24 @@ builder.Services.AddAuthentication(options =>
         ValidateIssuerSigningKey = true,
         IssuerSigningKey = new SymmetricSecurityKey(key),
         ValidateIssuer = true,
-        ValidIssuer = jwtSettings["Issuer"],
+        ValidIssuer = jwtSection["Issuer"],
         ValidateAudience = true,
-        ValidAudience = jwtSettings["Audience"],
+        ValidAudience = jwtSection["Audience"],
         ValidateLifetime = true,
         ClockSkew = TimeSpan.Zero
+    };
+    
+    // Add JWT bearer events for debugging
+    options.Events = new JwtBearerEvents
+    {
+        OnAuthenticationFailed = context =>
+        {
+            if (context.Exception.GetType() == typeof(SecurityTokenExpiredException))
+            {
+                context.Response.Headers.Add("Token-Expired", "true");
+            }
+            return Task.CompletedTask;
+        }
     };
 });
 
@@ -108,49 +136,98 @@ builder.Services.AddAuthorization();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll",
-        builder =>
+        policy =>
         {
-            builder.AllowAnyOrigin()
+            policy.AllowAnyOrigin()
                    .AllowAnyMethod()
                    .AllowAnyHeader();
         });
+    
+    options.AddPolicy("AllowSpecific",
+        policy =>
+        {
+            var corsOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? new[] { "http://localhost:3000" };
+            policy.WithOrigins(corsOrigins)
+                   .AllowAnyMethod()
+                   .AllowAnyHeader()
+                   .AllowCredentials();
+        });
 });
+
+// Add health checks
+builder.Services.AddHealthChecks()
+    .AddDbContextCheck<POSDbContext>("database");
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
 {
+    app.UseDeveloperExceptionPage();
+    
+    // Enable Swagger in development
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Cookie Barrel POS API V1");
+        c.RoutePrefix = "swagger";
+        c.DocumentTitle = "Cookie Barrel POS API Documentation";
+        c.DocExpansion(Swashbuckle.AspNetCore.SwaggerUI.DocExpansion.None);
+        c.DefaultModelsExpandDepth(2);
+        c.DefaultModelRendering(Swashbuckle.AspNetCore.SwaggerUI.ModelRendering.Model);
+        c.DisplayRequestDuration();
+        c.EnableDeepLinking();
+        c.EnableFilter();
+        c.ShowExtensions();
+        c.EnableValidator();
+        c.SupportedSubmitMethods(
+            Swashbuckle.AspNetCore.SwaggerUI.SubmitMethod.Get, 
+            Swashbuckle.AspNetCore.SwaggerUI.SubmitMethod.Post,
+            Swashbuckle.AspNetCore.SwaggerUI.SubmitMethod.Put, 
+            Swashbuckle.AspNetCore.SwaggerUI.SubmitMethod.Delete,
+            Swashbuckle.AspNetCore.SwaggerUI.SubmitMethod.Patch);
+    });
 }
+else
+{
+    // In production, you might want to restrict Swagger or add authentication
+    app.UseExceptionHandler("/error");
+    app.UseHsts();
+}
+
+// Redirect root to Swagger
+app.MapGet("/", () => Results.Redirect("/swagger")).ExcludeFromDescription();
 
 app.UseHttpsRedirection();
-app.UseCors("AllowAll");
+app.UseCors(app.Environment.IsDevelopment() ? "AllowAll" : "AllowSpecific");
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Map health checks
+app.MapHealthChecks("/health");
+
+// Map controllers
 app.MapControllers();
 
-// Migrate and seed database on startup
-using (var scope = app.Services.CreateScope())
+// Log startup information
+Log.Information("Starting Cookie Barrel POS API");
+Log.Information($"Environment: {app.Environment.EnvironmentName}");
+Log.Information($"URLs: {string.Join(", ", builder.Configuration["ASPNETCORE_URLS"]?.Split(';') ?? new[] { "Not configured" })}");
+
+// Note: Database migration moved to separate Migrator project
+// Run POS.Migrator to set up the database
+
+try
 {
-    var dbContext = scope.ServiceProvider.GetRequiredService<POSDbContext>();
-    try
-    {
-        dbContext.Database.Migrate();
-        Log.Information("Database migrated successfully");
-        
-        // Seed the database
-        var seeder = new POS.Infrastructure.Data.Seeders.DatabaseSeeder(
-            dbContext,
-            scope.ServiceProvider.GetRequiredService<ILogger<POS.Infrastructure.Data.Seeders.DatabaseSeeder>>());
-        seeder.SeedAsync().GetAwaiter().GetResult();
-        Log.Information("Database seeded successfully");
-    }
-    catch (Exception ex)
-    {
-        Log.Error(ex, "An error occurred while setting up the database");
-    }
+    app.Run();
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "Application terminated unexpectedly");
+}
+finally
+{
+    Log.CloseAndFlush();
 }
 
-app.Run();
+public partial class Program { } // Make the Program class partial for testing
