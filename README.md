@@ -202,6 +202,12 @@ Each store has its own manager and cashiers. PIN login requires selecting the co
 - ✅ Payment handling (Cash, Card, Split payments)
 - ✅ Shift management
 - ✅ GST/Tax calculations
+- ✅ **Theme Customization** (NEW)
+  - 40+ customizable colors
+  - 4 preset themes (Default, Dark, Eco, Premium)
+  - Company branding (name, logo)
+  - Admin interface for easy customization
+  - Live preview and instant updates
 
 ### Reporting
 - Sales reports by date/store
@@ -214,6 +220,16 @@ Each store has its own manager and cashiers. PIN login requires selecting the co
 - Role-based authorization
 - PIN-based quick login
 - Audit trails
+
+### Theme Customization
+- **Full color customization** - 40+ variables
+- **Preset themes** - Default, Dark, Eco, Premium
+- **Company branding** - Custom name and logo
+- **Admin interface** - Easy-to-use UI
+- **Live updates** - See changes instantly
+- **Persistent storage** - Saves preferences
+
+**For more details, see:** [Theme Documentation](documentation/theme-documentation-index.md)
 
 ## Project Structure
 
@@ -232,10 +248,15 @@ pos-app/
 │   │   ├── components/
 │   │   ├── pages/
 │   │   ├── services/
+│   │   ├── theme/              # Theme system (NEW)
 │   │   └── utils/
 │   └── public/
 └── documentation/
-    └── cookie_barrel_catalog_devseed_2025-09-19.json  # Product catalog
+    ├── cookie_barrel_catalog_devseed_2025-09-19.json  # Product catalog
+    ├── theme-documentation-index.md                    # Theme docs (NEW)
+    ├── theme-quick-start.md                           # Admin guide (NEW)
+    ├── theme-customization.md                         # Developer guide (NEW)
+    └── theme-implementation-summary.md                # Overview (NEW)
 ```
 
 ## Development Tips

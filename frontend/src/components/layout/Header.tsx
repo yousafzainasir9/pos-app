@@ -1,15 +1,17 @@
 import React from 'react';
 import { Navbar, Nav, Container, Badge, Dropdown } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
-import { FaShoppingCart, FaUser, FaCashRegister, FaSignOutAlt } from 'react-icons/fa';
+import { FaShoppingCart, FaUser, FaCashRegister, FaSignOutAlt, FaPalette } from 'react-icons/fa';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCart } from '@/contexts/CartContext';
 import { useShift } from '@/contexts/ShiftContext';
+import { useTheme } from '@/theme/ThemeContext';
 
 const Header: React.FC = () => {
   const { user, logout } = useAuth();
   const { totalItems } = useCart();
   const { isShiftOpen, currentShift } = useShift();
+  const { theme } = useTheme();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -18,10 +20,10 @@ const Header: React.FC = () => {
   };
 
   return (
-    <Navbar bg="dark" variant="dark" expand="lg" sticky="top">
+    <Navbar className="navbar-theme" expand="lg" sticky="top">
       <Container fluid>
-        <Navbar.Brand as={Link} to="/" className="fw-bold">
-          Cookie Barrel POS
+        <Navbar.Brand as={Link} to="/" className="fw-bold logo-text">
+          <span className="logo-icon">🍪</span> {theme.companyName}
         </Navbar.Brand>
         
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
@@ -105,6 +107,12 @@ const Header: React.FC = () => {
                 <Dropdown.Item as={Link} to="/profile">
                   Profile
                 </Dropdown.Item>
+                {user?.role === 'Admin' && (
+                  <Dropdown.Item as={Link} to="/theme">
+                    <FaPalette className="me-2" />
+                    Theme Settings
+                  </Dropdown.Item>
+                )}
                 <Dropdown.Divider />
                 <Dropdown.Item onClick={handleLogout}>
                   <FaSignOutAlt className="me-2" />

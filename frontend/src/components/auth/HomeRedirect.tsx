@@ -7,10 +7,10 @@ const HomeRedirect: React.FC = () => {
 
   // Redirect based on user role
   if (user?.role === 'Admin') {
-    return <Navigate to="/admin" replace />;
+    return <Navigate to="/orders" replace />;
   }
 
-  // Default to POS for other roles
+  // Default to POS for other roles (Manager, Cashier, Staff)
   return <Navigate to="/pos" replace />;
 };
 

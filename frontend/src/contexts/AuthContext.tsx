@@ -7,8 +7,8 @@ interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (credentials: LoginRequest) => Promise<void>;
-  pinLogin: (credentials: PinLoginRequest) => Promise<void>;
+  login: (credentials: LoginRequest) => Promise<User>;
+  pinLogin: (credentials: PinLoginRequest) => Promise<User>;
   logout: () => Promise<void>;
   checkAuth: () => void;
 }
@@ -33,22 +33,24 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setIsLoading(false);
   };
 
-  const login = async (credentials: LoginRequest) => {
+  const login = async (credentials: LoginRequest): Promise<User> => {
     try {
       const response = await authService.login(credentials);
       setUser(response.user);
       toast.success('Login successful!');
+      return response.user;
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Login failed');
       throw error;
     }
   };
 
-  const pinLogin = async (credentials: PinLoginRequest) => {
+  const pinLogin = async (credentials: PinLoginRequest): Promise<User> => {
     try {
       const response = await authService.pinLogin(credentials);
       setUser(response.user);
       toast.success('Login successful!');
+      return response.user;
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'PIN login failed');
       throw error;

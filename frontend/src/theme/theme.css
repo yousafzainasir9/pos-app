@@ -1,0 +1,320 @@
+/* Theme CSS Variables */
+/* These variables are dynamically updated by the ThemeContext */
+
+:root {
+  /* Primary Colors */
+  --color-primary: #0d6efd;
+  --color-primary-hover: #0b5ed7;
+  --color-primary-active: #0a58ca;
+  --color-primary-light: #cfe2ff;
+  --color-primary-dark: #084298;
+
+  /* Secondary Colors */
+  --color-secondary: #6c757d;
+  --color-secondary-hover: #5c636a;
+  --color-secondary-active: #565e64;
+  --color-secondary-light: #e2e3e5;
+  --color-secondary-dark: #41464b;
+
+  /* Accent Colors */
+  --color-accent: #d97706;
+  --color-accent-hover: #b45309;
+  --color-accent-light: #fef3c7;
+
+  /* Status Colors */
+  --color-success: #198754;
+  --color-success-light: #d1e7dd;
+  --color-warning: #ffc107;
+  --color-warning-light: #fff3cd;
+  --color-danger: #dc3545;
+  --color-danger-light: #f8d7da;
+  --color-info: #0dcaf0;
+  --color-info-light: #cff4fc;
+
+  /* Neutral Colors */
+  --color-background: #f8f9fa;
+  --color-background-secondary: #e9ecef;
+  --color-surface: #ffffff;
+  --color-surface-hover: #f8f9fa;
+  --color-border: #dee2e6;
+  --color-border-light: #e9ecef;
+
+  /* Text Colors */
+  --color-text-primary: #212529;
+  --color-text-secondary: #6c757d;
+  --color-text-muted: #adb5bd;
+  --color-text-light: #ffffff;
+  --color-text-dark: #000000;
+
+  /* Logo Colors */
+  --color-logo-background: #2c3e50;
+  --color-logo-text: #ffffff;
+  --color-logo-accent: #d97706;
+  --color-logo-icon: #d97706;
+
+  /* Spacing */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+
+  /* Border Radius */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+
+  /* Transitions */
+  --transition-fast: 150ms ease-in-out;
+  --transition-base: 300ms ease-in-out;
+  --transition-slow: 500ms ease-in-out;
+}
+
+/* Utility Classes for Theme Colors */
+.bg-primary-custom {
+  background-color: var(--color-primary) !important;
+}
+
+.text-primary-custom {
+  color: var(--color-primary) !important;
+}
+
+.border-primary-custom {
+  border-color: var(--color-primary) !important;
+}
+
+.bg-secondary-custom {
+  background-color: var(--color-secondary) !important;
+}
+
+.text-secondary-custom {
+  color: var(--color-secondary) !important;
+}
+
+.bg-accent {
+  background-color: var(--color-accent) !important;
+}
+
+.text-accent {
+  color: var(--color-accent) !important;
+}
+
+.bg-surface {
+  background-color: var(--color-surface) !important;
+}
+
+.bg-surface-hover:hover {
+  background-color: var(--color-surface-hover) !important;
+}
+
+/* Logo Styling */
+.logo-container {
+  background-color: var(--color-logo-background);
+  transition: var(--transition-base);
+}
+
+.logo-text {
+  color: var(--color-logo-text);
+}
+
+.logo-icon {
+  color: var(--color-logo-icon);
+}
+
+.logo-accent {
+  color: var(--color-logo-accent);
+}
+
+/* Button Customizations */
+.btn-theme-primary {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-text-light);
+}
+
+.btn-theme-primary:hover {
+  background-color: var(--color-primary-hover);
+  border-color: var(--color-primary-hover);
+  color: var(--color-text-light);
+}
+
+.btn-theme-primary:active {
+  background-color: var(--color-primary-active);
+  border-color: var(--color-primary-active);
+}
+
+.btn-theme-secondary {
+  background-color: var(--color-secondary);
+  border-color: var(--color-secondary);
+  color: var(--color-text-light);
+}
+
+.btn-theme-secondary:hover {
+  background-color: var(--color-secondary-hover);
+  border-color: var(--color-secondary-hover);
+  color: var(--color-text-light);
+}
+
+.btn-theme-accent {
+  background-color: var(--color-accent);
+  border-color: var(--color-accent);
+  color: var(--color-text-light);
+}
+
+.btn-theme-accent:hover {
+  background-color: var(--color-accent-hover);
+  border-color: var(--color-accent-hover);
+  color: var(--color-text-light);
+}
+
+/* Card Customizations */
+.card-theme {
+  background-color: var(--color-surface);
+  border-color: var(--color-border);
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition-base);
+}
+
+.card-theme:hover {
+  box-shadow: var(--shadow-md);
+}
+
+/* Navbar Customizations */
+.navbar-theme {
+  background-color: var(--color-logo-background) !important;
+}
+
+.navbar-theme .navbar-brand {
+  color: var(--color-logo-text) !important;
+  font-weight: bold;
+}
+
+.navbar-theme .nav-link {
+  color: var(--color-text-light) !important;
+}
+
+.navbar-theme .nav-link:hover {
+  color: var(--color-logo-accent) !important;
+}
+
+/* Badge Customizations */
+.badge-theme-primary {
+  background-color: var(--color-primary);
+  color: var(--color-text-light);
+}
+
+.badge-theme-accent {
+  background-color: var(--color-accent);
+  color: var(--color-text-light);
+}
+
+/* Form Customizations */
+.form-control:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+.form-select:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+/* Table Customizations */
+.table-theme {
+  background-color: var(--color-surface);
+}
+
+.table-theme thead {
+  background-color: var(--color-background-secondary);
+  color: var(--color-text-primary);
+}
+
+.table-theme tbody tr:hover {
+  background-color: var(--color-surface-hover);
+}
+
+/* Alert Customizations */
+.alert-theme-primary {
+  background-color: var(--color-primary-light);
+  border-color: var(--color-primary);
+  color: var(--color-primary-dark);
+}
+
+.alert-theme-accent {
+  background-color: var(--color-accent-light);
+  border-color: var(--color-accent);
+  color: var(--color-accent-hover);
+}
+
+/* Loading Spinner */
+.spinner-theme {
+  color: var(--color-primary);
+}
+
+/* Link Customizations */
+a {
+  color: var(--color-primary);
+  transition: var(--transition-fast);
+}
+
+a:hover {
+  color: var(--color-primary-hover);
+}
+
+/* Background Utilities */
+.bg-theme-primary {
+  background-color: var(--color-primary) !important;
+}
+
+.bg-theme-secondary {
+  background-color: var(--color-secondary) !important;
+}
+
+.bg-theme-accent {
+  background-color: var(--color-accent) !important;
+}
+
+.bg-theme-surface {
+  background-color: var(--color-surface) !important;
+}
+
+.bg-theme-background {
+  background-color: var(--color-background) !important;
+}
+
+/* Text Utilities */
+.text-theme-primary {
+  color: var(--color-primary) !important;
+}
+
+.text-theme-secondary {
+  color: var(--color-secondary) !important;
+}
+
+.text-theme-accent {
+  color: var(--color-accent) !important;
+}
+
+.text-theme-muted {
+  color: var(--color-text-muted) !important;
+}
+
+/* Border Utilities */
+.border-theme-primary {
+  border-color: var(--color-primary) !important;
+}
+
+.border-theme-secondary {
+  border-color: var(--color-secondary) !important;
+}
+
+.border-theme-accent {
+  border-color: var(--color-accent) !important;
+}

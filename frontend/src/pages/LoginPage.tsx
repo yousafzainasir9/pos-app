@@ -37,8 +37,13 @@ const LoginPage: React.FC = () => {
   const handleLogin = async (data: LoginFormData) => {
     setIsLoading(true);
     try {
-      await login(data);
-      navigate('/pos');
+      const response = await login(data);
+      // Redirect based on user role
+      if (response?.role === 'Admin') {
+        navigate('/orders');
+      } else {
+        navigate('/pos');
+      }
     } catch (error) {
       console.error('Login failed:', error);
     } finally {
@@ -49,8 +54,13 @@ const LoginPage: React.FC = () => {
   const handlePinLogin = async (data: PinLoginFormData) => {
     setIsLoading(true);
     try {
-      await pinLogin(data);
-      navigate('/pos');
+      const response = await pinLogin(data);
+      // Redirect based on user role
+      if (response?.role === 'Admin') {
+        navigate('/orders');
+      } else {
+        navigate('/pos');
+      }
     } catch (error) {
       console.error('PIN login failed:', error);
     } finally {

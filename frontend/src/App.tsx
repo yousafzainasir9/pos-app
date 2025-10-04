@@ -4,11 +4,13 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
+import './theme/theme.css';
 
 // Contexts
 import { AuthProvider } from './contexts/AuthContext';
 import { CartProvider } from './contexts/CartContext';
 import { ShiftProvider } from './contexts/ShiftContext';
+import { ThemeProvider } from './theme/ThemeContext';
 
 // Layout
 import Layout from './components/layout/Layout';
@@ -24,13 +26,15 @@ import ProductsPage from './pages/ProductsPage';
 import ShiftPage from './pages/ShiftPage';
 import ReportsPage from './pages/ReportsPage';
 import AdminPage from './pages/AdminPage';
+import ThemeSettingsPage from './pages/ThemeSettingsPage';
 
 function App() {
   return (
     <Router>
-      <AuthProvider>
-        <CartProvider>
-          <ShiftProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <CartProvider>
+            <ShiftProvider>
             <Routes>
               {/* Public Routes */}
               <Route path="/login" element={<LoginPage />} />
@@ -56,6 +60,7 @@ function App() {
               <Route path="/shift" element={<Layout><ShiftPage /></Layout>} />
               <Route path="/reports" element={<Layout><ReportsPage /></Layout>} />
               <Route path="/admin" element={<Layout><AdminPage /></Layout>} />
+              <Route path="/theme" element={<Layout><ThemeSettingsPage /></Layout>} />
               
               {/* Catch all */}
               <Route path="*" element={<Navigate to="/" replace />} />
@@ -76,6 +81,7 @@ function App() {
           </ShiftProvider>
         </CartProvider>
       </AuthProvider>
+    </ThemeProvider>
     </Router>
   );
 }
