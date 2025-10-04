@@ -1,8 +1,17 @@
 // API Response types
 export interface ApiResponse<T> {
+  success: boolean;
   data?: T;
   message?: string;
-  errors?: string[];
+  error?: ErrorResponse;
+}
+
+export interface ErrorResponse {
+  errorCode: string;
+  message: string;
+  errors?: Record<string, string[]>;
+  stackTrace?: string;
+  timestamp: string;
 }
 
 // Enums

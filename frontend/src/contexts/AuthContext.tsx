@@ -40,7 +40,22 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       toast.success('Login successful!');
       return response.user;
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Login failed');
+      // Handle new error format
+      const errorMessage = error.message || 
+                          error.response?.data?.error?.message || 
+                          'Login failed';
+      
+      // Show validation errors if present
+      if (error.errors) {
+        Object.entries(error.errors).forEach(([field, messages]: [string, any]) => {
+          if (Array.isArray(messages)) {
+            messages.forEach(msg => toast.error(`${field}: ${msg}`));
+          }
+        });
+      } else {
+        toast.error(errorMessage);
+      }
+      
       throw error;
     }
   };
@@ -52,7 +67,22 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       toast.success('Login successful!');
       return response.user;
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'PIN login failed');
+      // Handle new error format
+      const errorMessage = error.message || 
+                          error.response?.data?.error?.message || 
+                          'PIN login failed';
+      
+      // Show validation errors if present
+      if (error.errors) {
+        Object.entries(error.errors).forEach(([field, messages]: [string, any]) => {
+          if (Array.isArray(messages)) {
+            messages.forEach(msg => toast.error(`${field}: ${msg}`));
+          }
+        });
+      } else {
+        toast.error(errorMessage);
+      }
+      
       throw error;
     }
   };

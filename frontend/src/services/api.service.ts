@@ -1,5 +1,6 @@
 import axios, { AxiosInstance, AxiosError, AxiosRequestConfig } from 'axios';
 import { toast } from 'react-toastify';
+import { ApiResponse } from '@/types';
 
 const API_BASE_URL = 'https://localhost:7021/api';
 
@@ -87,8 +88,17 @@ class ApiService {
           }
 
           try {
-            const response = await axios.post(`${API_BASE_URL}/auth/refresh`, { refreshToken });
-            const { token, refreshToken: newRefreshToken } = response.data;
+            const response = await axios.post<ApiResponse<any>>(
+              `${API_BASE_URL}/auth/refresh`, 
+              { refreshToken }
+            );
+            
+            // Handle new API response format
+            if (!response.data.success || !response.data.data) {
+              throw new Error('Token refresh failed');
+            }
+
+            const { token, refreshToken: newRefreshToken } = response.data.data;
             
             localStorage.setItem('token', token);
             localStorage.setItem('refreshToken', newRefreshToken);
@@ -110,17 +120,37 @@ class ApiService {
           }
         }
 
-        // Handle other errors
-        if (error.response?.status === 500) {
-          console.error('Server error:', error.response);
-        } else if (error.response?.status === 404) {
-          // Don't show toast for 404 on shift endpoints
-          if (!originalRequest?.url?.includes('/shifts/current')) {
-            console.log('404 - Resource not found');
+        // Handle new error response format
+        if (error.response?.data) {
+          const apiError = error.response.data as ApiResponse<any>;
+          
+          if (apiError.error) {
+            // Extract error message and details
+            const errorMessage = apiError.error.message;
+            const errorCode = apiError.error.errorCode;
+            const fieldErrors = apiError.error.errors;
+
+            // Handle specific error codes
+            if (errorCode === 'AUTH_001' || errorCode === 'AUTH_002') {
+              toast.error(errorMessage);
+            } else if (error.response.status === 429) {
+              toast.error('Too many requests. Please try again later.');
+            } else if (error.response.status === 500) {
+              toast.error('Server error occurred');
+            } else if (error.response.status === 400) {
+              // Show validation errors if present
+              if (fieldErrors && Object.keys(fieldErrors).length > 0) {
+                Object.entries(fieldErrors).forEach(([field, messages]) => {
+                  messages.forEach(msg => toast.error(`${field}: ${msg}`));
+                });
+              } else {
+                toast.error(errorMessage || 'Bad request');
+              }
+            } else if (error.response.status !== 404) {
+              // Don't show 404 errors, but show others
+              toast.error(errorMessage || 'An error occurred');
+            }
           }
-        } else if (error.response?.status === 400) {
-          const message = (error.response.data as any)?.message || 'Bad request';
-          toast.error(message);
         }
 
         return Promise.reject(error);

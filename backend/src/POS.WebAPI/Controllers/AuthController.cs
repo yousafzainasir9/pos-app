@@ -81,7 +81,7 @@ public class AuthController : ControllerBase
                 Token = token,
                 RefreshToken = refreshToken,
                 ExpiresIn = AuthConstants.AccessTokenExpiryMinutes * 60,
-                User = new UserDto
+                User = new AuthUserDto
                 {
                     Id = user.Id,
                     Username = user.Username,
@@ -154,7 +154,7 @@ public class AuthController : ControllerBase
                 Token = token,
                 RefreshToken = refreshToken,
                 ExpiresIn = AuthConstants.AccessTokenExpiryMinutes * 60,
-                User = new UserDto
+                User = new AuthUserDto
                 {
                     Id = user.Id,
                     Username = user.Username,
@@ -224,7 +224,7 @@ public class AuthController : ControllerBase
                 Token = token,
                 RefreshToken = newRefreshToken,
                 ExpiresIn = AuthConstants.AccessTokenExpiryMinutes * 60,
-                User = new UserDto
+                User = new AuthUserDto
                 {
                     Id = user.Id,
                     Username = user.Username,
