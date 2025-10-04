@@ -3,10 +3,12 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using POS.Application.Common.Interfaces;
 using POS.Infrastructure.Data;
 using POS.Infrastructure.Data.Interceptors;
 using POS.Infrastructure.Data.Seeders;
-using System.Diagnostics;
+using POS.Infrastructure.Services;
+using POS.Migrator.Services;
 
 var host = Host.CreateDefaultBuilder(args)
     .ConfigureAppConfiguration((context, config) =>
@@ -22,8 +24,8 @@ var host = Host.CreateDefaultBuilder(args)
         
         // Register the interceptor and its dependencies
         services.AddScoped<AuditableEntitySaveChangesInterceptor>();
-        services.AddScoped<ICurrentUserService, MigratorUserService>();
-        services.AddScoped<IDateTimeService, MigratorDateTimeService>();
+        services.AddScoped<ICurrentUserService, MigratorCurrentUserService>();
+        services.AddScoped<IDateTimeService, DateTimeService>();
         
         services.AddDbContext<POSDbContext>(options =>
             options.UseSqlServer(connectionString));
@@ -73,10 +75,6 @@ using (var scope = host.Services.CreateScope())
             Console.WriteLine("✅ Database dropped");
         }
 
-        // Ensure database exists
-        Console.WriteLine("📦 Ensuring database exists...");
-        await context.Database.EnsureCreatedAsync();
-        
         // Check for pending migrations
         var pendingMigrations = await context.Database.GetPendingMigrationsAsync();
         var pendingCount = pendingMigrations.Count();
@@ -96,20 +94,13 @@ using (var scope = host.Services.CreateScope())
         else
         {
             Console.WriteLine("✅ Database is up to date - no pending migrations");
-            
-            // Check if model has changes that need migration
-            Console.WriteLine("\n🔍 Checking for model changes...");
-            Console.WriteLine("   To generate a new migration if models have changed, run:");
-            Console.WriteLine("   cd src\\POS.Infrastructure");
-            Console.WriteLine("   dotnet ef migrations add YourMigrationName -s ..\\POS.WebAPI");
-            Console.WriteLine();
         }
 
         // Seed data
         var seedData = configuration.GetValue<bool>("SeedData", true);
         if (seedData)
         {
-            Console.WriteLine("🌱 Seeding database...");
+            Console.WriteLine("\n🌱 Seeding database...");
             await seeder.SeedAsync(refreshDatabase);
             Console.WriteLine("✅ Seed data inserted successfully");
         }
@@ -130,6 +121,10 @@ using (var scope = host.Services.CreateScope())
         Console.WriteLine("\n========================================");
         Console.WriteLine("   DATABASE SETUP COMPLETED ✅");
         Console.WriteLine("========================================");
+        Console.WriteLine("\nDefault Credentials:");
+        Console.WriteLine("  Admin:    admin / Admin123!");
+        Console.WriteLine("  Manager:  manager / Manager123!");
+        Console.WriteLine("  Cashier:  cashier1 / Cashier123!");
     }
     catch (Exception ex)
     {
@@ -153,27 +148,4 @@ using (var scope = host.Services.CreateScope())
     }
 }
 
-// Helper to create a migration (this won't work at runtime, but shows the command)
-void ShowMigrationHelp()
-{
-    Console.WriteLine("\n📝 To create a new migration:");
-    Console.WriteLine("   1. Open a terminal in the backend folder");
-    Console.WriteLine("   2. Run these commands:");
-    Console.WriteLine("      cd src\\POS.Infrastructure");
-    Console.WriteLine("      dotnet ef migrations add YourMigrationName -s ..\\POS.WebAPI");
-    Console.WriteLine("   3. Then run this migrator again to apply it");
-}
-
-// Simple implementations for the migrator context
-public class MigratorUserService : ICurrentUserService
-{
-    public long? UserId => 1; // System user
-    public string? Username => "System";
-    public string? Email => "system@pos.com";
-}
-
-public class MigratorDateTimeService : IDateTimeService
-{
-    public DateTime Now => DateTime.Now;
-    public DateTime UtcNow => DateTime.UtcNow;
-}
+public partial class Program { }

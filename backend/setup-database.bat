@@ -1,86 +1,50 @@
 @echo off
 echo ========================================
-echo    Cookie Barrel POS Database Setup
+echo  POS Database Setup
 echo ========================================
 echo.
-echo Select an option:
-echo 1. Refresh Database (Drop and recreate with fresh data)
-echo 2. Update Database (Apply migrations only, keep existing data)
-echo 3. Exit
+echo This will:
+echo   1. Create the database (if not exists)
+echo   2. Apply all migrations
+echo   3. Seed initial data
 echo.
-set /p choice=Enter your choice (1-3): 
-
-if "%choice%"=="1" goto refresh
-if "%choice%"=="2" goto update
-if "%choice%"=="3" goto exit
-goto invalid
-
-:refresh
+echo NOTE: RefreshDatabase is set to TRUE in appsettings.json
+echo       This will DROP and recreate the database!
 echo.
-echo WARNING: This will DELETE all existing data and recreate the database!
-echo.
-set /p confirm=Are you sure? (Y/N): 
-if /i "%confirm%" neq "Y" goto exit
-
-echo.
-echo Refreshing database...
-cd src\POS.Migrator
-
-REM Set RefreshDatabase to true in appsettings
-echo { > appsettings.json
-echo   "ConnectionStrings": { >> appsettings.json
-echo     "DefaultConnection": "Server=Zai;Database=POSDatabase;User Id=sa;Password=1234;TrustServerCertificate=True;MultipleActiveResultSets=true" >> appsettings.json
-echo   }, >> appsettings.json
-echo   "RefreshDatabase": true, >> appsettings.json
-echo   "Logging": { >> appsettings.json
-echo     "LogLevel": { >> appsettings.json
-echo       "Default": "Information", >> appsettings.json
-echo       "Microsoft": "Warning", >> appsettings.json
-echo       "Microsoft.Hosting.Lifetime": "Information", >> appsettings.json
-echo       "Microsoft.EntityFrameworkCore": "Warning" >> appsettings.json
-echo     } >> appsettings.json
-echo   } >> appsettings.json
-echo } >> appsettings.json
-
-dotnet run
-goto end
-
-:update
-echo.
-echo Updating database (keeping existing data)...
-cd src\POS.Migrator
-
-REM Set RefreshDatabase to false in appsettings
-echo { > appsettings.json
-echo   "ConnectionStrings": { >> appsettings.json
-echo     "DefaultConnection": "Server=Zai;Database=POSDatabase;User Id=sa;Password=1234;TrustServerCertificate=True;MultipleActiveResultSets=true" >> appsettings.json
-echo   }, >> appsettings.json
-echo   "RefreshDatabase": false, >> appsettings.json
-echo   "Logging": { >> appsettings.json
-echo     "LogLevel": { >> appsettings.json
-echo       "Default": "Information", >> appsettings.json
-echo       "Microsoft": "Warning", >> appsettings.json
-echo       "Microsoft.Hosting.Lifetime": "Information", >> appsettings.json
-echo       "Microsoft.EntityFrameworkCore": "Warning" >> appsettings.json
-echo     } >> appsettings.json
-echo   } >> appsettings.json
-echo } >> appsettings.json
-
-dotnet run
-goto end
-
-:invalid
-echo.
-echo Invalid choice! Please select 1, 2, or 3.
 pause
-goto start
 
-:exit
+cd /d "%~dp0"
+cd src\POS.Migrator
+
 echo.
-echo Exiting...
-goto end
+echo Running migrator...
+echo.
 
-:end
-cd ..\..
+dotnet run --configuration Debug
+
+if errorlevel 1 (
+    echo.
+    echo ========================================
+    echo  ERROR: Database setup failed!
+    echo ========================================
+    echo.
+    echo Please check the error messages above.
+    pause
+    exit /b 1
+)
+
+echo.
+echo ========================================
+echo  Database setup completed successfully!
+echo ========================================
+echo.
+echo You can now:
+echo   1. Run 'run.bat' to start the API
+echo   2. Test at https://localhost:7xxx/swagger
+echo.
+echo Default users:
+echo   admin / Admin123!
+echo   manager / Manager123!
+echo   cashier1 / Cashier123!
 echo.
 pause
