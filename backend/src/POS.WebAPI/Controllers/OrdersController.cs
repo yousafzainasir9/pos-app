@@ -28,15 +28,74 @@ public class OrdersController : ControllerBase
         _currentUserService = currentUserService;
     }
 
-    [HttpGet]
-    public async Task<ActionResult<IEnumerable<OrderDto>>> GetOrders(
+    [HttpGet("summary")]
+    public async Task<ActionResult<object>> GetOrdersSummary(
         [FromQuery] DateTime? fromDate,
         [FromQuery] DateTime? toDate,
-        [FromQuery] OrderStatus? status,
-        [FromQuery] long? customerId)
+        [FromQuery] OrderStatus? status)
     {
         try
         {
+            var query = _unitOfWork.Repository<Order>().Query().AsQueryable();
+
+            if (fromDate.HasValue)
+            {
+                query = query.Where(o => o.OrderDate >= fromDate.Value);
+            }
+
+            if (toDate.HasValue)
+            {
+                // Add one day to include the entire end date
+                var endDate = toDate.Value.Date.AddDays(1);
+                query = query.Where(o => o.OrderDate < endDate);
+            }
+
+            if (status.HasValue)
+            {
+                query = query.Where(o => o.Status == status.Value);
+            }
+
+            // Calculate summary statistics efficiently
+            var totalOrders = await query.CountAsync();
+            var totalSales = await query
+                .Where(o => o.Status == OrderStatus.Completed)
+                .SumAsync(o => (decimal?)o.TotalAmount) ?? 0;
+            var pendingOrders = await query
+                .CountAsync(o => o.Status == OrderStatus.Pending);
+            var processingOrders = await query
+                .CountAsync(o => o.Status == OrderStatus.Processing);
+
+            return Ok(new
+            {
+                totalOrders,
+                totalSales,
+                pendingOrders,
+                processingOrders
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving orders summary");
+            return StatusCode(500, "An error occurred while retrieving orders summary");
+        }
+    }
+
+    [HttpGet]
+    public async Task<ActionResult<object>> GetOrders(
+        [FromQuery] DateTime? fromDate,
+        [FromQuery] DateTime? toDate,
+        [FromQuery] OrderStatus? status,
+        [FromQuery] long? customerId,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20)
+    {
+        try
+        {
+            // Validate pagination parameters
+            if (page < 1) page = 1;
+            if (pageSize < 1) pageSize = 20;
+            if (pageSize > 100) pageSize = 100; // Max 100 items per page
+
             var query = _unitOfWork.Repository<Order>().Query()
                 .Include(o => o.Customer)
                 .Include(o => o.User)
@@ -53,7 +112,9 @@ public class OrdersController : ControllerBase
 
             if (toDate.HasValue)
             {
-                query = query.Where(o => o.OrderDate <= toDate.Value);
+                // Add one day to include the entire end date
+                var endDate = toDate.Value.Date.AddDays(1);
+                query = query.Where(o => o.OrderDate < endDate);
             }
 
             if (status.HasValue)
@@ -66,8 +127,14 @@ public class OrdersController : ControllerBase
                 query = query.Where(o => o.CustomerId == customerId.Value);
             }
 
+            // Get total count before pagination
+            var totalCount = await query.CountAsync();
+
+            // Apply pagination
             var orders = await query
                 .OrderByDescending(o => o.OrderDate)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
                 .Select(o => new OrderDto
                 {
                     Id = o.Id,
@@ -90,7 +157,22 @@ public class OrdersController : ControllerBase
                 })
                 .ToListAsync();
 
-            return Ok(orders);
+            // Calculate pagination metadata
+            var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+
+            return Ok(new
+            {
+                data = orders,
+                pagination = new
+                {
+                    currentPage = page,
+                    pageSize = pageSize,
+                    totalCount = totalCount,
+                    totalPages = totalPages,
+                    hasNext = page < totalPages,
+                    hasPrevious = page > 1
+                }
+            });
         }
         catch (Exception ex)
         {

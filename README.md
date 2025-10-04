@@ -178,14 +178,17 @@ The frontend will be available at: `http://localhost:5173`
 
 After running the migrator, these users are available for testing:
 
-| Role | Username | Password | PIN | Description |
-|------|----------|----------|-----|-------------|
-| Admin | admin | Admin123! | 9999 | Full system access |
-| Manager | manager1 | Manager123! | 1001 | Store management |
-| Cashier | cashier1 | Cashier123! | 2001 | POS operations |
-| Cashier | cashier2 | Cashier123! | 2002 | POS operations |
+| Role | Username | Password | PIN | Store | Description |
+|------|----------|----------|-----|-------|-------------|
+| Admin | admin | Admin123! | 9999 | Main | Full system access |
+| Manager | manager1 | Manager123! | 1001 | Main | Store 1 management |
+| Cashier | cashier2 | Cashier123! | 2002 | Main | POS operations |
+| Cashier | cashier3 | Cashier123! | 2003 | Main | POS operations |
+| Cashier | cashier4 | Cashier123! | 2004 | Main | POS operations |
 
-Each store has its own manager and cashiers. PIN login provides quick access for cashiers.
+Each store has its own manager and cashiers. PIN login requires selecting the correct store.
+
+**For complete login credentials, see:** [documentation/login-credentials.md](documentation/login-credentials.md)
 
 ## Features
 

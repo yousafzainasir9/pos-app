@@ -27,9 +27,12 @@ const Header: React.FC = () => {
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="me-auto">
-            <Nav.Link as={Link} to="/pos">
-              POS
-            </Nav.Link>
+            {/* POS access for Manager and Cashier only */}
+            {user?.role !== 'Admin' && (
+              <Nav.Link as={Link} to="/pos">
+                POS
+              </Nav.Link>
+            )}
             <Nav.Link as={Link} to="/orders">
               Orders
             </Nav.Link>
@@ -49,34 +52,38 @@ const Header: React.FC = () => {
           </Nav>
 
           <Nav className="ms-auto align-items-center">
-            {/* Shift Status */}
-            <div className="me-3">
-              {isShiftOpen ? (
-                <Badge bg="success" className="p-2">
-                  <FaCashRegister className="me-1" />
-                  Shift: {currentShift?.shiftNumber}
-                </Badge>
-              ) : (
-                <Badge bg="warning" className="p-2">
-                  <FaCashRegister className="me-1" />
-                  No Active Shift
-                </Badge>
-              )}
-            </div>
+            {/* Shift Status - Only for Manager and Cashier */}
+            {user?.role !== 'Admin' && (
+              <div className="me-3">
+                {isShiftOpen ? (
+                  <Badge bg="success" className="p-2">
+                    <FaCashRegister className="me-1" />
+                    Shift: {currentShift?.shiftNumber}
+                  </Badge>
+                ) : (
+                  <Badge bg="warning" className="p-2">
+                    <FaCashRegister className="me-1" />
+                    No Active Shift
+                  </Badge>
+                )}
+              </div>
+            )}
 
-            {/* Cart */}
-            <Nav.Link as={Link} to="/cart" className="position-relative me-3">
-              <FaShoppingCart size={20} />
-              {totalItems > 0 && (
-                <Badge 
-                  bg="danger" 
-                  className="position-absolute top-0 start-100 translate-middle"
-                  style={{ fontSize: '0.7rem' }}
-                >
-                  {totalItems}
-                </Badge>
-              )}
-            </Nav.Link>
+            {/* Cart - Only for Manager and Cashier */}
+            {user?.role !== 'Admin' && (
+              <Nav.Link as={Link} to="/cart" className="position-relative me-3">
+                <FaShoppingCart size={20} />
+                {totalItems > 0 && (
+                  <Badge 
+                    bg="danger" 
+                    className="position-absolute top-0 start-100 translate-middle"
+                    style={{ fontSize: '0.7rem' }}
+                  >
+                    {totalItems}
+                  </Badge>
+                )}
+              </Nav.Link>
+            )}
 
             {/* User Menu */}
             <Dropdown align="end">

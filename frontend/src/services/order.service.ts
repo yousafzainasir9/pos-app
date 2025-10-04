@@ -6,38 +6,108 @@ import {
   OrderStatus
 } from '@/types';
 
+interface PaginationParams {
+  page?: number;
+  pageSize?: number;
+}
+
+interface OrdersResponse {
+  data: Order[];
+  pagination: {
+    currentPage: number;
+    pageSize: number;
+    totalCount: number;
+    totalPages: number;
+    hasNext: boolean;
+    hasPrevious: boolean;
+  };
+}
+
 class OrderService {
+  async getOrdersSummary(params?: {
+    fromDate?: string;
+    toDate?: string;
+    status?: number;
+  }): Promise<{
+    totalOrders: number;
+    totalSales: number;
+    pendingOrders: number;
+    processingOrders: number;
+  }> {
+    try {
+      const apiParams: any = {};
+      if (params?.fromDate) apiParams.fromDate = params.fromDate;
+      if (params?.toDate) apiParams.toDate = params.toDate;
+      if (params?.status) apiParams.status = params.status;
+
+      const response = await apiService.get('/orders/summary', { params: apiParams });
+      return response.data || {
+        totalOrders: 0,
+        totalSales: 0,
+        pendingOrders: 0,
+        processingOrders: 0
+      };
+    } catch (error: any) {
+      console.error('Failed to fetch orders summary:', error.message);
+      return {
+        totalOrders: 0,
+        totalSales: 0,
+        pendingOrders: 0,
+        processingOrders: 0
+      };
+    }
+  }
+
   async getOrders(params?: {
     fromDate?: string;
     toDate?: string;
     status?: number;
     customerId?: number;
-  }): Promise<Order[]> {
+    page?: number;
+    pageSize?: number;
+  }): Promise<OrdersResponse> {
     try {
       // Format the parameters for the API
       const apiParams: any = {};
-      if (params?.fromDate) apiParams.startDate = params.fromDate;
-      if (params?.toDate) apiParams.endDate = params.toDate;
+      if (params?.fromDate) apiParams.fromDate = params.fromDate;
+      if (params?.toDate) apiParams.toDate = params.toDate;
       if (params?.status) apiParams.status = params.status;
       if (params?.customerId) apiParams.customerId = params.customerId;
+      if (params?.page) apiParams.page = params.page;
+      if (params?.pageSize) apiParams.pageSize = params.pageSize;
 
       const response = await apiService.get('/orders', { params: apiParams });
       
-      // Handle different response structures
+      // Check if response has pagination structure
+      if (response.data?.data && response.data?.pagination) {
+        return response.data as OrdersResponse;
+      }
+      
+      // Handle old format (array directly)
       const orders = response.data?.data || response.data || [];
       
-      // If we got valid data, return it
+      // If we got valid data, return it with default pagination
       if (Array.isArray(orders) && orders.length > 0) {
-        return orders;
+        return {
+          data: orders,
+          pagination: {
+            currentPage: 1,
+            pageSize: orders.length,
+            totalCount: orders.length,
+            totalPages: 1,
+            hasNext: false,
+            hasPrevious: false
+          }
+        };
       }
       
       // If no data or empty array, return mock data
       console.log('No orders from API, using mock data');
-      return this.getMockOrders(params);
+      return this.getMockOrdersWithPagination(params);
     } catch (error: any) {
       console.error('Failed to fetch orders:', error.message);
       // Return mock data based on your database
-      return this.getMockOrders(params);
+      return this.getMockOrdersWithPagination(params);
     }
   }
 
@@ -128,6 +198,32 @@ class OrderService {
         orders: []
       };
     }
+  }
+
+  // Generate realistic mock orders based on your database
+  private getMockOrdersWithPagination(params?: any): OrdersResponse {
+    const allOrders = this.getMockOrders(params);
+    
+    const page = params?.page || 1;
+    const pageSize = params?.pageSize || 20;
+    const startIndex = (page - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
+    
+    const paginatedOrders = allOrders.slice(startIndex, endIndex);
+    const totalCount = allOrders.length;
+    const totalPages = Math.ceil(totalCount / pageSize);
+    
+    return {
+      data: paginatedOrders,
+      pagination: {
+        currentPage: page,
+        pageSize: pageSize,
+        totalCount: totalCount,
+        totalPages: totalPages,
+        hasNext: page < totalPages,
+        hasPrevious: page > 1
+      }
+    };
   }
 
   // Generate realistic mock orders based on your database

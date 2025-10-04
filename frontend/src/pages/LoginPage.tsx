@@ -148,12 +148,29 @@ const LoginPage: React.FC = () => {
                   <div className="mt-3 text-center text-muted small">
                     Demo Accounts:<br />
                     Admin: admin / Admin123!<br />
-                    Cashier: cashier1 / Cashier123!
+                    Manager: manager1 / Manager123!<br />
+                    Cashier: cashier2 / Cashier123!
                   </div>
                 </Tab>
 
                 <Tab eventKey="pin" title="PIN Login">
                   <Form onSubmit={handleSubmitPin(handlePinLogin)}>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Store</Form.Label>
+                      <Form.Select
+                        {...registerPin('storeId', { valueAsNumber: true })}
+                        isInvalid={!!pinErrors.storeId}
+                        disabled={isLoading}
+                      >
+                        <option value="1">Cookie Barrel Main</option>
+                        <option value="2">Cookie Barrel Westfield</option>
+                        <option value="3">Cookie Barrel Airport</option>
+                      </Form.Select>
+                      <Form.Control.Feedback type="invalid">
+                        {pinErrors.storeId?.message}
+                      </Form.Control.Feedback>
+                    </Form.Group>
+
                     <Form.Group className="mb-3">
                       <Form.Label>PIN</Form.Label>
                       <div className="input-group">
@@ -221,8 +238,8 @@ const LoginPage: React.FC = () => {
                   <div className="mt-3 text-center text-muted small">
                     Demo PINs:<br />
                     Admin: 9999<br />
-                    Manager: 1234<br />
-                    Cashier: 1111
+                    Manager (Store 1): 1001<br />
+                    Cashier (Store 1): 2002, 2003, 2004
                   </div>
                 </Tab>
               </Tabs>

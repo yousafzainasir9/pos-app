@@ -12,6 +12,8 @@ import { ShiftProvider } from './contexts/ShiftContext';
 
 // Layout
 import Layout from './components/layout/Layout';
+import RoleBasedRoute from './components/auth/RoleBasedRoute';
+import HomeRedirect from './components/auth/HomeRedirect';
 
 // Pages
 import LoginPage from './pages/LoginPage';
@@ -34,9 +36,21 @@ function App() {
               <Route path="/login" element={<LoginPage />} />
               
               {/* Protected Routes */}
-              <Route path="/" element={<Layout><Navigate to="/pos" replace /></Layout>} />
-              <Route path="/pos" element={<Layout><POSPage /></Layout>} />
-              <Route path="/cart" element={<Layout><CartPage /></Layout>} />
+              <Route path="/" element={<Layout><HomeRedirect /></Layout>} />
+              <Route path="/pos" element={
+                <Layout>
+                  <RoleBasedRoute allowedRoles={['Manager', 'Cashier', 'Staff']}>
+                    <POSPage />
+                  </RoleBasedRoute>
+                </Layout>
+              } />
+              <Route path="/cart" element={
+                <Layout>
+                  <RoleBasedRoute allowedRoles={['Manager', 'Cashier', 'Staff']}>
+                    <CartPage />
+                  </RoleBasedRoute>
+                </Layout>
+              } />
               <Route path="/orders" element={<Layout><OrdersPage /></Layout>} />
               <Route path="/products" element={<Layout><ProductsPage /></Layout>} />
               <Route path="/shift" element={<Layout><ShiftPage /></Layout>} />

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Card, Badge, Button, Form, Row, Col } from 'react-bootstrap';
+import { Table, Card, Badge, Button, Form, Row, Col, Pagination } from 'react-bootstrap';
 import { FaEye, FaPrint, FaFilter, FaReceipt, FaTimes, FaCheck } from 'react-icons/fa';
 import { format } from 'date-fns';
 import { Order, OrderStatus } from '@/types';
@@ -9,6 +9,21 @@ import { toast } from 'react-toastify';
 const OrdersPage: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingSummary, setIsLoadingSummary] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(20);
+  const [pagination, setPagination] = useState({
+    totalCount: 0,
+    totalPages: 0,
+    hasNext: false,
+    hasPrevious: false
+  });
+  const [summary, setSummary] = useState({
+    totalOrders: 0,
+    totalSales: 0,
+    pendingOrders: 0,
+    processingOrders: 0
+  });
   
   // Initialize with today's date
   const today = format(new Date(), 'yyyy-MM-dd');
@@ -19,25 +34,68 @@ const OrdersPage: React.FC = () => {
   });
 
   useEffect(() => {
-    // Load orders with today's date on component mount
+    // Load both summary and orders on initial mount
+    loadSummary();
     loadOrders();
   }, []);
 
-  const loadOrders = async () => {
-    setIsLoading(true);
+  useEffect(() => {
+    // Load orders when page changes (but keep same filters)
+    loadOrders();
+  }, [currentPage]);
+
+  const loadSummary = async () => {
+    setIsLoadingSummary(true);
     try {
-      // Pass parameters correctly to the service
       const params: any = {};
       if (filter.status) params.status = parseInt(filter.status);
       if (filter.fromDate) params.fromDate = filter.fromDate;
       if (filter.toDate) params.toDate = filter.toDate;
 
-      const data = await orderService.getOrders(params);
-      setOrders(data);
+      const summaryData = await orderService.getOrdersSummary(params);
+      setSummary(summaryData);
+    } catch (error) {
+      console.error('Failed to load summary:', error);
+      setSummary({
+        totalOrders: 0,
+        totalSales: 0,
+        pendingOrders: 0,
+        processingOrders: 0
+      });
+    } finally {
+      setIsLoadingSummary(false);
+    }
+  };
+
+  const loadOrders = async () => {
+    setIsLoading(true);
+    try {
+      // Pass parameters correctly to the service
+      const params: any = {
+        page: currentPage,
+        pageSize: pageSize
+      };
+      if (filter.status) params.status = parseInt(filter.status);
+      if (filter.fromDate) params.fromDate = filter.fromDate;
+      if (filter.toDate) params.toDate = filter.toDate;
+
+      const response = await orderService.getOrders(params);
+      setOrders(response.data);
+      setPagination({
+        totalCount: response.pagination.totalCount,
+        totalPages: response.pagination.totalPages,
+        hasNext: response.pagination.hasNext,
+        hasPrevious: response.pagination.hasPrevious
+      });
     } catch (error) {
       console.error('Failed to load orders:', error);
-      // Service already handles mock data, so we don't need to call loadMockOrders
       setOrders([]);
+      setPagination({
+        totalCount: 0,
+        totalPages: 0,
+        hasNext: false,
+        hasPrevious: false
+      });
     } finally {
       setIsLoading(false);
     }
@@ -187,14 +245,30 @@ const OrdersPage: React.FC = () => {
     setFilter(prev => ({ ...prev, [key]: value }));
   };
 
-  const handleApplyFilter = () => {
-    loadOrders();
+  const handleApplyFilter = async () => {
+    setCurrentPage(1); // Reset to first page when applying filter
+    // Load both summary and orders with new filters
+    await Promise.all([
+      loadSummary(),
+      loadOrders()
+    ]);
   };
 
-  const handleClearFilter = () => {
+  const handleClearFilter = async () => {
     const today = format(new Date(), 'yyyy-MM-dd');
     setFilter({ status: '', fromDate: today, toDate: today });
-    setTimeout(() => loadOrders(), 100);
+    setCurrentPage(1); // Reset to first page
+    // Small delay to ensure state is updated before reloading
+    setTimeout(async () => {
+      await Promise.all([
+        loadSummary(),
+        loadOrders()
+      ]);
+    }, 50);
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
   };
 
   const handleViewOrder = (orderId: number) => {
@@ -280,7 +354,11 @@ const OrdersPage: React.FC = () => {
         <Col md={3}>
           <Card className="text-center">
             <Card.Body>
-              <h4 className="text-primary">{orders.length}</h4>
+              {isLoadingSummary ? (
+                <div className="spinner-border spinner-border-sm text-primary" />
+              ) : (
+                <h4 className="text-primary">{summary.totalOrders}</h4>
+              )}
               <p className="text-muted mb-0">Total Orders</p>
             </Card.Body>
           </Card>
@@ -288,9 +366,11 @@ const OrdersPage: React.FC = () => {
         <Col md={3}>
           <Card className="text-center">
             <Card.Body>
-              <h4 className="text-success">
-                ${orders.reduce((sum, o) => sum + o.totalAmount, 0).toFixed(2)}
-              </h4>
+              {isLoadingSummary ? (
+                <div className="spinner-border spinner-border-sm text-success" />
+              ) : (
+                <h4 className="text-success">${summary.totalSales.toFixed(2)}</h4>
+              )}
               <p className="text-muted mb-0">Total Sales</p>
             </Card.Body>
           </Card>
@@ -298,9 +378,11 @@ const OrdersPage: React.FC = () => {
         <Col md={3}>
           <Card className="text-center">
             <Card.Body>
-              <h4 className="text-warning">
-                {orders.filter(o => o.status === OrderStatus.Pending).length}
-              </h4>
+              {isLoadingSummary ? (
+                <div className="spinner-border spinner-border-sm text-warning" />
+              ) : (
+                <h4 className="text-warning">{summary.pendingOrders}</h4>
+              )}
               <p className="text-muted mb-0">Pending Orders</p>
             </Card.Body>
           </Card>
@@ -308,9 +390,11 @@ const OrdersPage: React.FC = () => {
         <Col md={3}>
           <Card className="text-center">
             <Card.Body>
-              <h4 className="text-info">
-                {orders.filter(o => o.status === OrderStatus.Processing).length}
-              </h4>
+              {isLoadingSummary ? (
+                <div className="spinner-border spinner-border-sm text-info" />
+              ) : (
+                <h4 className="text-info">{summary.processingOrders}</h4>
+              )}
               <p className="text-muted mb-0">Processing</p>
             </Card.Body>
           </Card>
@@ -383,6 +467,89 @@ const OrdersPage: React.FC = () => {
               <FaReceipt size={48} className="mb-3 opacity-50" />
               <p>No orders found for the selected filters</p>
               <small>Try adjusting your date range or status filter</small>
+            </div>
+          )}
+
+          {/* Pagination */}
+          {!isLoading && orders.length > 0 && pagination.totalPages > 1 && (
+            <div className="d-flex justify-content-between align-items-center mt-3">
+              <div className="text-muted">
+                Showing {((currentPage - 1) * pageSize) + 1} to {Math.min(currentPage * pageSize, pagination.totalCount)} of {pagination.totalCount} orders
+              </div>
+              <Pagination className="mb-0">
+                <Pagination.First 
+                  onClick={() => handlePageChange(1)} 
+                  disabled={!pagination.hasPrevious}
+                />
+                <Pagination.Prev 
+                  onClick={() => handlePageChange(currentPage - 1)} 
+                  disabled={!pagination.hasPrevious}
+                />
+                
+                {/* Show page numbers */}
+                {(() => {
+                  const pages = [];
+                  const maxPagesToShow = 5;
+                  let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
+                  let endPage = Math.min(pagination.totalPages, startPage + maxPagesToShow - 1);
+                  
+                  // Adjust start if we're near the end
+                  if (endPage - startPage < maxPagesToShow - 1) {
+                    startPage = Math.max(1, endPage - maxPagesToShow + 1);
+                  }
+                  
+                  // Add first page and ellipsis if needed
+                  if (startPage > 1) {
+                    pages.push(
+                      <Pagination.Item key={1} onClick={() => handlePageChange(1)}>
+                        1
+                      </Pagination.Item>
+                    );
+                    if (startPage > 2) {
+                      pages.push(<Pagination.Ellipsis key="ellipsis-start" disabled />);
+                    }
+                  }
+                  
+                  // Add page numbers
+                  for (let i = startPage; i <= endPage; i++) {
+                    pages.push(
+                      <Pagination.Item
+                        key={i}
+                        active={i === currentPage}
+                        onClick={() => handlePageChange(i)}
+                      >
+                        {i}
+                      </Pagination.Item>
+                    );
+                  }
+                  
+                  // Add ellipsis and last page if needed
+                  if (endPage < pagination.totalPages) {
+                    if (endPage < pagination.totalPages - 1) {
+                      pages.push(<Pagination.Ellipsis key="ellipsis-end" disabled />);
+                    }
+                    pages.push(
+                      <Pagination.Item
+                        key={pagination.totalPages}
+                        onClick={() => handlePageChange(pagination.totalPages)}
+                      >
+                        {pagination.totalPages}
+                      </Pagination.Item>
+                    );
+                  }
+                  
+                  return pages;
+                })()}
+                
+                <Pagination.Next 
+                  onClick={() => handlePageChange(currentPage + 1)} 
+                  disabled={!pagination.hasNext}
+                />
+                <Pagination.Last 
+                  onClick={() => handlePageChange(pagination.totalPages)} 
+                  disabled={!pagination.hasNext}
+                />
+              </Pagination>
             </div>
           )}
         </Card.Body>

@@ -6,7 +6,7 @@ import {
   User 
 } from '@/types';
 
-const API_BASE_URL = 'https://localhost:5001/api';
+const API_BASE_URL = 'https://localhost:7021/api';
 
 class AuthService {
   async login(credentials: LoginRequest): Promise<LoginResponse> {
