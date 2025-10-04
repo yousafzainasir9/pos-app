@@ -2,8 +2,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using POS.Application.Common.Interfaces;
+using POS.Application.Common.Models;
+using POS.Application.DTOs.Categories;
 using POS.Domain.Entities;
-using POS.WebAPI.DTOs;
 
 namespace POS.WebAPI.Controllers;
 

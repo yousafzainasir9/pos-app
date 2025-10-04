@@ -16,7 +16,12 @@ public class User : BaseEntity
     public UserRole Role { get; set; }
     public bool IsActive { get; set; } = true;
     public DateTime? LastLoginAt { get; set; }
-    public string? RefreshToken { get; set; }
+    
+    /// <summary>
+    /// Hashed refresh token for secure storage (SHA256)
+    /// The actual refresh token is sent to the client and this stores its hash
+    /// </summary>
+    public string? RefreshToken { get; set; } // This will now store the HASH
     public DateTime? RefreshTokenExpiryTime { get; set; }
     
     // Foreign keys

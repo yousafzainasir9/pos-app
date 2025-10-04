@@ -1,14 +1,9 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using POS.Application.Common.Constants;
-using POS.Application.Common.Exceptions;
 using POS.Application.Common.Interfaces;
-using POS.Application.Common.Models;
 using POS.Application.DTOs.Auth;
-using POS.Application.Interfaces;
 using POS.Domain.Entities;
 using POS.Domain.Enums;
 using System.IdentityModel.Tokens.Jwt;
@@ -24,31 +19,19 @@ public class AuthController : ControllerBase
     private readonly IUnitOfWork _unitOfWork;
     private readonly IConfiguration _configuration;
     private readonly ILogger<AuthController> _logger;
-    private readonly ISecurityService _securityService;
 
     public AuthController(
         IUnitOfWork unitOfWork,
         IConfiguration configuration,
-        ILogger<AuthController> logger,
-        ISecurityService securityService)
+        ILogger<AuthController> logger)
     {
         _unitOfWork = unitOfWork;
         _configuration = configuration;
         _logger = logger;
-        _securityService = securityService;
     }
 
-    /// <summary>
-    /// Authenticate user with username and password
-    /// </summary>
-    /// <param name="request">Login credentials</param>
-    /// <returns>Authentication token and user information</returns>
     [HttpPost("login")]
-    [EnableRateLimiting("auth")]
-    [ProducesResponseType(typeof(ApiResponse<LoginResponseDto>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<ApiResponse<LoginResponseDto>>> Login([FromBody] LoginRequestDto request)
+    public async Task<ActionResult<LoginResponseDto>> Login([FromBody] LoginRequestDto request)
     {
         try
         {
@@ -58,29 +41,25 @@ public class AuthController : ControllerBase
 
             if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
             {
-                _logger.LogWarning("Failed login attempt for username: {Username}", request.Username);
-                throw AuthenticationException.InvalidCredentials();
+                return Unauthorized("Invalid username or password");
             }
 
             var token = GenerateJwtToken(user);
-            var refreshToken = _securityService.GenerateSecureToken(AuthConstants.RefreshTokenByteSize);
-            var refreshTokenHash = _securityService.HashToken(refreshToken);
+            var refreshToken = GenerateRefreshToken();
 
-            // Update user with refresh token hash
-            user.RefreshToken = refreshTokenHash;
-            user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(AuthConstants.RefreshTokenExpiryDays);
+            // Update user with refresh token
+            user.RefreshToken = refreshToken;
+            user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
             user.LastLoginAt = DateTime.UtcNow;
 
             _unitOfWork.Repository<User>().Update(user);
             await _unitOfWork.SaveChangesAsync();
 
-            _logger.LogInformation("User {Username} logged in successfully", user.Username);
-
-            var response = new LoginResponseDto
+            return Ok(new LoginResponseDto
             {
                 Token = token,
                 RefreshToken = refreshToken,
-                ExpiresIn = AuthConstants.AccessTokenExpiryMinutes * 60,
+                ExpiresIn = 3600,
                 User = new UserDto
                 {
                     Id = user.Id,
@@ -92,32 +71,17 @@ public class AuthController : ControllerBase
                     StoreId = user.StoreId,
                     StoreName = user.Store?.Name
                 }
-            };
-
-            return Ok(ApiResponse<LoginResponseDto>.SuccessResponse(response, "Login successful"));
-        }
-        catch (AuthenticationException)
-        {
-            throw;
+            });
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error during login for user {Username}", request.Username);
-            throw;
+            return StatusCode(500, "An error occurred during login");
         }
     }
 
-    /// <summary>
-    /// Authenticate user with PIN code
-    /// </summary>
-    /// <param name="request">PIN login credentials</param>
-    /// <returns>Authentication token and user information</returns>
     [HttpPost("pin-login")]
-    [EnableRateLimiting("auth")]
-    [ProducesResponseType(typeof(ApiResponse<LoginResponseDto>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<ApiResponse<LoginResponseDto>>> PinLogin([FromBody] PinLoginRequestDto request)
+    public async Task<ActionResult<LoginResponseDto>> PinLogin([FromBody] PinLoginRequestDto request)
     {
         try
         {
@@ -127,17 +91,15 @@ public class AuthController : ControllerBase
 
             if (user == null)
             {
-                _logger.LogWarning("Failed PIN login attempt for store: {StoreId}", request.StoreId);
-                throw AuthenticationException.InvalidPin();
+                return Unauthorized("Invalid PIN");
             }
 
             var token = GenerateJwtToken(user);
-            var refreshToken = _securityService.GenerateSecureToken(AuthConstants.RefreshTokenByteSize);
-            var refreshTokenHash = _securityService.HashToken(refreshToken);
+            var refreshToken = GenerateRefreshToken();
 
-            // Update user with refresh token hash
-            user.RefreshToken = refreshTokenHash;
-            user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(AuthConstants.RefreshTokenExpiryDays);
+            // Update user with refresh token
+            user.RefreshToken = refreshToken;
+            user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
             user.LastLoginAt = DateTime.UtcNow;
 
             _unitOfWork.Repository<User>().Update(user);
@@ -147,13 +109,11 @@ public class AuthController : ControllerBase
             var activeShift = await _unitOfWork.Repository<Shift>().Query()
                 .FirstOrDefaultAsync(s => s.UserId == user.Id && s.Status == ShiftStatus.Open);
 
-            _logger.LogInformation("User {Username} logged in via PIN for store {StoreId}", user.Username, request.StoreId);
-
-            var response = new LoginResponseDto
+            return Ok(new LoginResponseDto
             {
                 Token = token,
                 RefreshToken = refreshToken,
-                ExpiresIn = AuthConstants.AccessTokenExpiryMinutes * 60,
+                ExpiresIn = 3600,
                 User = new UserDto
                 {
                     Id = user.Id,
@@ -167,63 +127,44 @@ public class AuthController : ControllerBase
                     HasActiveShift = activeShift != null,
                     ActiveShiftId = activeShift?.Id
                 }
-            };
-
-            return Ok(ApiResponse<LoginResponseDto>.SuccessResponse(response, "PIN login successful"));
-        }
-        catch (AuthenticationException)
-        {
-            throw;
+            });
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error during PIN login for store {StoreId}", request.StoreId);
-            throw;
+            _logger.LogError(ex, "Error during PIN login");
+            return StatusCode(500, "An error occurred during login");
         }
     }
 
-    /// <summary>
-    /// Refresh access token using refresh token
-    /// </summary>
-    /// <param name="request">Refresh token request</param>
-    /// <returns>New authentication token</returns>
     [HttpPost("refresh")]
-    [ProducesResponseType(typeof(ApiResponse<LoginResponseDto>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status401Unauthorized)]
-    public async Task<ActionResult<ApiResponse<LoginResponseDto>>> RefreshToken([FromBody] RefreshTokenRequestDto request)
+    public async Task<ActionResult<LoginResponseDto>> RefreshToken([FromBody] RefreshTokenRequestDto request)
     {
         try
         {
-            var refreshTokenHash = _securityService.HashToken(request.RefreshToken);
-
             var user = await _unitOfWork.Repository<User>().Query()
                 .Include(u => u.Store)
-                .FirstOrDefaultAsync(u => u.RefreshToken == refreshTokenHash);
+                .FirstOrDefaultAsync(u => u.RefreshToken == request.RefreshToken);
 
             if (user == null || user.RefreshTokenExpiryTime <= DateTime.UtcNow)
             {
-                _logger.LogWarning("Invalid or expired refresh token attempted");
-                throw AuthenticationException.InvalidRefreshToken();
+                return Unauthorized("Invalid or expired refresh token");
             }
 
             var token = GenerateJwtToken(user);
-            var newRefreshToken = _securityService.GenerateSecureToken(AuthConstants.RefreshTokenByteSize);
-            var newRefreshTokenHash = _securityService.HashToken(newRefreshToken);
+            var refreshToken = GenerateRefreshToken();
 
-            // Update user with new refresh token hash
-            user.RefreshToken = newRefreshTokenHash;
-            user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(AuthConstants.RefreshTokenExpiryDays);
+            // Update user with new refresh token
+            user.RefreshToken = refreshToken;
+            user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
 
             _unitOfWork.Repository<User>().Update(user);
             await _unitOfWork.SaveChangesAsync();
 
-            _logger.LogInformation("Refresh token renewed for user {Username}", user.Username);
-
-            var response = new LoginResponseDto
+            return Ok(new LoginResponseDto
             {
                 Token = token,
-                RefreshToken = newRefreshToken,
-                ExpiresIn = AuthConstants.AccessTokenExpiryMinutes * 60,
+                RefreshToken = refreshToken,
+                ExpiresIn = 3600,
                 User = new UserDto
                 {
                     Id = user.Id,
@@ -235,29 +176,18 @@ public class AuthController : ControllerBase
                     StoreId = user.StoreId,
                     StoreName = user.Store?.Name
                 }
-            };
-
-            return Ok(ApiResponse<LoginResponseDto>.SuccessResponse(response, "Token refreshed successfully"));
-        }
-        catch (AuthenticationException)
-        {
-            throw;
+            });
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error refreshing token");
-            throw;
+            return StatusCode(500, "An error occurred while refreshing token");
         }
     }
 
-    /// <summary>
-    /// Logout current user
-    /// </summary>
-    /// <returns>Success message</returns>
     [HttpPost("logout")]
     [Authorize]
-    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
-    public async Task<ActionResult<ApiResponse>> Logout()
+    public async Task<ActionResult> Logout()
     {
         try
         {
@@ -272,27 +202,22 @@ public class AuthController : ControllerBase
 
                     _unitOfWork.Repository<User>().Update(user);
                     await _unitOfWork.SaveChangesAsync();
-
-                    _logger.LogInformation("User {UserId} logged out successfully", userId);
                 }
             }
 
-            return Ok(ApiResponse.SuccessResponse("Logged out successfully"));
+            return Ok(new { message = "Logged out successfully" });
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error during logout");
-            throw;
+            return StatusCode(500, "An error occurred during logout");
         }
     }
-
-    #region Private Methods
 
     private string GenerateJwtToken(User user)
     {
         var jwtSettings = _configuration.GetSection("Jwt");
-        var key = Encoding.ASCII.GetBytes(jwtSettings["SecretKey"] ?? 
-            throw new InvalidOperationException("JWT SecretKey not configured"));
+        var key = Encoding.ASCII.GetBytes(jwtSettings["SecretKey"] ?? throw new InvalidOperationException("JWT SecretKey not configured"));
 
         var claims = new List<Claim>
         {
@@ -312,10 +237,8 @@ public class AuthController : ControllerBase
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             Subject = new ClaimsIdentity(claims),
-            Expires = DateTime.UtcNow.AddMinutes(AuthConstants.AccessTokenExpiryMinutes),
-            SigningCredentials = new SigningCredentials(
-                new SymmetricSecurityKey(key), 
-                SecurityAlgorithms.HmacSha256Signature),
+            Expires = DateTime.UtcNow.AddMinutes(Convert.ToDouble(jwtSettings["ExpiryInMinutes"] ?? "1440")),
+            SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature),
             Issuer = jwtSettings["Issuer"],
             Audience = jwtSettings["Audience"]
         };
@@ -325,5 +248,13 @@ public class AuthController : ControllerBase
         return tokenHandler.WriteToken(token);
     }
 
-    #endregion
+    private string GenerateRefreshToken()
+    {
+        var randomBytes = new byte[32];
+        using (var rng = System.Security.Cryptography.RandomNumberGenerator.Create())
+        {
+            rng.GetBytes(randomBytes);
+            return Convert.ToBase64String(randomBytes);
+        }
+    }
 }

@@ -48,7 +48,15 @@ const ReportsPage: React.FC = () => {
   const { isAuthenticated } = useAuth();
   const [activeReport, setActiveReport] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [dateRange, setDateRange] = useState({
+  const [isExporting, setIsExporting] = useState(false);
+  
+  // Separate date ranges for each report type
+  const [salesDateRange, setSalesDateRange] = useState({
+    startDate: format(startOfWeek(new Date()), 'yyyy-MM-dd'),
+    endDate: format(endOfWeek(new Date()), 'yyyy-MM-dd')
+  });
+  
+  const [productDateRange, setProductDateRange] = useState({
     startDate: format(startOfWeek(new Date()), 'yyyy-MM-dd'),
     endDate: format(endOfWeek(new Date()), 'yyyy-MM-dd')
   });
@@ -68,7 +76,7 @@ const ReportsPage: React.FC = () => {
   const loadSalesReport = async () => {
     setIsLoading(true);
     try {
-      const data = await reportService.getSalesReport(dateRange.startDate, dateRange.endDate);
+      const data = await reportService.getSalesReport(salesDateRange.startDate, salesDateRange.endDate);
       setSalesData(data);
     } catch (error) {
       console.error('Error loading sales report:', error);
@@ -80,7 +88,7 @@ const ReportsPage: React.FC = () => {
   const loadProductPerformance = async () => {
     setIsLoading(true);
     try {
-      const data = await reportService.getProductPerformance(dateRange.startDate, dateRange.endDate);
+      const data = await reportService.getProductPerformance(productDateRange.startDate, productDateRange.endDate);
       setProductData(data);
     } catch (error) {
       console.error('Error loading product performance:', error);
@@ -120,7 +128,7 @@ const ReportsPage: React.FC = () => {
     setActiveReport(null);
   };
 
-  const handleDateRangeChange = (preset?: string) => {
+  const handleDateRangeChange = (preset: string, reportType: 'sales' | 'products') => {
     const today = new Date();
     let start, end;
 
@@ -151,12 +159,31 @@ const ReportsPage: React.FC = () => {
         return;
     }
 
-    setDateRange({ startDate: start, endDate: end });
+    if (reportType === 'sales') {
+      setSalesDateRange({ startDate: start, endDate: end });
+    } else if (reportType === 'products') {
+      setProductDateRange({ startDate: start, endDate: end });
+    }
   };
 
   const handleExportData = async (reportType: string) => {
+    setIsExporting(true);
     try {
-      const blob = await reportService.exportReport(reportType, dateRange.startDate, dateRange.endDate);
+      let startDate, endDate;
+      
+      // Use appropriate date range based on report type
+      if (reportType === 'sales') {
+        startDate = salesDateRange.startDate;
+        endDate = salesDateRange.endDate;
+      } else if (reportType === 'products') {
+        startDate = productDateRange.startDate;
+        endDate = productDateRange.endDate;
+      } else {
+        // For shifts, use current date
+        startDate = endDate = format(new Date(), 'yyyy-MM-dd');
+      }
+      
+      const blob = await reportService.exportReport(reportType, startDate, endDate);
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
@@ -166,6 +193,8 @@ const ReportsPage: React.FC = () => {
       toast.success('Report exported successfully');
     } catch (error) {
       toast.error('Failed to export report');
+    } finally {
+      setIsExporting(false);
     }
   };
 
@@ -176,9 +205,19 @@ const ReportsPage: React.FC = () => {
         <Button 
           variant="primary" 
           onClick={() => handleExportData('sales')}
+          disabled={isExporting}
         >
-          <FaFileExport className="me-2" />
-          Export Data
+          {isExporting ? (
+            <>
+              <Spinner animation="border" size="sm" className="me-2" />
+              Exporting...
+            </>
+          ) : (
+            <>
+              <FaFileExport className="me-2" />
+              Export Data
+            </>
+          )}
         </Button>
       </div>
 
@@ -335,8 +374,8 @@ const ReportsPage: React.FC = () => {
                     <Form.Label>Start Date</Form.Label>
                     <Form.Control
                       type="date"
-                      value={dateRange.startDate}
-                      onChange={(e) => setDateRange({ ...dateRange, startDate: e.target.value })}
+                      value={salesDateRange.startDate}
+                      onChange={(e) => setSalesDateRange({ ...salesDateRange, startDate: e.target.value })}
                     />
                   </Form.Group>
                 </Col>
@@ -345,20 +384,20 @@ const ReportsPage: React.FC = () => {
                     <Form.Label>End Date</Form.Label>
                     <Form.Control
                       type="date"
-                      value={dateRange.endDate}
-                      onChange={(e) => setDateRange({ ...dateRange, endDate: e.target.value })}
+                      value={salesDateRange.endDate}
+                      onChange={(e) => setSalesDateRange({ ...salesDateRange, endDate: e.target.value })}
                     />
                   </Form.Group>
                 </Col>
                 <Col md={6}>
                   <div className="d-flex flex-wrap gap-2">
-                    <Button size="sm" variant="outline-secondary" onClick={() => handleDateRangeChange('today')}>
+                    <Button size="sm" variant="outline-secondary" onClick={() => handleDateRangeChange('today', 'sales')}>
                       Today
                     </Button>
-                    <Button size="sm" variant="outline-secondary" onClick={() => handleDateRangeChange('thisWeek')}>
+                    <Button size="sm" variant="outline-secondary" onClick={() => handleDateRangeChange('thisWeek', 'sales')}>
                       This Week
                     </Button>
-                    <Button size="sm" variant="outline-secondary" onClick={() => handleDateRangeChange('thisMonth')}>
+                    <Button size="sm" variant="outline-secondary" onClick={() => handleDateRangeChange('thisMonth', 'sales')}>
                       This Month
                     </Button>
                     <Button size="sm" variant="primary" onClick={loadSalesReport}>
@@ -508,9 +547,22 @@ const ReportsPage: React.FC = () => {
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={handleCloseModal}>Close</Button>
-          <Button variant="primary" onClick={() => handleExportData('sales')}>
-            <FaDownload className="me-2" />
-            Export to CSV
+          <Button 
+            variant="primary" 
+            onClick={() => handleExportData('sales')}
+            disabled={isExporting}
+          >
+            {isExporting ? (
+              <>
+                <Spinner animation="border" size="sm" className="me-2" />
+                Exporting...
+              </>
+            ) : (
+              <>
+                <FaDownload className="me-2" />
+                Export to CSV
+              </>
+            )}
           </Button>
         </Modal.Footer>
       </Modal>
@@ -524,6 +576,50 @@ const ReportsPage: React.FC = () => {
           </Button>
         </Modal.Header>
         <Modal.Body style={{ maxHeight: '80vh', overflowY: 'auto' }}>
+          {/* Date Range Selector */}
+          <Card className="mb-4">
+            <Card.Body>
+              <Row className="align-items-end">
+                <Col md={3}>
+                  <Form.Group>
+                    <Form.Label>Start Date</Form.Label>
+                    <Form.Control
+                      type="date"
+                      value={productDateRange.startDate}
+                      onChange={(e) => setProductDateRange({ ...productDateRange, startDate: e.target.value })}
+                    />
+                  </Form.Group>
+                </Col>
+                <Col md={3}>
+                  <Form.Group>
+                    <Form.Label>End Date</Form.Label>
+                    <Form.Control
+                      type="date"
+                      value={productDateRange.endDate}
+                      onChange={(e) => setProductDateRange({ ...productDateRange, endDate: e.target.value })}
+                    />
+                  </Form.Group>
+                </Col>
+                <Col md={6}>
+                  <div className="d-flex flex-wrap gap-2">
+                    <Button size="sm" variant="outline-secondary" onClick={() => handleDateRangeChange('today', 'products')}>
+                      Today
+                    </Button>
+                    <Button size="sm" variant="outline-secondary" onClick={() => handleDateRangeChange('thisWeek', 'products')}>
+                      This Week
+                    </Button>
+                    <Button size="sm" variant="outline-secondary" onClick={() => handleDateRangeChange('thisMonth', 'products')}>
+                      This Month
+                    </Button>
+                    <Button size="sm" variant="primary" onClick={loadProductPerformance}>
+                      Refresh
+                    </Button>
+                  </div>
+                </Col>
+              </Row>
+            </Card.Body>
+          </Card>
+
           {isLoading ? (
             <div className="text-center py-5">
               <Spinner animation="border" />
@@ -622,9 +718,22 @@ const ReportsPage: React.FC = () => {
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={handleCloseModal}>Close</Button>
-          <Button variant="primary" onClick={() => handleExportData('products')}>
-            <FaDownload className="me-2" />
-            Export to CSV
+          <Button 
+            variant="primary" 
+            onClick={() => handleExportData('products')}
+            disabled={isExporting}
+          >
+            {isExporting ? (
+              <>
+                <Spinner animation="border" size="sm" className="me-2" />
+                Exporting...
+              </>
+            ) : (
+              <>
+                <FaDownload className="me-2" />
+                Export to CSV
+              </>
+            )}
           </Button>
         </Modal.Footer>
       </Modal>
@@ -761,9 +870,22 @@ const ReportsPage: React.FC = () => {
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={handleCloseModal}>Close</Button>
-          <Button variant="primary" onClick={() => handleExportData('shifts')}>
-            <FaDownload className="me-2" />
-            Export to CSV
+          <Button 
+            variant="primary" 
+            onClick={() => handleExportData('shifts')}
+            disabled={isExporting}
+          >
+            {isExporting ? (
+              <>
+                <Spinner animation="border" size="sm" className="me-2" />
+                Exporting...
+              </>
+            ) : (
+              <>
+                <FaDownload className="me-2" />
+                Export to CSV
+              </>
+            )}
           </Button>
         </Modal.Footer>
       </Modal>

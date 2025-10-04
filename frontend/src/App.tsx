@@ -27,6 +27,8 @@ import ShiftPage from './pages/ShiftPage';
 import ReportsPage from './pages/ReportsPage';
 import AdminPage from './pages/AdminPage';
 import ThemeSettingsPage from './pages/ThemeSettingsPage';
+import UserManagementPage from './pages/UserManagementPage';
+import StoreSettingsPage from './pages/StoreSettingsPage';
 
 function App() {
   return (
@@ -59,8 +61,31 @@ function App() {
               <Route path="/products" element={<Layout><ProductsPage /></Layout>} />
               <Route path="/shift" element={<Layout><ShiftPage /></Layout>} />
               <Route path="/reports" element={<Layout><ReportsPage /></Layout>} />
-              <Route path="/admin" element={<Layout><AdminPage /></Layout>} />
-              <Route path="/theme" element={<Layout><ThemeSettingsPage /></Layout>} />
+              
+              {/* Admin Routes */}
+              <Route path="/admin" element={
+                <Layout>
+                  <RoleBasedRoute allowedRoles={['Admin', 'Manager']}>
+                    <AdminPage />
+                  </RoleBasedRoute>
+                </Layout>
+              } />
+              <Route path="/admin/users" element={
+                <Layout>
+                  <RoleBasedRoute allowedRoles={['Admin', 'Manager']}>
+                    <UserManagementPage />
+                  </RoleBasedRoute>
+                </Layout>
+              } />
+              <Route path="/admin/store-settings" element={
+                <Layout>
+                  <RoleBasedRoute allowedRoles={['Admin', 'Manager']}>
+                    <StoreSettingsPage />
+                  </RoleBasedRoute>
+                </Layout>
+              } />
+              
+              <Route path="/theme-settings" element={<Layout><ThemeSettingsPage /></Layout>} />
               
               {/* Catch all */}
               <Route path="*" element={<Navigate to="/" replace />} />
