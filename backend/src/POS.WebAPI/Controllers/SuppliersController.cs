@@ -2,8 +2,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using POS.Application.Common.Interfaces;
+using POS.Application.Common.Models;
+using POS.Application.DTOs.Suppliers;
 using POS.Domain.Entities;
-using POS.WebAPI.DTOs;
 
 namespace POS.WebAPI.Controllers;
 
@@ -48,20 +49,13 @@ public class SuppliersController : ControllerBase
                 })
                 .ToListAsync();
 
-            return Ok(new ApiResponse<List<SupplierDto>>
-            {
-                Success = true,
-                Data = suppliers
-            });
+            return Ok(ApiResponse<List<SupplierDto>>.SuccessResponse(suppliers));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error getting suppliers");
-            return StatusCode(500, new ApiResponse<List<SupplierDto>>
-            {
-                Success = false,
-                Message = "An error occurred while retrieving suppliers"
-            });
+            return StatusCode(500, ApiResponse<List<SupplierDto>>.ErrorResponse(
+                new ErrorResponse("INTERNAL_ERROR", "An error occurred while retrieving suppliers")));
         }
     }
 
@@ -74,11 +68,8 @@ public class SuppliersController : ControllerBase
             
             if (supplier == null)
             {
-                return NotFound(new ApiResponse<SupplierDto>
-                {
-                    Success = false,
-                    Message = "Supplier not found"
-                });
+                return NotFound(ApiResponse<SupplierDto>.ErrorResponse(
+                    new ErrorResponse("NOT_FOUND", "Supplier not found")));
             }
 
             var dto = new SupplierDto
@@ -98,20 +89,13 @@ public class SuppliersController : ControllerBase
                 IsActive = supplier.IsActive
             };
 
-            return Ok(new ApiResponse<SupplierDto>
-            {
-                Success = true,
-                Data = dto
-            });
+            return Ok(ApiResponse<SupplierDto>.SuccessResponse(dto));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error getting supplier {Id}", id);
-            return StatusCode(500, new ApiResponse<SupplierDto>
-            {
-                Success = false,
-                Message = "An error occurred while retrieving the supplier"
-            });
+            return StatusCode(500, ApiResponse<SupplierDto>.ErrorResponse(
+                new ErrorResponse("INTERNAL_ERROR", "An error occurred while retrieving the supplier")));
         }
     }
 
@@ -157,20 +141,14 @@ public class SuppliersController : ControllerBase
                 IsActive = supplier.IsActive
             };
 
-            return CreatedAtAction(nameof(GetById), new { id = supplier.Id }, new ApiResponse<SupplierDto>
-            {
-                Success = true,
-                Data = result
-            });
+            return CreatedAtAction(nameof(GetById), new { id = supplier.Id }, 
+                ApiResponse<SupplierDto>.SuccessResponse(result, "Supplier created successfully"));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error creating supplier");
-            return StatusCode(500, new ApiResponse<SupplierDto>
-            {
-                Success = false,
-                Message = "An error occurred while creating the supplier"
-            });
+            return StatusCode(500, ApiResponse<SupplierDto>.ErrorResponse(
+                new ErrorResponse("INTERNAL_ERROR", "An error occurred while creating the supplier")));
         }
     }
 
@@ -184,11 +162,8 @@ public class SuppliersController : ControllerBase
             
             if (supplier == null)
             {
-                return NotFound(new ApiResponse<SupplierDto>
-                {
-                    Success = false,
-                    Message = "Supplier not found"
-                });
+                return NotFound(ApiResponse<SupplierDto>.ErrorResponse(
+                    new ErrorResponse("NOT_FOUND", "Supplier not found")));
             }
 
             supplier.Name = dto.Name;
@@ -224,20 +199,13 @@ public class SuppliersController : ControllerBase
                 IsActive = supplier.IsActive
             };
 
-            return Ok(new ApiResponse<SupplierDto>
-            {
-                Success = true,
-                Data = result
-            });
+            return Ok(ApiResponse<SupplierDto>.SuccessResponse(result, "Supplier updated successfully"));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error updating supplier {Id}", id);
-            return StatusCode(500, new ApiResponse<SupplierDto>
-            {
-                Success = false,
-                Message = "An error occurred while updating the supplier"
-            });
+            return StatusCode(500, ApiResponse<SupplierDto>.ErrorResponse(
+                new ErrorResponse("INTERNAL_ERROR", "An error occurred while updating the supplier")));
         }
     }
 
@@ -251,31 +219,20 @@ public class SuppliersController : ControllerBase
             
             if (supplier == null)
             {
-                return NotFound(new ApiResponse<bool>
-                {
-                    Success = false,
-                    Message = "Supplier not found"
-                });
+                return NotFound(ApiResponse<bool>.ErrorResponse(
+                    new ErrorResponse("NOT_FOUND", "Supplier not found")));
             }
 
             _unitOfWork.Repository<Supplier>().Remove(supplier);
             await _unitOfWork.SaveChangesAsync();
 
-            return Ok(new ApiResponse<bool>
-            {
-                Success = true,
-                Data = true,
-                Message = "Supplier deleted successfully"
-            });
+            return Ok(ApiResponse<bool>.SuccessResponse(true, "Supplier deleted successfully"));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error deleting supplier {Id}", id);
-            return StatusCode(500, new ApiResponse<bool>
-            {
-                Success = false,
-                Message = "An error occurred while deleting the supplier"
-            });
+            return StatusCode(500, ApiResponse<bool>.ErrorResponse(
+                new ErrorResponse("INTERNAL_ERROR", "An error occurred while deleting the supplier")));
         }
     }
 }

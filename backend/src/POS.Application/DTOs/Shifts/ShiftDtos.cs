@@ -15,11 +15,11 @@ public class CloseShiftDto
 public class ShiftDto
 {
     public long Id { get; set; }
-    public required string ShiftNumber { get; set; }
+    public string ShiftNumber { get; set; } = string.Empty;
     public DateTime StartTime { get; set; }
     public DateTime? EndTime { get; set; }
     public decimal StartingCash { get; set; }
-    public required string Status { get; set; }
+    public string Status { get; set; } = string.Empty;
     public int TotalOrders { get; set; }
     public decimal TotalSales { get; set; }
 }
@@ -37,11 +37,11 @@ public class ShiftSummaryDto : ShiftDto
 public class ShiftReportDto
 {
     public long ShiftId { get; set; }
-    public required string ShiftNumber { get; set; }
-    public required string CashierName { get; set; }
+    public string ShiftNumber { get; set; } = string.Empty;
+    public string CashierName { get; set; } = string.Empty;
     public DateTime StartTime { get; set; }
     public DateTime? EndTime { get; set; }
-    public required string Status { get; set; }
+    public string Status { get; set; } = string.Empty;
     public decimal StartingCash { get; set; }
     public decimal? EndingCash { get; set; }
     public int TotalOrders { get; set; }
@@ -56,7 +56,7 @@ public class ShiftReportDto
 
 public class ProductSalesDto
 {
-    public required string ProductName { get; set; }
+    public string ProductName { get; set; } = string.Empty;
     public int Quantity { get; set; }
     public decimal TotalSales { get; set; }
 }

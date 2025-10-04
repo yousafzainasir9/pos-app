@@ -2,8 +2,11 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using POS.Application.Common.Interfaces;
+using POS.Application.Common.Models;
+using POS.Application.DTOs;
+using POS.Application.DTOs.Categories;
+using POS.Application.DTOs.Suppliers;
 using POS.Domain.Entities;
-using POS.WebAPI.DTOs;
 
 namespace POS.WebAPI.Controllers;
 
@@ -98,7 +101,7 @@ public class ProductsController : ControllerBase
                     ProductCount = 0
                 } : null,
                 SupplierId = p.SupplierId,
-                Supplier = p.Supplier != null ? new SupplierDto
+                Supplier = p.Supplier != null ? new POS.Application.DTOs.Suppliers.SupplierDto
                 {
                     Id = p.Supplier.Id,
                     Name = p.Supplier.Name,
@@ -106,20 +109,13 @@ public class ProductsController : ControllerBase
                 } : null
             }).ToListAsync();
 
-            return Ok(new ApiResponse<List<ProductListDto>>
-            {
-                Success = true,
-                Data = products
-            });
+            return Ok(ApiResponse<List<ProductListDto>>.SuccessResponse(products));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error retrieving products");
-            return StatusCode(500, new ApiResponse<List<ProductListDto>>
-            {
-                Success = false,
-                Message = "An error occurred while retrieving products"
-            });
+            return StatusCode(500, ApiResponse<List<ProductListDto>>.ErrorResponse(
+                new ErrorResponse("INTERNAL_ERROR", "An error occurred while retrieving products")));
         }
     }
 
@@ -137,11 +133,8 @@ public class ProductsController : ControllerBase
 
             if (product == null)
             {
-                return NotFound(new ApiResponse<ProductDto>
-                {
-                    Success = false,
-                    Message = "Product not found"
-                });
+                return NotFound(ApiResponse<ProductDto>.ErrorResponse(
+                    new ErrorResponse("NOT_FOUND", "Product not found")));
             }
 
             var dto = new ProductDto
@@ -172,20 +165,13 @@ public class ProductsController : ControllerBase
                 SupplierName = product.Supplier?.Name
             };
 
-            return Ok(new ApiResponse<ProductDto>
-            {
-                Success = true,
-                Data = dto
-            });
+            return Ok(ApiResponse<ProductDto>.SuccessResponse(dto));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error retrieving product {ProductId}", id);
-            return StatusCode(500, new ApiResponse<ProductDto>
-            {
-                Success = false,
-                Message = "An error occurred while retrieving the product"
-            });
+            return StatusCode(500, ApiResponse<ProductDto>.ErrorResponse(
+                new ErrorResponse("INTERNAL_ERROR", "An error occurred while retrieving the product")));
         }
     }
 
@@ -245,20 +231,14 @@ public class ProductsController : ControllerBase
                 SupplierId = product.SupplierId
             };
 
-            return CreatedAtAction(nameof(GetProduct), new { id = product.Id }, new ApiResponse<ProductDto>
-            {
-                Success = true,
-                Data = result
-            });
+            return CreatedAtAction(nameof(GetProduct), new { id = product.Id }, 
+                ApiResponse<ProductDto>.SuccessResponse(result, "Product created successfully"));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error creating product");
-            return StatusCode(500, new ApiResponse<ProductDto>
-            {
-                Success = false,
-                Message = "An error occurred while creating the product"
-            });
+            return StatusCode(500, ApiResponse<ProductDto>.ErrorResponse(
+                new ErrorResponse("INTERNAL_ERROR", "An error occurred while creating the product")));
         }
     }
 
@@ -271,11 +251,8 @@ public class ProductsController : ControllerBase
             var product = await _unitOfWork.Repository<Product>().GetByIdAsync(id);
             if (product == null)
             {
-                return NotFound(new ApiResponse<ProductDto>
-                {
-                    Success = false,
-                    Message = "Product not found"
-                });
+                return NotFound(ApiResponse<ProductDto>.ErrorResponse(
+                    new ErrorResponse("NOT_FOUND", "Product not found")));
             }
 
             product.Name = dto.Name;
@@ -325,20 +302,13 @@ public class ProductsController : ControllerBase
                 SupplierId = product.SupplierId
             };
 
-            return Ok(new ApiResponse<ProductDto>
-            {
-                Success = true,
-                Data = result
-            });
+            return Ok(ApiResponse<ProductDto>.SuccessResponse(result, "Product updated successfully"));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error updating product {ProductId}", id);
-            return StatusCode(500, new ApiResponse<ProductDto>
-            {
-                Success = false,
-                Message = "An error occurred while updating the product"
-            });
+            return StatusCode(500, ApiResponse<ProductDto>.ErrorResponse(
+                new ErrorResponse("INTERNAL_ERROR", "An error occurred while updating the product")));
         }
     }
 
@@ -351,31 +321,20 @@ public class ProductsController : ControllerBase
             var product = await _unitOfWork.Repository<Product>().GetByIdAsync(id);
             if (product == null)
             {
-                return NotFound(new ApiResponse<bool>
-                {
-                    Success = false,
-                    Message = "Product not found"
-                });
+                return NotFound(ApiResponse<bool>.ErrorResponse(
+                    new ErrorResponse("NOT_FOUND", "Product not found")));
             }
 
             _unitOfWork.Repository<Product>().Remove(product);
             await _unitOfWork.SaveChangesAsync();
 
-            return Ok(new ApiResponse<bool>
-            {
-                Success = true,
-                Data = true,
-                Message = "Product deleted successfully"
-            });
+            return Ok(ApiResponse<bool>.SuccessResponse(true, "Product deleted successfully"));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error deleting product {ProductId}", id);
-            return StatusCode(500, new ApiResponse<bool>
-            {
-                Success = false,
-                Message = "An error occurred while deleting the product"
-            });
+            return StatusCode(500, ApiResponse<bool>.ErrorResponse(
+                new ErrorResponse("INTERNAL_ERROR", "An error occurred while deleting the product")));
         }
     }
 
@@ -393,11 +352,8 @@ public class ProductsController : ControllerBase
 
             if (product == null)
             {
-                return NotFound(new ApiResponse<ProductDto>
-                {
-                    Success = false,
-                    Message = "Product not found"
-                });
+                return NotFound(ApiResponse<ProductDto>.ErrorResponse(
+                    new ErrorResponse("NOT_FOUND", "Product not found")));
             }
 
             var dto = new ProductDto
@@ -428,20 +384,13 @@ public class ProductsController : ControllerBase
                 SupplierName = product.Supplier?.Name
             };
 
-            return Ok(new ApiResponse<ProductDto>
-            {
-                Success = true,
-                Data = dto
-            });
+            return Ok(ApiResponse<ProductDto>.SuccessResponse(dto));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error retrieving product by barcode {Barcode}", barcode);
-            return StatusCode(500, new ApiResponse<ProductDto>
-            {
-                Success = false,
-                Message = "An error occurred while retrieving the product"
-            });
+            return StatusCode(500, ApiResponse<ProductDto>.ErrorResponse(
+                new ErrorResponse("INTERNAL_ERROR", "An error occurred while retrieving the product")));
         }
     }
 }
