@@ -4,17 +4,14 @@ import {
   Card, 
   Row, 
   Col, 
-  ListGroup, 
-  Badge
+  ListGroup
 } from 'react-bootstrap';
 import { 
   FaUsers, 
   FaStore, 
   FaCog, 
   FaDatabase, 
-  FaShieldAlt,
-  FaCheckCircle,
-  FaTimesCircle
+  FaShieldAlt
 } from 'react-icons/fa';
 import { useAuth } from '@/contexts/AuthContext';
 import { Navigate, useNavigate } from 'react-router-dom';
@@ -32,10 +29,6 @@ const AdminPage: React.FC = () => {
     <Container fluid>
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h2>Administration</h2>
-        <Badge bg="success" className="fs-6">
-          <FaCheckCircle className="me-2" />
-          Fully Functional
-        </Badge>
       </div>
 
       <Row className="g-4">
@@ -53,7 +46,6 @@ const AdminPage: React.FC = () => {
                   <h5 className="mb-0">User Management</h5>
                   <small className="text-muted">Manage staff accounts</small>
                 </div>
-                <FaCheckCircle size={20} className="text-success" />
               </div>
               <ListGroup variant="flush">
                 <ListGroup.Item action>
@@ -69,9 +61,6 @@ const AdminPage: React.FC = () => {
                   Reset Passwords & PINs
                 </ListGroup.Item>
               </ListGroup>
-              <div className="mt-3 text-center">
-                <Badge bg="success">Fully Implemented</Badge>
-              </div>
             </Card.Body>
           </Card>
         </Col>
@@ -90,7 +79,6 @@ const AdminPage: React.FC = () => {
                   <h5 className="mb-0">Store Settings</h5>
                   <small className="text-muted">Configure store details</small>
                 </div>
-                <FaCheckCircle size={20} className="text-success" />
               </div>
               <ListGroup variant="flush">
                 <ListGroup.Item action>Store Information</ListGroup.Item>
@@ -98,9 +86,6 @@ const AdminPage: React.FC = () => {
                 <ListGroup.Item action>Operating Hours</ListGroup.Item>
                 <ListGroup.Item action>Currency & Format</ListGroup.Item>
               </ListGroup>
-              <div className="mt-3 text-center">
-                <Badge bg="success">Fully Implemented</Badge>
-              </div>
             </Card.Body>
           </Card>
         </Col>
@@ -119,7 +104,6 @@ const AdminPage: React.FC = () => {
                   <h5 className="mb-0">Theme Settings</h5>
                   <small className="text-muted">Customize appearance</small>
                 </div>
-                <FaCheckCircle size={20} className="text-success" />
               </div>
               <ListGroup variant="flush">
                 <ListGroup.Item action>
@@ -132,9 +116,6 @@ const AdminPage: React.FC = () => {
                   Font Settings
                 </ListGroup.Item>
               </ListGroup>
-              <div className="mt-3 text-center">
-                <Badge bg="success">Fully Implemented</Badge>
-              </div>
             </Card.Body>
           </Card>
         </Col>
@@ -154,7 +135,6 @@ const AdminPage: React.FC = () => {
                     <h5 className="mb-0">Data Management</h5>
                     <small className="text-muted">Import/Export data</small>
                   </div>
-                  <FaCheckCircle size={20} className="text-success" />
                 </div>
                 <ListGroup variant="flush">
                   <ListGroup.Item action>Backup Database</ListGroup.Item>
@@ -162,9 +142,6 @@ const AdminPage: React.FC = () => {
                   <ListGroup.Item action>Export Reports</ListGroup.Item>
                   <ListGroup.Item action>Data Archiving</ListGroup.Item>
                 </ListGroup>
-                <div className="mt-3 text-center">
-                  <Badge bg="success">Fully Implemented</Badge>
-                </div>
               </Card.Body>
             </Card>
           </Col>
@@ -185,7 +162,6 @@ const AdminPage: React.FC = () => {
                     <h5 className="mb-0">System Settings</h5>
                     <small className="text-muted">Configure system</small>
                   </div>
-                  <FaCheckCircle size={20} className="text-success" />
                 </div>
                 <ListGroup variant="flush">
                   <ListGroup.Item action>General Settings</ListGroup.Item>
@@ -193,9 +169,6 @@ const AdminPage: React.FC = () => {
                   <ListGroup.Item action>Email Settings</ListGroup.Item>
                   <ListGroup.Item action>Default Values</ListGroup.Item>
                 </ListGroup>
-                <div className="mt-3 text-center">
-                  <Badge bg="success">Fully Implemented</Badge>
-                </div>
               </Card.Body>
             </Card>
           </Col>
@@ -216,7 +189,6 @@ const AdminPage: React.FC = () => {
                     <h5 className="mb-0">Security & Audit</h5>
                     <small className="text-muted">Monitor system activity</small>
                   </div>
-                  <FaCheckCircle size={20} className="text-success" />
                 </div>
                 <ListGroup variant="flush">
                   <ListGroup.Item action>Audit Logs</ListGroup.Item>
@@ -224,9 +196,6 @@ const AdminPage: React.FC = () => {
                   <ListGroup.Item action>Analytics Dashboard</ListGroup.Item>
                   <ListGroup.Item action>Export Reports</ListGroup.Item>
                 </ListGroup>
-                <div className="mt-3 text-center">
-                  <Badge bg="success">Fully Implemented</Badge>
-                </div>
               </Card.Body>
             </Card>
           </Col>
