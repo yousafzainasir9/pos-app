@@ -8,7 +8,7 @@ interface CartContextType {
   totalAmount: number;
   taxAmount: number;
   subTotal: number;
-  addItem: (product: Product, quantity?: number) => void;
+  addItem: (product: Product, quantity?: number, notes?: string) => void;
   removeItem: (productId: number) => void;
   updateQuantity: (productId: number, quantity: number) => void;
   clearCart: () => void;
@@ -37,7 +37,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     localStorage.setItem('cart', JSON.stringify(items));
   }, [items]);
 
-  const addItem = (product: Product, quantity: number = 1) => {
+  const addItem = (product: Product, quantity: number = 1, notes?: string) => {
     setItems(prevItems => {
       const existingItem = prevItems.find(item => item.productId === product.id);
       
@@ -48,7 +48,8 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             ? {
                 ...item,
                 quantity: item.quantity + quantity,
-                subtotal: (item.quantity + quantity) * item.unitPrice
+                subtotal: (item.quantity + quantity) * item.unitPrice,
+                notes: notes || item.notes
               }
             : item
         );
@@ -62,6 +63,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           unitPrice: product.priceIncGst,
           discountAmount: 0,
           subtotal: quantity * product.priceIncGst,
+          notes: notes
         };
         toast.success(`${product.name} added to cart`);
         return [...prevItems, newItem];

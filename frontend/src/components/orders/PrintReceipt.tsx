@@ -95,8 +95,13 @@ const PrintReceipt: React.FC<PrintReceiptProps> = ({ order }) => {
               </div>
               <div style={{ fontSize: '10px', color: '#666', paddingLeft: '10px' }}>
                 {item.quantity} x ${item.unitPriceIncGst.toFixed(2)}
-                {item.discountAmount > 0 && ` (Disc: -$${item.discountAmount.toFixed(2)})`}
+                {item.discountAmount > 0 && ` (Disc: -${item.discountAmount.toFixed(2)})`}
               </div>
+              {item.notes && (
+                <div style={{ fontSize: '10px', color: '#0066cc', paddingLeft: '10px', fontStyle: 'italic' }}>
+                  Note: {item.notes}
+                </div>
+              )}
             </div>
           ))
         ) : (
@@ -322,12 +327,17 @@ export const printReceipt = (order: Order) => {
                 <div class="item">
                   <div class="row">
                     <span>${item.productName}</span>
-                    <span>$${item.totalAmount.toFixed(2)}</span>
+                    <span>${item.totalAmount.toFixed(2)}</span>
                   </div>
                   <div class="item-details">
-                    ${item.quantity} x $${item.unitPriceIncGst.toFixed(2)}
-                    ${item.discountAmount > 0 ? ` (Disc: -$${item.discountAmount.toFixed(2)})` : ''}
+                    ${item.quantity} x ${item.unitPriceIncGst.toFixed(2)}
+                    ${item.discountAmount > 0 ? ` (Disc: -${item.discountAmount.toFixed(2)})` : ''}
                   </div>
+                  ${item.notes ? `
+                    <div class="item-details" style="color: #0066cc; font-style: italic;">
+                      Note: ${item.notes}
+                    </div>
+                  ` : ''}
                 </div>
               `).join('') : 
               '<div style="text-align: center; color: #999; padding: 10px;">No items</div>'

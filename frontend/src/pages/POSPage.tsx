@@ -7,6 +7,7 @@ import { Product, Category } from '@/types';
 import productService from '@/services/product.service';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
+import ProductDetailModal from '@/components/pos/ProductDetailModal';
 import './POSPage.css';
 
 const POSPage: React.FC = () => {
@@ -21,6 +22,10 @@ const POSPage: React.FC = () => {
   const [barcode, setBarcode] = useState('');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [isLoading, setIsLoading] = useState(false);
+  
+  // Modal state
+  const [showProductModal, setShowProductModal] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
   useEffect(() => {
     loadCategories();
@@ -69,7 +74,7 @@ const POSPage: React.FC = () => {
     try {
       const product = await productService.getProductByBarcode(barcode);
       if (product) {
-        handleAddToCart(product);
+        handleProductClick(product);
         setBarcode('');
       }
     } catch (error) {
@@ -77,20 +82,25 @@ const POSPage: React.FC = () => {
     }
   };
 
-  const handleAddToCart = (product: Product) => {
+  const handleProductClick = (product: Product) => {
     if (!isShiftOpen) {
       toast.error('Please open a shift first');
       navigate('/shift');
       return;
     }
 
-    if (product.trackInventory && product.stockQuantity <= 0) {
-      toast.error('Product out of stock');
+    setSelectedProduct(product);
+    setShowProductModal(true);
+  };
+
+  const handleAddToCartFromModal = (product: Product, quantity: number, notes?: string) => {
+    if (product.trackInventory && product.stockQuantity < quantity) {
+      toast.error('Insufficient stock');
       return;
     }
 
-    addItem(product);
-    toast.success(`${product.name} added to cart`, {
+    addItem(product, quantity, notes);
+    toast.success(`${quantity}x ${product.name} added to cart`, {
       position: 'bottom-right',
       autoClose: 2000
     });
@@ -258,7 +268,7 @@ const POSPage: React.FC = () => {
               <Card 
                 className="h-100 product-card shadow-sm"
                 role="button"
-                onClick={() => handleAddToCart(product)}
+                onClick={() => handleProductClick(product)}
                 style={{ cursor: isShiftOpen ? 'pointer' : 'not-allowed' }}
               >
                 <div className="product-image-container" style={{ 
@@ -351,7 +361,7 @@ const POSPage: React.FC = () => {
               <Card.Body 
                 className="d-flex align-items-center py-2"
                 role="button"
-                onClick={() => handleAddToCart(product)}
+                onClick={() => handleProductClick(product)}
                 style={{ cursor: isShiftOpen ? 'pointer' : 'not-allowed' }}
               >
                 <div className="product-image-thumbnail me-3" style={{
@@ -420,6 +430,14 @@ const POSPage: React.FC = () => {
           <p>No products found</p>
         </div>
       )}
+
+      {/* Product Detail Modal */}
+      <ProductDetailModal
+        show={showProductModal}
+        onHide={() => setShowProductModal(false)}
+        product={selectedProduct}
+        onAddToCart={handleAddToCartFromModal}
+      />
     </div>
   );
 };

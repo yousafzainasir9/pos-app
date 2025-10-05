@@ -169,17 +169,24 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({ show, onHide, order
                   <tbody>
                     {order.items && order.items.length > 0 ? (
                       order.items.map((item) => (
-                        <tr key={item.id} className={item.isVoided ? 'text-decoration-line-through text-muted' : ''}>
-                          <td>
-                            {item.productName}
-                            {item.isVoided && <Badge bg="danger" className="ms-2">Voided</Badge>}
-                          </td>
-                          <td>{item.productSKU || '-'}</td>
-                          <td className="text-end">{item.quantity}</td>
-                          <td className="text-end">${item.unitPriceIncGst.toFixed(2)}</td>
-                          <td className="text-end">${item.discountAmount.toFixed(2)}</td>
-                          <td className="text-end fw-bold">${item.totalAmount.toFixed(2)}</td>
-                        </tr>
+                        <React.Fragment key={item.id}>
+                          <tr className={item.isVoided ? 'text-decoration-line-through text-muted' : ''}>
+                            <td>
+                              <div>{item.productName}</div>
+                              {item.notes && (
+                                <small className="text-primary d-block">
+                                  <strong>Note:</strong> {item.notes}
+                                </small>
+                              )}
+                              {item.isVoided && <Badge bg="danger" className="ms-2">Voided</Badge>}
+                            </td>
+                            <td>{item.productSKU || '-'}</td>
+                            <td className="text-end">{item.quantity}</td>
+                            <td className="text-end">${item.unitPriceIncGst.toFixed(2)}</td>
+                            <td className="text-end">${item.discountAmount.toFixed(2)}</td>
+                            <td className="text-end fw-bold">${item.totalAmount.toFixed(2)}</td>
+                          </tr>
+                        </React.Fragment>
                       ))
                     ) : (
                       <tr>

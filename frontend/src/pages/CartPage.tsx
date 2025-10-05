@@ -146,7 +146,12 @@ const CartPage: React.FC = () => {
                       <td>
                         <div>
                           <div className="fw-bold">{item.productName}</div>
-                          {item.sku && <small className="text-muted">SKU: {item.sku}</small>}
+                          {item.sku && <small className="text-muted d-block">SKU: {item.sku}</small>}
+                          {item.notes && (
+                            <small className="text-primary d-block">
+                              <strong>Note:</strong> {item.notes}
+                            </small>
+                          )}
                         </div>
                       </td>
                       <td>${item.unitPrice.toFixed(2)}</td>
