@@ -139,30 +139,36 @@ const AdminPage: React.FC = () => {
           </Card>
         </Col>
 
-        {/* Data Management - Coming Soon */}
-        <Col md={6} lg={4}>
-          <Card className="h-100 border-warning opacity-75">
-            <Card.Body>
-              <div className="d-flex align-items-center mb-3">
-                <FaDatabase size={32} className="text-info me-3" />
-                <div className="flex-grow-1">
-                  <h5 className="mb-0">Data Management</h5>
-                  <small className="text-muted">Import/Export data</small>
+        {/* Data Management - WORKING (Admin Only) */}
+        {user?.role === 'Admin' && (
+          <Col md={6} lg={4}>
+            <Card 
+              className="h-100 border-success" 
+              style={{ cursor: 'pointer' }} 
+              onClick={() => navigate('/admin/data')}
+            >
+              <Card.Body>
+                <div className="d-flex align-items-center mb-3">
+                  <FaDatabase size={32} className="text-info me-3" />
+                  <div className="flex-grow-1">
+                    <h5 className="mb-0">Data Management</h5>
+                    <small className="text-muted">Import/Export data</small>
+                  </div>
+                  <FaCheckCircle size={20} className="text-success" />
                 </div>
-                <FaTimesCircle size={20} className="text-warning" />
-              </div>
-              <ListGroup variant="flush">
-                <ListGroup.Item>Backup Database</ListGroup.Item>
-                <ListGroup.Item>Import Products</ListGroup.Item>
-                <ListGroup.Item>Export Reports</ListGroup.Item>
-                <ListGroup.Item>Data Archiving</ListGroup.Item>
-              </ListGroup>
-              <div className="mt-3 text-center">
-                <Badge bg="warning">Coming Soon</Badge>
-              </div>
-            </Card.Body>
-          </Card>
-        </Col>
+                <ListGroup variant="flush">
+                  <ListGroup.Item action>Backup Database</ListGroup.Item>
+                  <ListGroup.Item action>Import Products</ListGroup.Item>
+                  <ListGroup.Item action>Export Reports</ListGroup.Item>
+                  <ListGroup.Item action>Data Archiving</ListGroup.Item>
+                </ListGroup>
+                <div className="mt-3 text-center">
+                  <Badge bg="success">Fully Implemented</Badge>
+                </div>
+              </Card.Body>
+            </Card>
+          </Col>
+        )}
 
         {/* System Settings - Coming Soon */}
         <Col md={6} lg={4}>

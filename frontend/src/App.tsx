@@ -30,6 +30,7 @@ import ThemeSettingsPage from './pages/ThemeSettingsPage';
 import UserManagementPage from './pages/UserManagementPage';
 import StoreSettingsPage from './pages/StoreSettingsPage';
 import SecurityAuditPage from './pages/SecurityAuditPage';
+import DataManagementPage from './pages/DataManagementPage';
 
 function App() {
   return (
@@ -89,6 +90,13 @@ function App() {
                 <Layout>
                   <RoleBasedRoute allowedRoles={['Admin']}>
                     <SecurityAuditPage />
+                  </RoleBasedRoute>
+                </Layout>
+              } />
+              <Route path="/admin/data" element={
+                <Layout>
+                  <RoleBasedRoute allowedRoles={['Admin']}>
+                    <DataManagementPage />
                   </RoleBasedRoute>
                 </Layout>
               } />
