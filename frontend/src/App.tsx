@@ -31,6 +31,7 @@ import UserManagementPage from './pages/UserManagementPage';
 import StoreSettingsPage from './pages/StoreSettingsPage';
 import SecurityAuditPage from './pages/SecurityAuditPage';
 import DataManagementPage from './pages/DataManagementPage';
+import SystemSettingsPage from './pages/SystemSettingsPage';
 
 function App() {
   return (
@@ -97,6 +98,13 @@ function App() {
                 <Layout>
                   <RoleBasedRoute allowedRoles={['Admin']}>
                     <DataManagementPage />
+                  </RoleBasedRoute>
+                </Layout>
+              } />
+              <Route path="/admin/settings" element={
+                <Layout>
+                  <RoleBasedRoute allowedRoles={['Admin']}>
+                    <SystemSettingsPage />
                   </RoleBasedRoute>
                 </Layout>
               } />

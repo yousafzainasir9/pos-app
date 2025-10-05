@@ -3,6 +3,7 @@ using POS.Application.Common.Interfaces;
 using POS.Domain.Common;
 using POS.Domain.Entities;
 using POS.Domain.Entities.Audit;
+using POS.Domain.Entities.Settings;
 using POS.Infrastructure.Data.Configurations;
 using POS.Infrastructure.Data.Interceptors;
 using System.Linq.Expressions;
@@ -38,6 +39,9 @@ public class POSDbContext : DbContext, IApplicationDbContext
     // Audit & Security
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
     public DbSet<SecurityLog> SecurityLogs => Set<SecurityLog>();
+    
+    // Settings
+    public DbSet<SystemSetting> SystemSettings => Set<SystemSetting>();
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {

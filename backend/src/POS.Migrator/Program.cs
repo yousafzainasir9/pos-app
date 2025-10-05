@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -21,6 +22,9 @@ var host = Host.CreateDefaultBuilder(args)
     .ConfigureServices((context, services) =>
     {
         var connectionString = context.Configuration.GetConnectionString("DefaultConnection");
+        
+        // Register a mock IHttpContextAccessor for the migrator (console app doesn't have HTTP context)
+        services.AddSingleton<IHttpContextAccessor, MockHttpContextAccessor>();
         
         // Register the interceptor and its dependencies
         services.AddScoped<AuditableEntitySaveChangesInterceptor>();
@@ -146,6 +150,12 @@ using (var scope = host.Services.CreateScope())
         
         Environment.Exit(1);
     }
+}
+
+// Mock HttpContextAccessor for console application
+public class MockHttpContextAccessor : IHttpContextAccessor
+{
+    public HttpContext? HttpContext { get; set; }
 }
 
 public partial class Program { }

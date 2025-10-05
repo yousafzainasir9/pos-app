@@ -170,30 +170,36 @@ const AdminPage: React.FC = () => {
           </Col>
         )}
 
-        {/* System Settings - Coming Soon */}
-        <Col md={6} lg={4}>
-          <Card className="h-100 border-warning opacity-75">
-            <Card.Body>
-              <div className="d-flex align-items-center mb-3">
-                <FaCog size={32} className="text-warning me-3" />
-                <div className="flex-grow-1">
-                  <h5 className="mb-0">System Settings</h5>
-                  <small className="text-muted">Configure system</small>
+        {/* System Settings - WORKING (Admin Only) */}
+        {user?.role === 'Admin' && (
+          <Col md={6} lg={4}>
+            <Card 
+              className="h-100 border-success" 
+              style={{ cursor: 'pointer' }} 
+              onClick={() => navigate('/admin/settings')}
+            >
+              <Card.Body>
+                <div className="d-flex align-items-center mb-3">
+                  <FaCog size={32} className="text-warning me-3" />
+                  <div className="flex-grow-1">
+                    <h5 className="mb-0">System Settings</h5>
+                    <small className="text-muted">Configure system</small>
+                  </div>
+                  <FaCheckCircle size={20} className="text-success" />
                 </div>
-                <FaTimesCircle size={20} className="text-warning" />
-              </div>
-              <ListGroup variant="flush">
-                <ListGroup.Item>General Settings</ListGroup.Item>
-                <ListGroup.Item>Receipt Template</ListGroup.Item>
-                <ListGroup.Item>Email Settings</ListGroup.Item>
-                <ListGroup.Item>Default Values</ListGroup.Item>
-              </ListGroup>
-              <div className="mt-3 text-center">
-                <Badge bg="warning">Coming Soon</Badge>
-              </div>
-            </Card.Body>
-          </Card>
-        </Col>
+                <ListGroup variant="flush">
+                  <ListGroup.Item action>General Settings</ListGroup.Item>
+                  <ListGroup.Item action>Receipt Template</ListGroup.Item>
+                  <ListGroup.Item action>Email Settings</ListGroup.Item>
+                  <ListGroup.Item action>Default Values</ListGroup.Item>
+                </ListGroup>
+                <div className="mt-3 text-center">
+                  <Badge bg="success">Fully Implemented</Badge>
+                </div>
+              </Card.Body>
+            </Card>
+          </Col>
+        )}
 
         {/* Security & Audit - WORKING (Admin Only) */}
         {user?.role === 'Admin' && (

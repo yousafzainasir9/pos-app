@@ -7,6 +7,7 @@ import orderService from '@/services/order.service';
 import { toast } from 'react-toastify';
 import OrderDetailModal from '@/components/orders/OrderDetailModal';
 import { printReceipt } from '@/components/orders/PrintReceipt';
+import { getCachedDefaultValues } from '@/hooks/useSystemSettings';
 
 const OrdersPage: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -107,121 +108,6 @@ const OrdersPage: React.FC = () => {
     }
   };
 
-  const loadMockOrders = () => {
-    // Generate mock orders for today
-    const mockOrders: Order[] = [
-      {
-        id: 1,
-        orderNumber: 'ORD-2024-001',
-        orderDate: new Date().toISOString(),
-        customerName: 'John Doe',
-        customerId: 1,
-        orderType: 1, // Dine In
-        status: OrderStatus.Completed,
-        subTotal: 45.00,
-        discountAmount: 0,
-        taxAmount: 4.50,
-        totalAmount: 49.50,
-        paidAmount: 49.50,
-        changeAmount: 0,
-        items: [],
-        payments: [],
-        notes: '',
-        userId: 1,
-        storeId: 1
-      },
-      {
-        id: 2,
-        orderNumber: 'ORD-2024-002',
-        orderDate: new Date(Date.now() - 3600000).toISOString(), // 1 hour ago
-        customerName: 'Jane Smith',
-        customerId: 2,
-        orderType: 2, // Take Away
-        status: OrderStatus.Processing,
-        subTotal: 32.00,
-        discountAmount: 3.20,
-        taxAmount: 2.88,
-        totalAmount: 31.68,
-        paidAmount: 31.68,
-        changeAmount: 0,
-        items: [],
-        payments: [],
-        notes: '',
-        userId: 1,
-        storeId: 1
-      },
-      {
-        id: 3,
-        orderNumber: 'ORD-2024-003',
-        orderDate: new Date(Date.now() - 7200000).toISOString(), // 2 hours ago
-        customerName: null,
-        customerId: null,
-        orderType: 1, // Dine In
-        status: OrderStatus.Completed,
-        subTotal: 18.50,
-        discountAmount: 0,
-        taxAmount: 1.85,
-        totalAmount: 20.35,
-        paidAmount: 20.35,
-        changeAmount: 0,
-        items: [],
-        payments: [],
-        notes: 'Table 5',
-        userId: 1,
-        storeId: 1
-      },
-      {
-        id: 4,
-        orderNumber: 'ORD-2024-004',
-        orderDate: new Date(Date.now() - 1800000).toISOString(), // 30 min ago
-        customerName: 'Mike Johnson',
-        customerId: 3,
-        orderType: 3, // Delivery
-        status: OrderStatus.Pending,
-        subTotal: 65.00,
-        discountAmount: 0,
-        taxAmount: 6.50,
-        totalAmount: 71.50,
-        paidAmount: 71.50,
-        changeAmount: 0,
-        items: [],
-        payments: [],
-        notes: 'Delivery to 123 Main St',
-        userId: 1,
-        storeId: 1
-      },
-      {
-        id: 5,
-        orderNumber: 'ORD-2024-005',
-        orderDate: new Date(Date.now() - 900000).toISOString(), // 15 min ago
-        customerName: 'Sarah Wilson',
-        customerId: 4,
-        orderType: 1, // Dine In
-        status: OrderStatus.Processing,
-        subTotal: 28.00,
-        discountAmount: 2.80,
-        taxAmount: 2.52,
-        totalAmount: 27.72,
-        paidAmount: 30.00,
-        changeAmount: 2.28,
-        items: [],
-        payments: [],
-        notes: 'Table 2',
-        userId: 1,
-        storeId: 1
-      }
-    ];
-
-    // Filter mock orders based on selected filters
-    let filteredOrders = [...mockOrders];
-    
-    if (filter.status) {
-      filteredOrders = filteredOrders.filter(o => o.status === parseInt(filter.status));
-    }
-
-    setOrders(filteredOrders);
-  };
-
   const getStatusBadge = (status: OrderStatus) => {
     const statusMap = {
       [OrderStatus.Pending]: { variant: 'warning', label: 'Pending' },
@@ -285,17 +171,28 @@ const OrdersPage: React.FC = () => {
   const handlePrintReceipt = async (orderId: number) => {
     try {
       const order = await orderService.getOrder(orderId);
-      printReceipt(order);
-      toast.success('Receipt sent to printer');
+      const settings = await getCachedDefaultValues();
+      
+      // Print with configured number of copies
+      await printReceipt(order, settings.receiptPrintCopies || 1);
+      toast.success(`Receipt ${settings.receiptPrintCopies > 1 ? `(${settings.receiptPrintCopies} copies)` : ''} sent to printer`);
     } catch (error) {
       console.error('Failed to print receipt:', error);
       toast.error('Failed to print receipt');
     }
   };
 
-  const handlePrintFromModal = (order: Order) => {
-    printReceipt(order);
-    toast.success('Receipt sent to printer');
+  const handlePrintFromModal = async (order: Order) => {
+    try {
+      const settings = await getCachedDefaultValues();
+      
+      // Print with configured number of copies
+      await printReceipt(order, settings.receiptPrintCopies || 1);
+      toast.success(`Receipt ${settings.receiptPrintCopies > 1 ? `(${settings.receiptPrintCopies} copies)` : ''} sent to printer`);
+    } catch (error) {
+      console.error('Failed to print receipt:', error);
+      toast.error('Failed to print receipt');
+    }
   };
 
   const getPaymentStatus = (order: Order) => {
