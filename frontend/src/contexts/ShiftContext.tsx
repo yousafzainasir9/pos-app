@@ -52,17 +52,17 @@ export const ShiftProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       setIsLoading(true);
       const response = await apiService.post('/shifts/open', request);
       setCurrentShift(response.data.data);
-      toast.success('Shift opened successfully');
-    } catch (error: any) {
-      // Check if shift already exists - backend returns the existing shift in data
-      if (error.response?.status === 400 && error.response?.data?.data) {
-        // Use the existing shift data returned by the server
-        setCurrentShift(error.response.data.data);
-        toast.info('You already have an open shift. Using existing shift.');
+      
+      // Check if message indicates existing shift
+      const message = response.data.message || '';
+      if (message.toLowerCase().includes('existing')) {
+        toast.info('Using existing open shift');
       } else {
-        toast.error(error.response?.data?.message || 'Failed to open shift');
-        throw error;
+        toast.success('Shift opened successfully');
       }
+    } catch (error: any) {
+      toast.error(error.response?.data?.error?.message || 'Failed to open shift');
+      throw error;
     } finally {
       setIsLoading(false);
     }

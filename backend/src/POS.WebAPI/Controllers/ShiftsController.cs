@@ -45,12 +45,25 @@ public class ShiftsController : ControllerBase
 
             // Check for existing open shift
             var existingShift = await _unitOfWork.Repository<Shift>().Query()
+                .Include(s => s.Orders)
                 .FirstOrDefaultAsync(s => s.UserId == currentUserId && s.Status == ShiftStatus.Open);
 
             if (existingShift != null)
             {
-                return BadRequest(ApiResponse<ShiftDto>.ErrorResponse(
-                    new ErrorResponse("SHIFT_ALREADY_OPEN", "User already has an open shift")));
+                // Return the existing shift instead of an error
+                var completedOrders = existingShift.Orders.Where(o => o.Status == OrderStatus.Completed).ToList();
+                var totalSales = completedOrders.Sum(o => o.TotalAmount);
+
+                return Ok(ApiResponse<ShiftDto>.SuccessResponse(new ShiftDto
+                {
+                    Id = existingShift.Id,
+                    ShiftNumber = existingShift.ShiftNumber,
+                    StartTime = existingShift.StartTime,
+                    StartingCash = existingShift.StartingCash,
+                    Status = existingShift.Status.ToString(),
+                    TotalOrders = completedOrders.Count,
+                    TotalSales = totalSales
+                }, "Using existing open shift"));
             }
 
             // Generate shift number

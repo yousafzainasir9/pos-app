@@ -78,26 +78,11 @@ class OrderService {
 
       const response = await apiService.get('/orders', { params: apiParams });
       
-      // Check if response has pagination structure
-      if (response.data?.data && response.data?.pagination) {
-        return response.data as OrdersResponse;
-      }
-      
-      // Handle old format (array directly)
-      const orders = response.data?.data || response.data || [];
-      
-      // If we got valid data, return it with default pagination
-      if (Array.isArray(orders) && orders.length > 0) {
+      // Handle new API response format
+      if (response.data?.data?.data && response.data?.data?.pagination) {
         return {
-          data: orders,
-          pagination: {
-            currentPage: 1,
-            pageSize: orders.length,
-            totalCount: orders.length,
-            totalPages: 1,
-            hasNext: false,
-            hasPrevious: false
-          }
+          data: response.data.data.data,
+          pagination: response.data.data.pagination
         };
       }
       

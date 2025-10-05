@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using POS.Application.Common.Interfaces;
+using POS.Application.Common.Models;
 using POS.Application.DTOs;
 using POS.Domain.Entities;
 using POS.Domain.Enums;
@@ -81,7 +82,7 @@ public class OrdersController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<object>> GetOrders(
+    public async Task<ActionResult<ApiResponse<object>>> GetOrders(
         [FromQuery] DateTime? fromDate,
         [FromQuery] DateTime? toDate,
         [FromQuery] OrderStatus? status,
@@ -160,7 +161,7 @@ public class OrdersController : ControllerBase
             // Calculate pagination metadata
             var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
 
-            return Ok(new
+            return Ok(ApiResponse<object>.SuccessResponse(new
             {
                 data = orders,
                 pagination = new
@@ -172,12 +173,13 @@ public class OrdersController : ControllerBase
                     hasNext = page < totalPages,
                     hasPrevious = page > 1
                 }
-            });
+            }));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error retrieving orders");
-            return StatusCode(500, "An error occurred while retrieving orders");
+            return StatusCode(500, ApiResponse<object>.ErrorResponse(
+                new ErrorResponse("INTERNAL_ERROR", "An error occurred while retrieving orders")));
         }
     }
 
