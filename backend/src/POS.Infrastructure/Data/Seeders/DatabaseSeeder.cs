@@ -16,6 +16,59 @@ public class DatabaseSeeder
     private readonly string _excelDataPath;
     private readonly string _jsonDataPath;
     private readonly Random _random = new Random();
+    
+    // Image URL mappings for different product types
+    private readonly Dictionary<string, List<string>> _imageUrlsByCategory = new()
+    {
+        ["cookies"] = new List<string>
+        {
+            "https://images.unsplash.com/photo-1499636136210-6f4ee915583e?w=500&h=500&fit=crop",
+            "https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=500&h=500&fit=crop",
+            "https://images.unsplash.com/photo-1590080876876-5ae8d2b2cba8?w=500&h=500&fit=crop",
+            "https://images.unsplash.com/photo-1486427944299-d1955d23e34d?w=500&h=500&fit=crop",
+            "https://images.unsplash.com/photo-1581899326674-1a3f39c4f1d7?w=500&h=500&fit=crop"
+        },
+        ["breads"] = new List<string>
+        {
+            "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=500&h=500&fit=crop",
+            "https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=500&h=500&fit=crop",
+            "https://images.unsplash.com/photo-1549931319-a545dcf3bc73?w=500&h=500&fit=crop",
+            "https://images.unsplash.com/photo-1598373182133-52452f7691ef?w=500&h=500&fit=crop",
+            "https://images.unsplash.com/photo-1608198399988-427d83c2b152?w=500&h=500&fit=crop"
+        },
+        ["cakes"] = new List<string>
+        {
+            "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=500&h=500&fit=crop",
+            "https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=500&h=500&fit=crop",
+            "https://images.unsplash.com/photo-1621303837174-89787a7d4729?w=500&h=500&fit=crop",
+            "https://images.unsplash.com/photo-1464349095431-e9a21285b5f3?w=500&h=500&fit=crop",
+            "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=500&h=500&fit=crop"
+        },
+        ["pastries"] = new List<string>
+        {
+            "https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=500&h=500&fit=crop",
+            "https://images.unsplash.com/photo-1608198399988-427d83c2b152?w=500&h=500&fit=crop",
+            "https://images.unsplash.com/photo-1530610476181-d83430b64dcd?w=500&h=500&fit=crop",
+            "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=500&h=500&fit=crop",
+            "https://images.unsplash.com/photo-1586985289688-ca3cf47d3e6e?w=500&h=500&fit=crop"
+        },
+        ["beverages"] = new List<string>
+        {
+            "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=500&h=500&fit=crop",
+            "https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=500&h=500&fit=crop",
+            "https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=500&h=500&fit=crop",
+            "https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=500&h=500&fit=crop",
+            "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=500&h=500&fit=crop"
+        },
+        ["default"] = new List<string>
+        {
+            "https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=500&h=500&fit=crop",
+            "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=500&h=500&fit=crop",
+            "https://images.unsplash.com/photo-1499636136210-6f4ee915583e?w=500&h=500&fit=crop",
+            "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=500&h=500&fit=crop",
+            "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=500&h=500&fit=crop"
+        }
+    };
 
     public DatabaseSeeder(POSDbContext context, ILogger<DatabaseSeeder> logger)
     {
@@ -455,9 +508,10 @@ public class DatabaseSeeder
                                 SupplierId = supplier.Id,
                                 IsActive = true,
                                 TrackInventory = true,
-                                StockQuantity = _random.Next(50, 200),
+                                StockQuantity = GetRandomStockQuantity(),
                                 LowStockThreshold = _random.Next(10, 30),
-                                DisplayOrder = totalProducts
+                                DisplayOrder = totalProducts,
+                                ImageUrl = GetImageUrlForProduct(category.Slug, subcategory.Slug, productData.Name)
                             };
 
                             // Extract pack size
@@ -536,13 +590,14 @@ public class DatabaseSeeder
                         GstAmount = Math.Round(price * 0.1m, 2),
                         PriceIncGst = Math.Round(price * 1.1m, 2),
                         Cost = Math.Round(price * 0.6m, 2),
-                        StockQuantity = _random.Next(50, 200),
+                        StockQuantity = GetRandomStockQuantity(),
                         LowStockThreshold = 20,
                         SubcategoryId = subcategory.Id,
                         SupplierId = suppliers[_random.Next(suppliers.Count)].Id,
                         IsActive = true,
                         TrackInventory = true,
-                        DisplayOrder = i
+                        DisplayOrder = i,
+                        ImageUrl = GetImageUrlForProduct(catSlug, subcategory.Slug, subcatName)
                     };
                     
                     await _context.Products.AddAsync(product);
@@ -1040,6 +1095,67 @@ public class DatabaseSeeder
     {
         string[] cardTypes = { "Visa", "MasterCard", "Amex", "Debit" };
         return cardTypes[_random.Next(cardTypes.Length)];
+    }
+
+    private int GetRandomStockQuantity()
+    {
+        // Create realistic stock distribution:
+        // 15% - Critical low stock (0-5 units)
+        // 15% - Low stock (6-15 units)
+        // 25% - Medium stock (16-50 units)
+        // 30% - Good stock (51-100 units)
+        // 15% - High stock (101-200 units)
+        
+        var chance = _random.Next(100);
+        
+        if (chance < 15) // 15% critical low stock
+        {
+            return _random.Next(0, 6); // 0, 1, 2, 3, 4, 5
+        }
+        else if (chance < 30) // 15% low stock
+        {
+            return _random.Next(6, 16); // 6-15
+        }
+        else if (chance < 55) // 25% medium stock
+        {
+            return _random.Next(16, 51); // 16-50
+        }
+        else if (chance < 85) // 30% good stock
+        {
+            return _random.Next(51, 101); // 51-100
+        }
+        else // 15% high stock
+        {
+            return _random.Next(101, 201); // 101-200
+        }
+    }
+
+    private string GetImageUrlForProduct(string categorySlug, string subcategorySlug, string productName)
+    {
+        // Try to match by subcategory first
+        var key = subcategorySlug.ToLower();
+        
+        // Map common subcategories to image categories
+        if (key.Contains("cookie") || key.Contains("biscuit"))
+            key = "cookies";
+        else if (key.Contains("bread") || key.Contains("baguette") || key.Contains("sourdough") || key.Contains("loaf"))
+            key = "breads";
+        else if (key.Contains("cake") || key.Contains("gateau"))
+            key = "cakes";
+        else if (key.Contains("pastry") || key.Contains("pastries") || key.Contains("croissant") || key.Contains("danish"))
+            key = "pastries";
+        else if (key.Contains("coffee") || key.Contains("tea") || key.Contains("beverage") || key.Contains("drink") || key.Contains("juice"))
+            key = "beverages";
+        else
+            key = categorySlug.ToLower();
+
+        // Get images for the category or use default
+        var imageList = _imageUrlsByCategory.ContainsKey(key) 
+            ? _imageUrlsByCategory[key] 
+            : _imageUrlsByCategory["default"];
+
+        // Return a random image from the list
+        return imageList[_random.Next(imageList.Count)];
     }
 
     // Data classes for JSON
