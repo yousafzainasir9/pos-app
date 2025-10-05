@@ -5,6 +5,8 @@ import { format } from 'date-fns';
 import { Order, OrderStatus } from '@/types';
 import orderService from '@/services/order.service';
 import { toast } from 'react-toastify';
+import OrderDetailModal from '@/components/orders/OrderDetailModal';
+import { printReceipt } from '@/components/orders/PrintReceipt';
 
 const OrdersPage: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -24,6 +26,10 @@ const OrdersPage: React.FC = () => {
     pendingOrders: 0,
     processingOrders: 0
   });
+  
+  // Modal states
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
   
   // Initialize with today's date
   const today = format(new Date(), 'yyyy-MM-dd');
@@ -272,12 +278,24 @@ const OrdersPage: React.FC = () => {
   };
 
   const handleViewOrder = (orderId: number) => {
-    // For now, just show a toast as the order detail page might not be implemented
-    toast.info(`View order #${orderId} - Feature coming soon!`);
+    setSelectedOrderId(orderId);
+    setShowDetailModal(true);
   };
 
-  const handlePrintReceipt = (orderId: number) => {
-    toast.info(`Print receipt for order #${orderId} - Feature coming soon!`);
+  const handlePrintReceipt = async (orderId: number) => {
+    try {
+      const order = await orderService.getOrder(orderId);
+      printReceipt(order);
+      toast.success('Receipt sent to printer');
+    } catch (error) {
+      console.error('Failed to print receipt:', error);
+      toast.error('Failed to print receipt');
+    }
+  };
+
+  const handlePrintFromModal = (order: Order) => {
+    printReceipt(order);
+    toast.success('Receipt sent to printer');
   };
 
   const getPaymentStatus = (order: Order) => {
@@ -554,6 +572,16 @@ const OrdersPage: React.FC = () => {
           )}
         </Card.Body>
       </Card>
+
+      {/* Order Detail Modal */}
+      {selectedOrderId && (
+        <OrderDetailModal
+          show={showDetailModal}
+          onHide={() => setShowDetailModal(false)}
+          orderId={selectedOrderId}
+          onPrint={handlePrintFromModal}
+        />
+      )}
     </div>
   );
 };
