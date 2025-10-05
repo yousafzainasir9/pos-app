@@ -10,6 +10,7 @@ using POS.Application.Common.Models;
 using POS.Application.DTOs.Auth;
 using POS.Application.Interfaces;
 using POS.Domain.Entities;
+using POS.Domain.Entities.Audit;
 using POS.Domain.Enums;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -25,17 +26,20 @@ public class AuthController : ControllerBase
     private readonly IConfiguration _configuration;
     private readonly ILogger<AuthController> _logger;
     private readonly ISecurityService _securityService;
+    private readonly IAuditService _auditService;
 
     public AuthController(
         IUnitOfWork unitOfWork,
         IConfiguration configuration,
         ILogger<AuthController> logger,
-        ISecurityService securityService)
+        ISecurityService securityService,
+        IAuditService auditService)
     {
         _unitOfWork = unitOfWork;
         _configuration = configuration;
         _logger = logger;
         _securityService = securityService;
+        _auditService = auditService;
     }
 
     /// <summary>
@@ -59,6 +63,19 @@ public class AuthController : ControllerBase
             if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
             {
                 _logger.LogWarning("Failed login attempt for username: {Username}", request.Username);
+                
+                // Log failed login security event
+                await LogSecurityEventAsync(new SecurityLog
+                {
+                    EventType = SecurityEventType.LoginFailed,
+                    Severity = SecuritySeverity.Warning,
+                    UserId = user?.Id,
+                    UserName = request.Username,
+                    Description = $"Failed login attempt for user: {request.Username}",
+                    Success = false,
+                    StoreId = user?.StoreId
+                });
+                
                 throw AuthenticationException.InvalidCredentials();
             }
 
@@ -75,6 +92,18 @@ public class AuthController : ControllerBase
             await _unitOfWork.SaveChangesAsync();
 
             _logger.LogInformation("User {Username} logged in successfully", user.Username);
+
+            // Log successful login security event
+            await LogSecurityEventAsync(new SecurityLog
+            {
+                EventType = SecurityEventType.Login,
+                Severity = SecuritySeverity.Info,
+                UserId = user.Id,
+                UserName = user.Username,
+                Description = $"User {user.Username} logged in successfully",
+                Success = true,
+                StoreId = user.StoreId
+            });
 
             var response = new LoginResponseDto
             {
@@ -128,6 +157,17 @@ public class AuthController : ControllerBase
             if (user == null)
             {
                 _logger.LogWarning("Failed PIN login attempt for store: {StoreId}", request.StoreId);
+                
+                // Log failed PIN login
+                await LogSecurityEventAsync(new SecurityLog
+                {
+                    EventType = SecurityEventType.LoginFailed,
+                    Severity = SecuritySeverity.Warning,
+                    Description = $"Failed PIN login attempt for store: {request.StoreId}",
+                    Success = false,
+                    StoreId = request.StoreId
+                });
+                
                 throw AuthenticationException.InvalidPin();
             }
 
@@ -148,6 +188,18 @@ public class AuthController : ControllerBase
                 .FirstOrDefaultAsync(s => s.UserId == user.Id && s.Status == ShiftStatus.Open);
 
             _logger.LogInformation("User {Username} logged in via PIN for store {StoreId}", user.Username, request.StoreId);
+
+            // Log successful PIN login
+            await LogSecurityEventAsync(new SecurityLog
+            {
+                EventType = SecurityEventType.Login,
+                Severity = SecuritySeverity.Info,
+                UserId = user.Id,
+                UserName = user.Username,
+                Description = $"User {user.Username} logged in via PIN for store {user.Store?.Name}",
+                Success = true,
+                StoreId = user.StoreId
+            });
 
             var response = new LoginResponseDto
             {
@@ -219,6 +271,18 @@ public class AuthController : ControllerBase
 
             _logger.LogInformation("Refresh token renewed for user {Username}", user.Username);
 
+            // Log token refresh
+            await LogSecurityEventAsync(new SecurityLog
+            {
+                EventType = SecurityEventType.TokenRefreshed,
+                Severity = SecuritySeverity.Info,
+                UserId = user.Id,
+                UserName = user.Username,
+                Description = $"Refresh token renewed for user {user.Username}",
+                Success = true,
+                StoreId = user.StoreId
+            });
+
             var response = new LoginResponseDto
             {
                 Token = token,
@@ -274,6 +338,18 @@ public class AuthController : ControllerBase
                     await _unitOfWork.SaveChangesAsync();
 
                     _logger.LogInformation("User {UserId} logged out successfully", userId);
+
+                    // Log logout event
+                    await LogSecurityEventAsync(new SecurityLog
+                    {
+                        EventType = SecurityEventType.Logout,
+                        Severity = SecuritySeverity.Info,
+                        UserId = user.Id,
+                        UserName = user.Username,
+                        Description = $"User {user.Username} logged out",
+                        Success = true,
+                        StoreId = user.StoreId
+                    });
                 }
             }
 
@@ -323,6 +399,23 @@ public class AuthController : ControllerBase
         var tokenHandler = new JwtSecurityTokenHandler();
         var token = tokenHandler.CreateToken(tokenDescriptor);
         return tokenHandler.WriteToken(token);
+    }
+
+    private async Task LogSecurityEventAsync(SecurityLog securityLog)
+    {
+        try
+        {
+            securityLog.Timestamp = DateTime.UtcNow;
+            securityLog.IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
+            securityLog.UserAgent = HttpContext.Request.Headers["User-Agent"].ToString();
+            
+            await _auditService.LogSecurityEventAsync(securityLog);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to log security event");
+            // Don't throw - security logging shouldn't break the main flow
+        }
     }
 
     #endregion

@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using POS.Application.Common.Interfaces;
 using POS.Domain.Common;
 using POS.Domain.Entities;
+using POS.Domain.Entities.Audit;
 using POS.Infrastructure.Data.Configurations;
 using POS.Infrastructure.Data.Interceptors;
 using System.Linq.Expressions;
@@ -33,6 +34,10 @@ public class POSDbContext : DbContext, IApplicationDbContext
     public DbSet<Payment> Payments => Set<Payment>();
     public DbSet<Shift> Shifts => Set<Shift>();
     public DbSet<InventoryTransaction> InventoryTransactions => Set<InventoryTransaction>();
+    
+    // Audit & Security
+    public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
+    public DbSet<SecurityLog> SecurityLogs => Set<SecurityLog>();
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {

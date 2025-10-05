@@ -50,6 +50,14 @@ const ReportsPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   
+  // Today's real-time stats
+  const [todayStats, setTodayStats] = useState({
+    sales: 0,
+    orders: 0,
+    products: 0,
+    lowStock: 0
+  });
+  
   // Separate date ranges for each report type
   const [salesDateRange, setSalesDateRange] = useState({
     startDate: format(startOfWeek(new Date()), 'yyyy-MM-dd'),
@@ -71,7 +79,28 @@ const ReportsPage: React.FC = () => {
       navigate('/login');
       return;
     }
+    // Load today's stats on mount
+    loadTodayStats();
   }, [isAuthenticated, navigate]);
+
+  const loadTodayStats = async () => {
+    try {
+      const today = format(new Date(), 'yyyy-MM-dd');
+      
+      // Get orders summary from API
+      const orderSummary = await reportService.getSalesReport(today, today);
+      
+      setTodayStats({
+        sales: orderSummary.totalSales || 0,
+        orders: orderSummary.totalOrders || 0,
+        products: orderSummary.topProducts?.reduce((sum, p) => sum + p.quantitySold, 0) || 0,
+        lowStock: 0 // Will be updated when we have product data
+      });
+    } catch (error) {
+      console.error('Error loading today\'s stats:', error);
+      // Keep zeros on error
+    }
+  };
 
   const loadSalesReport = async () => {
     setIsLoading(true);
@@ -283,25 +312,25 @@ const ReportsPage: React.FC = () => {
           <Row>
             <Col md={3} sm={6} className="mb-3">
               <div className="text-center">
-                <h3 className="text-primary">$4,250</h3>
+                <h3 className="text-primary">${todayStats.sales.toFixed(2)}</h3>
                 <p className="text-muted mb-0">Today's Sales</p>
               </div>
             </Col>
             <Col md={3} sm={6} className="mb-3">
               <div className="text-center">
-                <h3 className="text-success">42</h3>
+                <h3 className="text-success">{todayStats.orders}</h3>
                 <p className="text-muted mb-0">Orders Today</p>
               </div>
             </Col>
             <Col md={3} sm={6} className="mb-3">
               <div className="text-center">
-                <h3 className="text-info">156</h3>
+                <h3 className="text-info">{todayStats.products}</h3>
                 <p className="text-muted mb-0">Products Sold</p>
               </div>
             </Col>
             <Col md={3} sm={6} className="mb-3">
               <div className="text-center">
-                <h3 className="text-warning">8</h3>
+                <h3 className="text-warning">{todayStats.lowStock}</h3>
                 <p className="text-muted mb-0">Low Stock Items</p>
               </div>
             </Col>

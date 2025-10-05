@@ -29,6 +29,7 @@ import AdminPage from './pages/AdminPage';
 import ThemeSettingsPage from './pages/ThemeSettingsPage';
 import UserManagementPage from './pages/UserManagementPage';
 import StoreSettingsPage from './pages/StoreSettingsPage';
+import SecurityAuditPage from './pages/SecurityAuditPage';
 
 function App() {
   return (
@@ -81,6 +82,13 @@ function App() {
                 <Layout>
                   <RoleBasedRoute allowedRoles={['Admin', 'Manager']}>
                     <StoreSettingsPage />
+                  </RoleBasedRoute>
+                </Layout>
+              } />
+              <Route path="/admin/security" element={
+                <Layout>
+                  <RoleBasedRoute allowedRoles={['Admin']}>
+                    <SecurityAuditPage />
                   </RoleBasedRoute>
                 </Layout>
               } />

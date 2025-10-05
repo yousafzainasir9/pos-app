@@ -1,7 +1,7 @@
 import React from 'react';
 import { Navbar, Nav, Container, Badge, Dropdown } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
-import { FaShoppingCart, FaUser, FaCashRegister, FaSignOutAlt, FaPalette } from 'react-icons/fa';
+import { FaShoppingCart, FaUser, FaCashRegister, FaSignOutAlt, FaPalette, FaShieldAlt } from 'react-icons/fa';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCart } from '@/contexts/CartContext';
 import { useShift } from '@/contexts/ShiftContext';

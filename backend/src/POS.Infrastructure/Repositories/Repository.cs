@@ -9,7 +9,6 @@ public class Repository<T> : IRepository<T> where T : class
 {
     protected readonly POSDbContext _context;
     protected readonly DbSet<T> _dbSet;
-
     public Repository(POSDbContext context)
     {
         _context = context;

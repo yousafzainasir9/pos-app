@@ -189,30 +189,36 @@ const AdminPage: React.FC = () => {
           </Card>
         </Col>
 
-        {/* Security & Audit - Coming Soon */}
-        <Col md={6} lg={4}>
-          <Card className="h-100 border-warning opacity-75">
-            <Card.Body>
-              <div className="d-flex align-items-center mb-3">
-                <FaShieldAlt size={32} className="text-danger me-3" />
-                <div className="flex-grow-1">
-                  <h5 className="mb-0">Security & Audit</h5>
-                  <small className="text-muted">Security settings</small>
+        {/* Security & Audit - WORKING (Admin Only) */}
+        {user?.role === 'Admin' && (
+          <Col md={6} lg={4}>
+            <Card 
+              className="h-100 border-success" 
+              style={{ cursor: 'pointer' }} 
+              onClick={() => navigate('/admin/security')}
+            >
+              <Card.Body>
+                <div className="d-flex align-items-center mb-3">
+                  <FaShieldAlt size={32} className="text-danger me-3" />
+                  <div className="flex-grow-1">
+                    <h5 className="mb-0">Security & Audit</h5>
+                    <small className="text-muted">Monitor system activity</small>
+                  </div>
+                  <FaCheckCircle size={20} className="text-success" />
                 </div>
-                <FaTimesCircle size={20} className="text-warning" />
-              </div>
-              <ListGroup variant="flush">
-                <ListGroup.Item>Audit Logs</ListGroup.Item>
-                <ListGroup.Item>Access Control</ListGroup.Item>
-                <ListGroup.Item>Password Policy</ListGroup.Item>
-                <ListGroup.Item>Session Management</ListGroup.Item>
-              </ListGroup>
-              <div className="mt-3 text-center">
-                <Badge bg="warning">Coming Soon</Badge>
-              </div>
-            </Card.Body>
-          </Card>
-        </Col>
+                <ListGroup variant="flush">
+                  <ListGroup.Item action>Audit Logs</ListGroup.Item>
+                  <ListGroup.Item action>Security Logs</ListGroup.Item>
+                  <ListGroup.Item action>Analytics Dashboard</ListGroup.Item>
+                  <ListGroup.Item action>Export Reports</ListGroup.Item>
+                </ListGroup>
+                <div className="mt-3 text-center">
+                  <Badge bg="success">Fully Implemented</Badge>
+                </div>
+              </Card.Body>
+            </Card>
+          </Col>
+        )}
       </Row>
 
       {user?.role === 'Manager' && (

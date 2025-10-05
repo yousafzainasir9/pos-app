@@ -5,6 +5,7 @@ import {
   ProcessPaymentRequest,
   OrderStatus
 } from '@/types';
+import { toast } from 'react-toastify';
 
 interface PaginationParams {
   page?: number;
@@ -86,13 +87,34 @@ class OrderService {
         };
       }
       
-      // If no data or empty array, return mock data
-      console.log('No orders from API, using mock data');
-      return this.getMockOrdersWithPagination(params);
+      // If response format is unexpected, return empty result instead of mock data
+      console.warn('Unexpected API response format:', response);
+      return {
+        data: [],
+        pagination: {
+          currentPage: 1,
+          pageSize: 20,
+          totalCount: 0,
+          totalPages: 0,
+          hasNext: false,
+          hasPrevious: false
+        }
+      };
     } catch (error: any) {
       console.error('Failed to fetch orders:', error.message);
-      // Return mock data based on your database
-      return this.getMockOrdersWithPagination(params);
+      toast.error('Failed to load orders from server');
+      // Return empty result instead of mock data
+      return {
+        data: [],
+        pagination: {
+          currentPage: 1,
+          pageSize: 20,
+          totalCount: 0,
+          totalPages: 0,
+          hasNext: false,
+          hasPrevious: false
+        }
+      };
     }
   }
 

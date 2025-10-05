@@ -117,6 +117,7 @@ builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 builder.Services.AddScoped<IDateTimeService, DateTimeService>();
 builder.Services.AddScoped<IReportService, ReportService>();
 builder.Services.AddScoped<ISecurityService, POS.Infrastructure.Services.Security.SecurityService>();
+builder.Services.AddScoped<IAuditService, AuditService>();
 builder.Services.AddHttpContextAccessor();
 
 // Configure AutoMapper
