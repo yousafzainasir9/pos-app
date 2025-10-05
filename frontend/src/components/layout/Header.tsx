@@ -1,6 +1,6 @@
 import React from 'react';
 import { Navbar, Nav, Container, Badge, Dropdown } from 'react-bootstrap';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { FaShoppingCart, FaUser, FaCashRegister, FaSignOutAlt, FaPalette, FaShieldAlt } from 'react-icons/fa';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCart } from '@/contexts/CartContext';
@@ -13,6 +13,12 @@ const Header: React.FC = () => {
   const { isShiftOpen, currentShift } = useShift();
   const { theme } = useTheme();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Helper function to check if a path is active
+  const isActive = (path: string) => {
+    return location.pathname === path || location.pathname.startsWith(path + '/');
+  };
 
   const handleLogout = async () => {
     await logout();
@@ -31,22 +37,42 @@ const Header: React.FC = () => {
           <Nav className="me-auto">
             {/* POS access for Manager and Cashier only */}
             {user?.role !== 'Admin' && (
-              <Nav.Link as={Link} to="/pos">
+              <Nav.Link 
+                as={Link} 
+                to="/pos"
+                active={isActive('/pos')}
+              >
                 POS
               </Nav.Link>
             )}
-            <Nav.Link as={Link} to="/orders">
+            <Nav.Link 
+              as={Link} 
+              to="/orders"
+              active={isActive('/orders')}
+            >
               Orders
             </Nav.Link>
-            <Nav.Link as={Link} to="/products">
+            <Nav.Link 
+              as={Link} 
+              to="/products"
+              active={isActive('/products')}
+            >
               Products
             </Nav.Link>
             {user?.role === 'Admin' || user?.role === 'Manager' ? (
               <>
-                <Nav.Link as={Link} to="/reports">
+                <Nav.Link 
+                  as={Link} 
+                  to="/reports"
+                  active={isActive('/reports')}
+                >
                   Reports
                 </Nav.Link>
-                <Nav.Link as={Link} to="/admin">
+                <Nav.Link 
+                  as={Link} 
+                  to="/admin"
+                  active={isActive('/admin')}
+                >
                   Admin
                 </Nav.Link>
               </>
@@ -73,7 +99,12 @@ const Header: React.FC = () => {
 
             {/* Cart - Only for Manager and Cashier */}
             {user?.role !== 'Admin' && (
-              <Nav.Link as={Link} to="/cart" className="position-relative me-3">
+              <Nav.Link 
+                as={Link} 
+                to="/cart" 
+                className="position-relative me-3"
+                active={isActive('/cart')}
+              >
                 <FaShoppingCart size={20} />
                 {totalItems > 0 && (
                   <Badge 

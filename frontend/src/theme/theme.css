@@ -198,10 +198,30 @@
 
 .navbar-theme .nav-link {
   color: var(--color-text-light) !important;
+  transition: var(--transition-fast);
+  position: relative;
 }
 
 .navbar-theme .nav-link:hover {
   color: var(--color-logo-accent) !important;
+}
+
+/* Active Nav Link Styling */
+.navbar-theme .nav-link.active {
+  color: var(--color-logo-accent) !important;
+  font-weight: 600;
+}
+
+/* Underline effect for active nav link */
+.navbar-theme .nav-link.active::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background-color: var(--color-logo-accent);
+  border-radius: 2px;
 }
 
 /* Badge Customizations */

@@ -5,6 +5,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 import './theme/theme.css';
+import './styles/modal-scroll.css';
 
 // Contexts
 import { AuthProvider } from './contexts/AuthContext';
