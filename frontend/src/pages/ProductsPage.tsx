@@ -581,15 +581,59 @@ const ProductsPage: React.FC = () => {
                     <Pagination>
                       <Pagination.First onClick={() => setCurrentPage(1)} disabled={currentPage === 1} />
                       <Pagination.Prev onClick={() => setCurrentPage(currentPage - 1)} disabled={currentPage === 1} />
-                      {[...Array(totalPages)].map((_, index) => (
-                        <Pagination.Item
-                          key={index + 1}
-                          active={index + 1 === currentPage}
-                          onClick={() => setCurrentPage(index + 1)}
-                        >
-                          {index + 1}
-                        </Pagination.Item>
-                      ))}
+                      
+                      {/* Show page numbers dynamically */}
+                      {(() => {
+                        const pages = [];
+                        const maxPagesToShow = 5;
+                        let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
+                        let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
+                        
+                        // Adjust start if we're near the end
+                        if (endPage - startPage < maxPagesToShow - 1) {
+                          startPage = Math.max(1, endPage - maxPagesToShow + 1);
+                        }
+                        
+                        // Always show first page if not in range
+                        if (startPage > 1) {
+                          pages.push(
+                            <Pagination.Item key={1} onClick={() => setCurrentPage(1)}>
+                              1
+                            </Pagination.Item>
+                          );
+                          if (startPage > 2) {
+                            pages.push(<Pagination.Ellipsis key="ellipsis-start" disabled />);
+                          }
+                        }
+                        
+                        // Show page numbers in range
+                        for (let page = startPage; page <= endPage; page++) {
+                          pages.push(
+                            <Pagination.Item
+                              key={page}
+                              active={page === currentPage}
+                              onClick={() => setCurrentPage(page)}
+                            >
+                              {page}
+                            </Pagination.Item>
+                          );
+                        }
+                        
+                        // Always show last page if not in range
+                        if (endPage < totalPages) {
+                          if (endPage < totalPages - 1) {
+                            pages.push(<Pagination.Ellipsis key="ellipsis-end" disabled />);
+                          }
+                          pages.push(
+                            <Pagination.Item key={totalPages} onClick={() => setCurrentPage(totalPages)}>
+                              {totalPages}
+                            </Pagination.Item>
+                          );
+                        }
+                        
+                        return pages;
+                      })()}
+                      
                       <Pagination.Next onClick={() => setCurrentPage(currentPage + 1)} disabled={currentPage === totalPages} />
                       <Pagination.Last onClick={() => setCurrentPage(totalPages)} disabled={currentPage === totalPages} />
                     </Pagination>
