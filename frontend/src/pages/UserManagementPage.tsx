@@ -151,6 +151,12 @@ const UserManagementPage: React.FC = () => {
 
     try {
       if (modalMode === 'create') {
+        // Validate PIN format if provided
+        if (formData.pin && !/^\d{4,6}$/.test(formData.pin)) {
+          toast.error('PIN must be 4-6 digits');
+          return;
+        }
+
         const response = await userService.createUser(formData);
         if (response.success) {
           toast.success('User created successfully');
@@ -174,7 +180,11 @@ const UserManagementPage: React.FC = () => {
         }
       }
     } catch (error: any) {
-      toast.error(error.response?.data?.message || `Failed to ${modalMode} user`);
+      if (error.response?.data?.message) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error(`Failed to ${modalMode} user`);
+      }
     }
   };
 
@@ -234,7 +244,24 @@ const UserManagementPage: React.FC = () => {
       return;
     }
 
+    // Validate PIN format
+    if (!/^\d{4,6}$/.test(newPin)) {
+      toast.error('PIN must be 4-6 digits');
+      return;
+    }
+
     try {
+      // First check if PIN is already in use
+      const allUsersResponse = await userService.getUsers({ pageSize: 1000 });
+      if (allUsersResponse.success && allUsersResponse.data) {
+        const usersWithPin = allUsersResponse.data.items.filter(
+          (u: User) => u.id !== selectedUser.id
+        );
+        
+        // We can't directly check PINs, but the backend should validate
+        // For now, we'll let the backend handle the uniqueness check
+      }
+
       const response = await userService.resetPin(selectedUser.id, newPin);
       if (response.success) {
         toast.success('PIN reset successfully');
@@ -242,7 +269,11 @@ const UserManagementPage: React.FC = () => {
         setNewPin('');
       }
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Failed to reset PIN');
+      if (error.response?.data?.message) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error('Failed to reset PIN');
+      }
     }
   };
 
@@ -700,6 +731,9 @@ const UserManagementPage: React.FC = () => {
           <Alert variant="info">
             You are about to reset the PIN for <strong>{selectedUser?.fullName}</strong>
           </Alert>
+          <Alert variant="warning" className="small">
+            <strong>Important:</strong> Each PIN must be unique across all users. The PIN will be used for quick POS login.
+          </Alert>
           <Form.Group>
             <Form.Label>New PIN</Form.Label>
             <Form.Control
@@ -708,7 +742,11 @@ const UserManagementPage: React.FC = () => {
               onChange={(e) => setNewPin(e.target.value)}
               placeholder="Enter 4-6 digit PIN"
               maxLength={6}
+              pattern="\d{4,6}"
             />
+            <Form.Text className="text-muted">
+              Must be 4-6 digits and unique across all users
+            </Form.Text>
           </Form.Group>
         </Modal.Body>
         <Modal.Footer>

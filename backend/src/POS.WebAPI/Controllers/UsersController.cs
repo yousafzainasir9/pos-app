@@ -388,6 +388,19 @@ public class UsersController : ControllerBase
                 });
             }
 
+            // Check if the new PIN already exists for another user
+            var pinExists = await _context.Users
+                .AnyAsync(u => u.Pin == dto.NewPin && u.Id != id);
+
+            if (pinExists)
+            {
+                return BadRequest(new ApiResponse
+                {
+                    Success = false,
+                    Message = "PIN already exists"
+                });
+            }
+
             user.Pin = dto.NewPin;
             await _context.SaveChangesAsync(CancellationToken.None);
 
