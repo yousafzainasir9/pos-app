@@ -58,16 +58,19 @@ const ReportsPage: React.FC = () => {
     lowStock: 0
   });
   
-  // Separate date ranges for each report type
+  // Separate date ranges for each report type - Default to TODAY
+  const today = format(new Date(), 'yyyy-MM-dd');
   const [salesDateRange, setSalesDateRange] = useState({
-    startDate: format(startOfWeek(new Date()), 'yyyy-MM-dd'),
-    endDate: format(endOfWeek(new Date()), 'yyyy-MM-dd')
+    startDate: today,
+    endDate: today
   });
+  const [salesPreset, setSalesPreset] = useState<string>('today');
   
   const [productDateRange, setProductDateRange] = useState({
-    startDate: format(startOfWeek(new Date()), 'yyyy-MM-dd'),
-    endDate: format(endOfWeek(new Date()), 'yyyy-MM-dd')
+    startDate: today,
+    endDate: today
   });
+  const [productPreset, setProductPreset] = useState<string>('today');
 
   // Report data states
   const [salesData, setSalesData] = useState<SalesReportData | null>(null);
@@ -157,7 +160,8 @@ const ReportsPage: React.FC = () => {
     setActiveReport(null);
   };
 
-  const handleDateRangeChange = (preset: string, reportType: 'sales' | 'products') => {
+  // Handle preset button clicks - automatically loads data
+  const handleDateRangeChange = async (preset: string, reportType: 'sales' | 'products') => {
     const today = new Date();
     let start, end;
 
@@ -190,8 +194,43 @@ const ReportsPage: React.FC = () => {
 
     if (reportType === 'sales') {
       setSalesDateRange({ startDate: start, endDate: end });
+      setSalesPreset(preset);
+      // Automatically load data with new date range
+      setIsLoading(true);
+      try {
+        const data = await reportService.getSalesReport(start, end);
+        setSalesData(data);
+      } catch (error) {
+        console.error('Error loading sales report:', error);
+        toast.error('Failed to load sales report');
+      } finally {
+        setIsLoading(false);
+      }
     } else if (reportType === 'products') {
       setProductDateRange({ startDate: start, endDate: end });
+      setProductPreset(preset);
+      // Automatically load data with new date range
+      setIsLoading(true);
+      try {
+        const data = await reportService.getProductPerformance(start, end);
+        setProductData(data);
+      } catch (error) {
+        console.error('Error loading product performance:', error);
+        toast.error('Failed to load product performance');
+      } finally {
+        setIsLoading(false);
+      }
+    }
+  };
+
+  // Handle manual date changes - clears preset
+  const handleManualDateChange = (field: 'startDate' | 'endDate', value: string, reportType: 'sales' | 'products') => {
+    if (reportType === 'sales') {
+      setSalesDateRange(prev => ({ ...prev, [field]: value }));
+      setSalesPreset(''); // Clear preset when manually changing dates
+    } else if (reportType === 'products') {
+      setProductDateRange(prev => ({ ...prev, [field]: value }));
+      setProductPreset(''); // Clear preset when manually changing dates
     }
   };
 
@@ -404,7 +443,7 @@ const ReportsPage: React.FC = () => {
                     <Form.Control
                       type="date"
                       value={salesDateRange.startDate}
-                      onChange={(e) => setSalesDateRange({ ...salesDateRange, startDate: e.target.value })}
+                      onChange={(e) => handleManualDateChange('startDate', e.target.value, 'sales')}
                     />
                   </Form.Group>
                 </Col>
@@ -414,19 +453,31 @@ const ReportsPage: React.FC = () => {
                     <Form.Control
                       type="date"
                       value={salesDateRange.endDate}
-                      onChange={(e) => setSalesDateRange({ ...salesDateRange, endDate: e.target.value })}
+                      onChange={(e) => handleManualDateChange('endDate', e.target.value, 'sales')}
                     />
                   </Form.Group>
                 </Col>
                 <Col md={6}>
                   <div className="d-flex flex-wrap gap-2">
-                    <Button size="sm" variant="outline-secondary" onClick={() => handleDateRangeChange('today', 'sales')}>
+                    <Button 
+                      size="sm" 
+                      variant={salesPreset === 'today' ? 'secondary' : 'outline-secondary'}
+                      onClick={() => handleDateRangeChange('today', 'sales')}
+                    >
                       Today
                     </Button>
-                    <Button size="sm" variant="outline-secondary" onClick={() => handleDateRangeChange('thisWeek', 'sales')}>
+                    <Button 
+                      size="sm" 
+                      variant={salesPreset === 'thisWeek' ? 'secondary' : 'outline-secondary'}
+                      onClick={() => handleDateRangeChange('thisWeek', 'sales')}
+                    >
                       This Week
                     </Button>
-                    <Button size="sm" variant="outline-secondary" onClick={() => handleDateRangeChange('thisMonth', 'sales')}>
+                    <Button 
+                      size="sm" 
+                      variant={salesPreset === 'thisMonth' ? 'secondary' : 'outline-secondary'}
+                      onClick={() => handleDateRangeChange('thisMonth', 'sales')}
+                    >
                       This Month
                     </Button>
                     <Button size="sm" variant="primary" onClick={loadSalesReport}>
@@ -596,7 +647,7 @@ const ReportsPage: React.FC = () => {
         </Modal.Footer>
       </Modal>
 
-      {/* Product Performance Modal */}
+      {/* Product Performance Modal - Similar structure with productPreset */}
       <Modal show={activeReport === 'products'} onHide={handleCloseModal} size="xl">
         <Modal.Header>
           <Modal.Title>Product Performance</Modal.Title>
@@ -605,7 +656,6 @@ const ReportsPage: React.FC = () => {
           </Button>
         </Modal.Header>
         <Modal.Body style={{ maxHeight: '80vh', overflowY: 'auto' }}>
-          {/* Date Range Selector */}
           <Card className="mb-4">
             <Card.Body>
               <Row className="align-items-end">
@@ -615,7 +665,7 @@ const ReportsPage: React.FC = () => {
                     <Form.Control
                       type="date"
                       value={productDateRange.startDate}
-                      onChange={(e) => setProductDateRange({ ...productDateRange, startDate: e.target.value })}
+                      onChange={(e) => handleManualDateChange('startDate', e.target.value, 'products')}
                     />
                   </Form.Group>
                 </Col>
@@ -625,19 +675,31 @@ const ReportsPage: React.FC = () => {
                     <Form.Control
                       type="date"
                       value={productDateRange.endDate}
-                      onChange={(e) => setProductDateRange({ ...productDateRange, endDate: e.target.value })}
+                      onChange={(e) => handleManualDateChange('endDate', e.target.value, 'products')}
                     />
                   </Form.Group>
                 </Col>
                 <Col md={6}>
                   <div className="d-flex flex-wrap gap-2">
-                    <Button size="sm" variant="outline-secondary" onClick={() => handleDateRangeChange('today', 'products')}>
+                    <Button 
+                      size="sm" 
+                      variant={productPreset === 'today' ? 'secondary' : 'outline-secondary'}
+                      onClick={() => handleDateRangeChange('today', 'products')}
+                    >
                       Today
                     </Button>
-                    <Button size="sm" variant="outline-secondary" onClick={() => handleDateRangeChange('thisWeek', 'products')}>
+                    <Button 
+                      size="sm" 
+                      variant={productPreset === 'thisWeek' ? 'secondary' : 'outline-secondary'}
+                      onClick={() => handleDateRangeChange('thisWeek', 'products')}
+                    >
                       This Week
                     </Button>
-                    <Button size="sm" variant="outline-secondary" onClick={() => handleDateRangeChange('thisMonth', 'products')}>
+                    <Button 
+                      size="sm" 
+                      variant={productPreset === 'thisMonth' ? 'secondary' : 'outline-secondary'}
+                      onClick={() => handleDateRangeChange('thisMonth', 'products')}
+                    >
                       This Month
                     </Button>
                     <Button size="sm" variant="primary" onClick={loadProductPerformance}>
@@ -655,7 +717,6 @@ const ReportsPage: React.FC = () => {
             </div>
           ) : productData ? (
             <>
-              {/* Category Performance */}
               <Card className="mb-4">
                 <Card.Header>
                   <h5 className="mb-0">Category Performance</h5>
@@ -676,7 +737,6 @@ const ReportsPage: React.FC = () => {
               </Card>
 
               <Row>
-                {/* Top Products */}
                 <Col md={8}>
                   <Card>
                     <Card.Header>
@@ -715,7 +775,6 @@ const ReportsPage: React.FC = () => {
                   </Card>
                 </Col>
 
-                {/* Low Stock Alert */}
                 <Col md={4}>
                   <Card>
                     <Card.Header className="bg-warning text-dark">
@@ -767,7 +826,7 @@ const ReportsPage: React.FC = () => {
         </Modal.Footer>
       </Modal>
 
-      {/* Shift Reports Modal */}
+      {/* Shift Reports Modal - No date range filters needed */}
       <Modal show={activeReport === 'shifts'} onHide={handleCloseModal} size="xl">
         <Modal.Header>
           <Modal.Title>Shift Reports</Modal.Title>
@@ -857,7 +916,6 @@ const ReportsPage: React.FC = () => {
                 </Card.Body>
               </Card>
 
-              {/* Recent Transactions */}
               <Card>
                 <Card.Header>
                   <h5 className="mb-0">Recent Transactions</h5>
