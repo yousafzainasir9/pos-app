@@ -388,7 +388,7 @@ public class UsersController : ControllerBase
                 });
             }
 
-            user.Pin = BCrypt.Net.BCrypt.HashPassword(dto.NewPin);
+            user.Pin = dto.NewPin;
             await _context.SaveChangesAsync(CancellationToken.None);
 
             return Ok(ApiResponse.SuccessResponse("PIN reset successfully"));
