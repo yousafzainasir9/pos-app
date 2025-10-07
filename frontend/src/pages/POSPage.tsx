@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Row, Col, Card, Button, Form, InputGroup, Badge } from 'react-bootstrap';
-import { FaSearch, FaBarcode, FaShoppingCart, FaTh, FaList, FaImage } from 'react-icons/fa';
+import { FaSearch, FaBarcode, FaShoppingCart, FaTh, FaList, FaImage, FaInfoCircle } from 'react-icons/fa';
 import { useCart } from '@/contexts/CartContext';
 import { useShift } from '@/contexts/ShiftContext';
 import { Product, Category } from '@/types';
@@ -74,7 +74,7 @@ const POSPage: React.FC = () => {
     try {
       const product = await productService.getProductByBarcode(barcode);
       if (product) {
-        handleProductClick(product);
+        handleQuickAddToCart(product);
         setBarcode('');
       }
     } catch (error) {
@@ -82,7 +82,31 @@ const POSPage: React.FC = () => {
     }
   };
 
-  const handleProductClick = (product: Product) => {
+  // Quick add to cart with 1 quantity
+  const handleQuickAddToCart = (product: Product) => {
+    if (!isShiftOpen) {
+      toast.error('Please open a shift first');
+      navigate('/shift');
+      return;
+    }
+
+    // Check stock
+    if (product.trackInventory && product.stockQuantity < 1) {
+      toast.error('Product is out of stock');
+      return;
+    }
+
+    addItem(product, 1);
+    toast.success(`${product.name} added to cart`, {
+      position: 'bottom-right',
+      autoClose: 2000
+    });
+  };
+
+  // Open details modal
+  const handleViewDetails = (product: Product, e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent card click
+    
     if (!isShiftOpen) {
       toast.error('Please open a shift first');
       navigate('/shift');
@@ -119,15 +143,6 @@ const POSPage: React.FC = () => {
 
   const getSelectedCategory = () => {
     return categories.find(c => c.id === selectedCategory);
-  };
-
-  const getProductImage = (product: Product) => {
-    // Return product image URL or a placeholder
-    if (product.imageUrl) {
-      return product.imageUrl;
-    }
-    // Use a placeholder image service or default image
-    return `https://via.placeholder.com/300x200/f8f9fa/6c757d?text=${encodeURIComponent(product.name)}`;
   };
 
   return (
@@ -267,16 +282,16 @@ const POSPage: React.FC = () => {
             <Col key={product.id} xs={6} md={4} lg={3}>
               <Card 
                 className="h-100 product-card shadow-sm"
-                role="button"
-                onClick={() => handleProductClick(product)}
-                style={{ cursor: isShiftOpen ? 'pointer' : 'not-allowed' }}
               >
-                <div className="product-image-container" style={{ 
-                  height: '180px', 
-                  overflow: 'hidden',
-                  backgroundColor: '#f8f9fa',
-                  position: 'relative'
-                }}>
+                <div 
+                  className="product-image-container" 
+                  style={{ 
+                    height: '180px', 
+                    overflow: 'hidden',
+                    backgroundColor: '#f8f9fa',
+                    position: 'relative'
+                  }}
+                >
                   {product.imageUrl ? (
                     <Card.Img 
                       variant="top" 
@@ -324,7 +339,7 @@ const POSPage: React.FC = () => {
                     {product.subcategoryName && ` / ${product.subcategoryName}`}
                   </div>
                   <div className="mt-auto">
-                    <div className="d-flex justify-content-between align-items-center">
+                    <div className="d-flex justify-content-between align-items-center mb-2">
                       <div className="fs-5 fw-bold text-primary">
                         ${product.priceIncGst.toFixed(2)}
                       </div>
@@ -343,11 +358,36 @@ const POSPage: React.FC = () => {
                       </div>
                     )}
                     {product.barcode && (
-                      <div className="text-muted small">
+                      <div className="text-muted small mb-2">
                         <FaBarcode className="me-1" size={10} />
                         {product.barcode}
                       </div>
                     )}
+                    
+                    {/* Action Buttons */}
+                    <div className="d-flex gap-2 mt-2">
+                      <Button
+                        variant="success"
+                        size="sm"
+                        style={{ width: '50%' }}
+                        onClick={() => handleQuickAddToCart(product)}
+                        disabled={!isShiftOpen || (product.trackInventory && product.stockQuantity === 0)}
+                      >
+                        <FaShoppingCart className="me-1" size={12} />
+                        Single
+                      </Button>
+                      <Button
+                        variant="primary"
+                        size="sm"
+                        style={{ width: '50%' }}
+                        onClick={(e) => handleViewDetails(product, e)}
+                        disabled={!isShiftOpen}
+                        title="Add Multiple Items"
+                      >
+                        <FaShoppingCart className="me-1" size={12} />
+                        Multiple
+                      </Button>
+                    </div>
                   </div>
                 </Card.Body>
               </Card>
@@ -358,17 +398,15 @@ const POSPage: React.FC = () => {
         <div className="list-view">
           {products.map(product => (
             <Card key={product.id} className="mb-2 shadow-sm">
-              <Card.Body 
-                className="d-flex align-items-center py-2"
-                role="button"
-                onClick={() => handleProductClick(product)}
-                style={{ cursor: isShiftOpen ? 'pointer' : 'not-allowed' }}
-              >
-                <div className="product-image-thumbnail me-3" style={{
-                  width: '60px',
-                  height: '60px',
-                  flexShrink: 0
-                }}>
+              <Card.Body className="d-flex align-items-center py-2">
+                <div 
+                  className="product-image-thumbnail me-3" 
+                  style={{
+                    width: '60px',
+                    height: '60px',
+                    flexShrink: 0
+                  }}
+                >
                   {product.imageUrl ? (
                     <img 
                       src={product.imageUrl}
@@ -407,7 +445,7 @@ const POSPage: React.FC = () => {
                     )}
                   </small>
                 </div>
-                <div className="text-end">
+                <div className="text-end me-3">
                   <div className="fs-5 fw-bold text-primary">
                     ${product.priceIncGst.toFixed(2)}
                   </div>
@@ -418,6 +456,28 @@ const POSPage: React.FC = () => {
                       Stock: {product.stockQuantity}
                     </Badge>
                   )}
+                </div>
+                <div className="d-flex flex-column gap-2">
+                  <Button
+                    variant="success"
+                    size="sm"
+                    onClick={() => handleQuickAddToCart(product)}
+                    disabled={!isShiftOpen || (product.trackInventory && product.stockQuantity === 0)}
+                    style={{ minWidth: '110px' }}
+                  >
+                    <FaShoppingCart className="me-1" size={12} />
+                    Single Item
+                  </Button>
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    onClick={(e) => handleViewDetails(product, e)}
+                    disabled={!isShiftOpen}
+                    style={{ minWidth: '110px' }}
+                  >
+                    <FaShoppingCart className="me-1" size={12} />
+                    Multiple Items
+                  </Button>
                 </div>
               </Card.Body>
             </Card>

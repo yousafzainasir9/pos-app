@@ -12,13 +12,8 @@
 }
 
 .product-card:hover {
-  transform: translateY(-5px);
   box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
   border-color: #0d6efd;
-}
-
-.product-card:active {
-  transform: translateY(-2px);
 }
 
 /* Barcode display styles */
@@ -48,12 +43,20 @@
   background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
 }
 
-.product-image-container img {
-  transition: transform 0.3s ease;
+/* Product Action Buttons */
+.product-card .btn-success,
+.product-card .btn-primary {
+  transition: all 0.2s ease;
 }
 
-.product-card:hover .product-image-container img {
-  transform: scale(1.05);
+.product-card .btn-success:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(25, 135, 84, 0.3);
+}
+
+.product-card .btn-primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(13, 110, 253, 0.3);
 }
 
 /* Product Thumbnail in List View */
@@ -61,14 +64,6 @@
   border: 1px solid #dee2e6;
   border-radius: 4px;
   overflow: hidden;
-}
-
-.product-image-thumbnail img {
-  transition: transform 0.2s ease;
-}
-
-.list-view .card:hover .product-image-thumbnail img {
-  transform: scale(1.1);
 }
 
 /* List View Cards */
@@ -80,6 +75,21 @@
 .list-view .card:hover {
   border-left-color: #0d6efd;
   background-color: #f8f9fa;
+}
+
+/* List View Button Container */
+.list-view .btn {
+  font-size: 0.875rem;
+}
+
+.list-view .btn-success:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(25, 135, 84, 0.3);
+}
+
+.list-view .btn-primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(13, 110, 253, 0.3);
 }
 
 /* Category and Subcategory Buttons */
@@ -118,6 +128,28 @@
   border-width: 0.3em;
 }
 
+/* Button Icons Alignment */
+.btn svg {
+  vertical-align: middle;
+}
+
+/* Quick Add Animation */
+@keyframes quickAdd {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(0.95);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.product-card .btn-success:active:not(:disabled) {
+  animation: quickAdd 0.2s ease;
+}
+
 /* Responsive Adjustments */
 @media (max-width: 768px) {
   .product-image-container {
@@ -135,6 +167,17 @@
   .product-card .fs-5 {
     font-size: 1.1rem !important;
   }
+
+  /* Adjust button sizes on mobile */
+  .product-card .btn-sm {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+  }
+
+  .list-view .btn {
+    font-size: 0.75rem;
+    min-width: 85px !important;
+  }
 }
 
 /* Dark mode support (if you add it later) */
@@ -151,23 +194,6 @@
   .list-view .card:hover {
     background-color: #2d3238;
   }
-}
-
-/* Animation for adding to cart */
-@keyframes addToCart {
-  0% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(0.95);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
-
-.product-card:active {
-  animation: addToCart 0.3s ease;
 }
 
 /* Custom scrollbar for product list */
@@ -189,3 +215,17 @@
 .pos-page::-webkit-scrollbar-thumb:hover {
   background: #555;
 }
+
+/* Tooltip for disabled buttons */
+.btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Focus states for accessibility */
+.btn:focus-visible {
+  outline: 2px solid #0d6efd;
+  outline-offset: 2px;
+}
+
+
