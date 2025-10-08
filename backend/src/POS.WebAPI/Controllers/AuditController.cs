@@ -130,7 +130,7 @@ public class AuditController : ControllerBase
         CancellationToken cancellationToken)
     {
         var csv = await _auditService.ExportAuditLogsAsync(request, cancellationToken);
-        return File(csv, "text/csv", $"audit-logs-{DateTime.UtcNow:yyyyMMddHHmmss}.csv");
+        return File(csv, "text/csv", $"audit-logs-{DateTime.Now:yyyyMMddHHmmss}.csv");
     }
 
     /// <summary>
@@ -143,7 +143,7 @@ public class AuditController : ControllerBase
         CancellationToken cancellationToken)
     {
         var csv = await _auditService.ExportSecurityLogsAsync(request, cancellationToken);
-        return File(csv, "text/csv", $"security-logs-{DateTime.UtcNow:yyyyMMddHHmmss}.csv");
+        return File(csv, "text/csv", $"security-logs-{DateTime.Now:yyyyMMddHHmmss}.csv");
     }
 
     /// <summary>

@@ -1,33 +1,35 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using POS.Domain.Entities;
+using POS.Domain.Entities.Settings;
 
 namespace POS.Infrastructure.Data.Configurations;
 
-public class CategoryConfiguration : IEntityTypeConfiguration<Category>
+public class SystemSettingConfiguration : IEntityTypeConfiguration<SystemSetting>
 {
-    public void Configure(EntityTypeBuilder<Category> builder)
+    public void Configure(EntityTypeBuilder<SystemSetting> builder)
     {
-        builder.ToTable("Categories");
+        builder.ToTable("SystemSettings");
 
         builder.HasKey(e => e.Id);
 
-        builder.Property(e => e.Id)
-            .ValueGeneratedOnAdd();
-
-        builder.Property(e => e.Name)
+        builder.Property(e => e.Key)
             .IsRequired()
             .HasMaxLength(100);
 
-        builder.Property(e => e.Slug)
-            .IsRequired()
-            .HasMaxLength(100);
-
-        builder.HasIndex(e => e.Slug)
+        builder.HasIndex(e => e.Key)
             .IsUnique();
+
+        builder.Property(e => e.Value)
+            .IsRequired();
 
         builder.Property(e => e.Description)
             .HasMaxLength(500);
+
+        builder.Property(e => e.Category)
+            .HasMaxLength(50);
+
+        builder.Property(e => e.DataType)
+            .HasMaxLength(20);
 
         builder.Property(e => e.CreatedOn)
             .HasColumnType("datetime2")
@@ -38,11 +40,5 @@ public class CategoryConfiguration : IEntityTypeConfiguration<Category>
             
         builder.Property(e => e.DeletedOn)
             .HasColumnType("datetime2");
-
-        // Relationships
-        builder.HasMany(e => e.Subcategories)
-            .WithOne(e => e.Category)
-            .HasForeignKey(e => e.CategoryId)
-            .OnDelete(DeleteBehavior.Restrict);
     }
 }

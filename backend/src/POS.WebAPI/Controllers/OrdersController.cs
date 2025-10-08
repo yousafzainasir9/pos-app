@@ -285,7 +285,7 @@ public class OrdersController : ControllerBase
             var order = new Order
             {
                 OrderNumber = orderNumber,
-                OrderDate = DateTime.UtcNow,
+                OrderDate = DateTime.Now,
                 Status = OrderStatus.Pending,
                 OrderType = createOrderDto.OrderType,
                 TableNumber = createOrderDto.TableNumber,
@@ -358,7 +358,7 @@ public class OrdersController : ControllerBase
                         Quantity = -itemDto.Quantity,
                         StockBefore = product.StockQuantity + itemDto.Quantity,
                         StockAfter = product.StockQuantity,
-                        TransactionDate = DateTime.UtcNow,
+                        TransactionDate = DateTime.Now,
                         UserId = currentUserId,
                         Order = order,
                         Notes = $"Sale - Order #{orderNumber}"
@@ -419,7 +419,7 @@ public class OrdersController : ControllerBase
                 ReferenceNumber = paymentDto.ReferenceNumber,
                 CardLastFourDigits = paymentDto.CardLastFourDigits,
                 CardType = paymentDto.CardType,
-                PaymentDate = DateTime.UtcNow,
+                PaymentDate = DateTime.Now,
                 ProcessedByUserId = currentUserId,
                 Notes = paymentDto.Notes
             };
@@ -432,7 +432,7 @@ public class OrdersController : ControllerBase
             if (order.PaidAmount >= order.TotalAmount)
             {
                 order.Status = OrderStatus.Completed;
-                order.CompletedAt = DateTime.UtcNow;
+                order.CompletedAt = DateTime.Now;
                 order.ChangeAmount = order.PaidAmount - order.TotalAmount;
             }
             else
@@ -500,7 +500,7 @@ public class OrdersController : ControllerBase
                         Quantity = item.Quantity,
                         StockBefore = item.Product.StockQuantity - item.Quantity,
                         StockAfter = item.Product.StockQuantity,
-                        TransactionDate = DateTime.UtcNow,
+                        TransactionDate = DateTime.Now,
                         UserId = currentUserId,
                         OrderId = order.Id,
                         Notes = $"Void - Order #{order.OrderNumber}"
@@ -512,7 +512,7 @@ public class OrdersController : ControllerBase
 
             // Update order status
             order.Status = OrderStatus.Cancelled;
-            order.CancelledAt = DateTime.UtcNow;
+            order.CancelledAt = DateTime.Now;
             order.CancellationReason = voidDto.Reason;
 
             _unitOfWork.Repository<Order>().Update(order);

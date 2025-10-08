@@ -73,7 +73,7 @@ public class ShiftsController : ControllerBase
             var shift = new Shift
             {
                 ShiftNumber = shiftNumber,
-                StartTime = DateTime.UtcNow,
+                StartTime = DateTime.Now,
                 StartingCash = request.StartingCash,
                 Status = ShiftStatus.Open,
                 UserId = currentUserId,
@@ -152,7 +152,7 @@ public class ShiftsController : ControllerBase
                 .Sum(p => p.Amount);
 
             // Update shift
-            shift.EndTime = DateTime.UtcNow;
+            shift.EndTime = DateTime.Now;
             shift.EndingCash = request.EndingCash;
             shift.CashSales = cashSales;
             shift.CardSales = cardSales;

@@ -85,8 +85,8 @@ public class AuthController : ControllerBase
 
             // Update user with refresh token hash
             user.RefreshToken = refreshTokenHash;
-            user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(AuthConstants.RefreshTokenExpiryDays);
-            user.LastLoginAt = DateTime.UtcNow;
+            user.RefreshTokenExpiryTime = DateTime.Now.AddDays(AuthConstants.RefreshTokenExpiryDays);
+            user.LastLoginAt = DateTime.Now;
 
             _unitOfWork.Repository<User>().Update(user);
             await _unitOfWork.SaveChangesAsync();
@@ -177,8 +177,8 @@ public class AuthController : ControllerBase
 
             // Update user with refresh token hash
             user.RefreshToken = refreshTokenHash;
-            user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(AuthConstants.RefreshTokenExpiryDays);
-            user.LastLoginAt = DateTime.UtcNow;
+            user.RefreshTokenExpiryTime = DateTime.Now.AddDays(AuthConstants.RefreshTokenExpiryDays);
+            user.LastLoginAt = DateTime.Now;
 
             _unitOfWork.Repository<User>().Update(user);
             await _unitOfWork.SaveChangesAsync();
@@ -252,7 +252,7 @@ public class AuthController : ControllerBase
                 .Include(u => u.Store)
                 .FirstOrDefaultAsync(u => u.RefreshToken == refreshTokenHash);
 
-            if (user == null || user.RefreshTokenExpiryTime <= DateTime.UtcNow)
+            if (user == null || user.RefreshTokenExpiryTime <= DateTime.Now)
             {
                 _logger.LogWarning("Invalid or expired refresh token attempted");
                 throw AuthenticationException.InvalidRefreshToken();
@@ -264,7 +264,7 @@ public class AuthController : ControllerBase
 
             // Update user with new refresh token hash
             user.RefreshToken = newRefreshTokenHash;
-            user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(AuthConstants.RefreshTokenExpiryDays);
+            user.RefreshTokenExpiryTime = DateTime.Now.AddDays(AuthConstants.RefreshTokenExpiryDays);
 
             _unitOfWork.Repository<User>().Update(user);
             await _unitOfWork.SaveChangesAsync();
@@ -388,7 +388,7 @@ public class AuthController : ControllerBase
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             Subject = new ClaimsIdentity(claims),
-            Expires = DateTime.UtcNow.AddMinutes(AuthConstants.AccessTokenExpiryMinutes),
+            Expires = DateTime.Now.AddMinutes(AuthConstants.AccessTokenExpiryMinutes),
             SigningCredentials = new SigningCredentials(
                 new SymmetricSecurityKey(key), 
                 SecurityAlgorithms.HmacSha256Signature),
@@ -405,7 +405,7 @@ public class AuthController : ControllerBase
     {
         try
         {
-            securityLog.Timestamp = DateTime.UtcNow;
+            securityLog.Timestamp = DateTime.Now;
             securityLog.IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
             securityLog.UserAgent = HttpContext.Request.Headers["User-Agent"].ToString();
             

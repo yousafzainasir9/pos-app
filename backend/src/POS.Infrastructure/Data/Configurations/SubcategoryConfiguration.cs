@@ -4,16 +4,13 @@ using POS.Domain.Entities;
 
 namespace POS.Infrastructure.Data.Configurations;
 
-public class CategoryConfiguration : IEntityTypeConfiguration<Category>
+public class SubcategoryConfiguration : IEntityTypeConfiguration<Subcategory>
 {
-    public void Configure(EntityTypeBuilder<Category> builder)
+    public void Configure(EntityTypeBuilder<Subcategory> builder)
     {
-        builder.ToTable("Categories");
+        builder.ToTable("Subcategories");
 
         builder.HasKey(e => e.Id);
-
-        builder.Property(e => e.Id)
-            .ValueGeneratedOnAdd();
 
         builder.Property(e => e.Name)
             .IsRequired()
@@ -23,10 +20,13 @@ public class CategoryConfiguration : IEntityTypeConfiguration<Category>
             .IsRequired()
             .HasMaxLength(100);
 
-        builder.HasIndex(e => e.Slug)
+        builder.HasIndex(e => new { e.CategoryId, e.Slug })
             .IsUnique();
 
         builder.Property(e => e.Description)
+            .HasMaxLength(500);
+
+        builder.Property(e => e.ImageUrl)
             .HasMaxLength(500);
 
         builder.Property(e => e.CreatedOn)
@@ -40,9 +40,14 @@ public class CategoryConfiguration : IEntityTypeConfiguration<Category>
             .HasColumnType("datetime2");
 
         // Relationships
-        builder.HasMany(e => e.Subcategories)
-            .WithOne(e => e.Category)
+        builder.HasOne(e => e.Category)
+            .WithMany(e => e.Subcategories)
             .HasForeignKey(e => e.CategoryId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasMany(e => e.Products)
+            .WithOne(e => e.Subcategory)
+            .HasForeignKey(e => e.SubcategoryId)
             .OnDelete(DeleteBehavior.Restrict);
     }
 }

@@ -221,9 +221,9 @@ public class AuditService : IAuditService
 
     public async Task<AuditStatisticsDto> GetAuditStatisticsAsync(int days = 30, CancellationToken cancellationToken = default)
     {
-        var startDate = DateTime.UtcNow.AddDays(-days);
-        var last24Hours = DateTime.UtcNow.AddHours(-24);
-        var last7Days = DateTime.UtcNow.AddDays(-7);
+        var startDate = DateTime.Now.AddDays(-days);
+        var last24Hours = DateTime.Now.AddHours(-24);
+        var last7Days = DateTime.Now.AddDays(-7);
 
         var statistics = new AuditStatisticsDto
         {

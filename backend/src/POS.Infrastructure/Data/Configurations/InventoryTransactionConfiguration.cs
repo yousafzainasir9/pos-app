@@ -8,6 +8,20 @@ public class InventoryTransactionConfiguration : IEntityTypeConfiguration<Invent
 {
     public void Configure(EntityTypeBuilder<InventoryTransaction> builder)
     {
+        builder.Property(e => e.TransactionDate)
+            .HasColumnType("datetime2")
+            .HasDefaultValueSql("GETDATE()");
+
+        builder.Property(e => e.CreatedOn)
+            .HasColumnType("datetime2")
+            .HasDefaultValueSql("GETDATE()");
+            
+        builder.Property(e => e.ModifiedOn)
+            .HasColumnType("datetime2");
+            
+        builder.Property(e => e.DeletedOn)
+            .HasColumnType("datetime2");
+
         builder.Property(e => e.UnitCost)
             .HasPrecision(18, 2);
 

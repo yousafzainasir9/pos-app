@@ -51,7 +51,7 @@ public class HealthController : ControllerBase
             var response = new
             {
                 Status = canConnect ? "Healthy" : "Unhealthy",
-                Timestamp = DateTime.UtcNow,
+                Timestamp = DateTime.Now,
                 Environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT"),
                 Database = new
                 {
@@ -123,6 +123,6 @@ public class HealthController : ControllerBase
     public IActionResult Live()
     {
         // Simple liveness check - if the API can respond, it's alive
-        return Ok(new { Status = "Alive", Timestamp = DateTime.UtcNow });
+        return Ok(new { Status = "Alive", Timestamp = DateTime.Now });
     }
 }

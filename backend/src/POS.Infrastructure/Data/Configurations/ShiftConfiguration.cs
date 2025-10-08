@@ -8,6 +8,23 @@ public class ShiftConfiguration : IEntityTypeConfiguration<Shift>
 {
     public void Configure(EntityTypeBuilder<Shift> builder)
     {
+        builder.Property(e => e.StartTime)
+            .HasColumnType("datetime2")
+            .HasDefaultValueSql("GETDATE()");
+
+        builder.Property(e => e.EndTime)
+            .HasColumnType("datetime2");
+
+        builder.Property(e => e.CreatedOn)
+            .HasColumnType("datetime2")
+            .HasDefaultValueSql("GETDATE()");
+            
+        builder.Property(e => e.ModifiedOn)
+            .HasColumnType("datetime2");
+            
+        builder.Property(e => e.DeletedOn)
+            .HasColumnType("datetime2");
+
         builder.Property(e => e.StartingCash)
             .HasPrecision(18, 2);
 

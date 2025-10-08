@@ -53,8 +53,21 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(e => e.RefreshToken)
             .HasMaxLength(500);
 
+        builder.Property(e => e.LastLoginAt)
+            .HasColumnType("datetime2");
+
+        builder.Property(e => e.RefreshTokenExpiryTime)
+            .HasColumnType("datetime2");
+
         builder.Property(e => e.CreatedOn)
-            .HasDefaultValueSql("GETUTCDATE()");
+            .HasColumnType("datetime2")
+            .HasDefaultValueSql("GETDATE()");
+            
+        builder.Property(e => e.ModifiedOn)
+            .HasColumnType("datetime2");
+            
+        builder.Property(e => e.DeletedOn)
+            .HasColumnType("datetime2");
 
         // Computed column
         builder.Ignore(e => e.FullName);

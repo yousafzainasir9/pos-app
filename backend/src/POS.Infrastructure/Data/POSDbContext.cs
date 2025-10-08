@@ -52,6 +52,17 @@ public class POSDbContext : DbContext, IApplicationDbContext
             warnings.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
     }
 
+    protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
+    {
+        // Configure all DateTime properties to be stored as datetime2 (more precise)
+        // Using local server time for single-timezone application
+        configurationBuilder.Properties<DateTime>()
+            .HaveColumnType("datetime2");
+            
+        configurationBuilder.Properties<DateTime?>()
+            .HaveColumnType("datetime2");
+    }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -94,7 +105,7 @@ public class POSDbContext : DbContext, IApplicationDbContext
         {
             entry.State = EntityState.Modified;
             entry.Entity.IsDeleted = true;
-            entry.Entity.DeletedOn = DateTime.UtcNow;
+            entry.Entity.DeletedOn = DateTime.Now;
         }
     }
 }

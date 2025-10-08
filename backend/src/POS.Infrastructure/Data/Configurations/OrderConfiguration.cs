@@ -56,8 +56,25 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
         builder.Property(e => e.CancellationReason)
             .HasMaxLength(500);
 
+        builder.Property(e => e.OrderDate)
+            .HasColumnType("datetime2")
+            .HasDefaultValueSql("GETDATE()");
+
+        builder.Property(e => e.CompletedAt)
+            .HasColumnType("datetime2");
+
+        builder.Property(e => e.CancelledAt)
+            .HasColumnType("datetime2");
+
         builder.Property(e => e.CreatedOn)
-            .HasDefaultValueSql("GETUTCDATE()");
+            .HasColumnType("datetime2")
+            .HasDefaultValueSql("GETDATE()");
+            
+        builder.Property(e => e.ModifiedOn)
+            .HasColumnType("datetime2");
+            
+        builder.Property(e => e.DeletedOn)
+            .HasColumnType("datetime2");
 
         // Relationships
         builder.HasOne(e => e.Customer)

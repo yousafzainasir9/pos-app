@@ -8,6 +8,16 @@ public class OrderItemConfiguration : IEntityTypeConfiguration<OrderItem>
 {
     public void Configure(EntityTypeBuilder<OrderItem> builder)
     {
+        builder.Property(e => e.CreatedOn)
+            .HasColumnType("datetime2")
+            .HasDefaultValueSql("GETDATE()");
+            
+        builder.Property(e => e.ModifiedOn)
+            .HasColumnType("datetime2");
+            
+        builder.Property(e => e.DeletedOn)
+            .HasColumnType("datetime2");
+
         builder.Property(e => e.UnitPriceExGst)
             .HasPrecision(18, 2);
 
