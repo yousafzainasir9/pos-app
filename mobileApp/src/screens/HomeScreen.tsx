@@ -158,11 +158,7 @@ const HomeScreen = () => {
 
       {/* Categories */}
       <View style={styles.categoriesContainer}>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.categoriesScroll}
-        >
+        <View style={styles.categoriesWrap}>
           {/* All Categories */}
           <View key="category-all">
             {renderCategoryChip({ item: { id: null, name: 'All' } })}
@@ -177,7 +173,7 @@ const HomeScreen = () => {
                 {renderCategoryChip({ item: category })}
               </View>
             ))}
-        </ScrollView>
+        </View>
       </View>
 
       {/* Products Grid */}
@@ -262,19 +258,21 @@ const styles = StyleSheet.create({
   },
   categoriesContainer: {
     backgroundColor: '#fff',
-    paddingVertical: spacing.sm,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.md,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
   },
-  categoriesScroll: {
-    paddingHorizontal: spacing.md,
+  categoriesWrap: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
   },
   categoryChip: {
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     borderRadius: 20,
     backgroundColor: '#f5f5f5',
-    marginRight: spacing.sm,
     borderWidth: 1,
     borderColor: colors.border,
   },
