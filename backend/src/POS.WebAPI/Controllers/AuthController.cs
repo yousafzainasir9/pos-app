@@ -152,22 +152,36 @@ public class AuthController : ControllerBase
     {
         try
         {
-            var user = await _unitOfWork.Repository<User>().Query()
-                .Include(u => u.Store)
-                .FirstOrDefaultAsync(u => u.Pin == request.Pin && u.IsActive && u.StoreId == request.StoreId);
+            User? user = null;
+            
+            // If StoreId is provided, lookup by PIN and StoreId (for staff)
+            // If StoreId is 0 or not provided, lookup by PIN only (for customers)
+            if (request.StoreId > 0)
+            {
+                user = await _unitOfWork.Repository<User>().Query()
+                    .Include(u => u.Store)
+                    .FirstOrDefaultAsync(u => u.Pin == request.Pin && u.IsActive && u.StoreId == request.StoreId);
+            }
+            else
+            {
+                // Customer PIN login - no store required
+                user = await _unitOfWork.Repository<User>().Query()
+                    .Include(u => u.Store)
+                    .FirstOrDefaultAsync(u => u.Pin == request.Pin && u.IsActive && u.Role == UserRole.Customer);
+            }
 
             if (user == null)
             {
-                _logger.LogWarning("Failed PIN login attempt for store: {StoreId}", request.StoreId);
+                _logger.LogWarning("Failed PIN login attempt for PIN: {Pin}", request.Pin);
                 
                 // Log failed PIN login
                 await LogSecurityEventAsync(new SecurityLog
                 {
                     EventType = SecurityEventType.LoginFailed,
                     Severity = SecuritySeverity.Warning,
-                    Description = $"Failed PIN login attempt for store: {request.StoreId}",
+                    Description = $"Failed PIN login attempt",
                     Success = false,
-                    StoreId = request.StoreId
+                    StoreId = request.StoreId > 0 ? request.StoreId : null
                 });
                 
                 throw AuthenticationException.InvalidPin();

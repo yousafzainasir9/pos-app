@@ -12,6 +12,7 @@ public class PinLoginRequestValidator : AbstractValidator<PinLoginRequestDto>
             .Matches(@"^\d{4}$").WithMessage("PIN must be exactly 4 digits");
 
         RuleFor(x => x.StoreId)
-            .GreaterThan(0).WithMessage("Valid Store ID is required");
+            .GreaterThanOrEqualTo(0).WithMessage("Store ID must be 0 or greater");
+            // StoreId = 0 for customers, > 0 for staff
     }
 }

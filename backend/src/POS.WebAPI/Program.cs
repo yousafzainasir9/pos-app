@@ -11,6 +11,8 @@ using POS.Infrastructure.Services;
 using POS.WebAPI.Services;
 using Serilog;
 using System.Text;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,6 +28,11 @@ builder.Host.UseSerilog();
 
 // Add services to the container
 builder.Services.AddControllers();
+
+// Add FluentValidation
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddValidatorsFromAssemblyContaining<POS.Application.Validators.Auth.LoginRequestValidator>();
+
 builder.Services.AddEndpointsApiExplorer();
 
 // Configure Swagger with JWT support
@@ -233,7 +240,11 @@ else
 // Redirect root to Swagger
 app.MapGet("/", () => Results.Redirect("/swagger")).ExcludeFromDescription();
 
-app.UseHttpsRedirection();
+// Only use HTTPS redirection in production (allows mobile app to connect via HTTP in development)
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
 app.UseCors(app.Environment.IsDevelopment() ? "AllowAll" : "AllowSpecific");
 app.UseAuthentication();
 app.UseAuthorization();

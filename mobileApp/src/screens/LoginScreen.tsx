@@ -12,7 +12,7 @@ import {
   Alert,
 } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
-import { loginUser, setGuestMode, clearError } from '../store/slices/authSlice';
+import { loginUser, pinLoginUser, setGuestMode, clearError } from '../store/slices/authSlice';
 import { colors, spacing } from '../constants/theme';
 import { AppDispatch, RootState } from '../store/store';
 import Logo from '../components/common/Logo';
@@ -29,34 +29,44 @@ const LoginScreen = () => {
   const [pin, setPin] = useState('');
 
   const handleUsernameLogin = async () => {
+    console.log('📱 Username Login Button Clicked');
+    
     if (!username.trim() || !password.trim()) {
       Alert.alert('Error', 'Please enter both username and password');
       return;
     }
 
+    console.log('📱 Dispatching loginUser action...');
     try {
       await dispatch(loginUser({ username, password })).unwrap();
+      console.log('✅ Login successful!');
     } catch (err) {
-      // Error is handled by the slice and displayed below
+      console.log('❌ Login failed:', err);
     }
   };
 
   const handlePinLogin = async () => {
+    console.log('📱 PIN Login Button Clicked');
+    console.log('📱 PIN:', pin);
+    
     if (!pin.trim() || pin.length !== 4) {
       Alert.alert('Error', 'Please enter a 4-digit PIN');
       return;
     }
 
-    // Use PIN as username/password for customer login
-    // This works because customers have their PIN stored
+    console.log('📱 Dispatching pinLoginUser action...');
+    console.log('📱 Data:', { pin, storeId: 0 });
+    
     try {
-      await dispatch(loginUser({ username: pin, password: pin })).unwrap();
+      const result = await dispatch(pinLoginUser({ pin, storeId: 0 })).unwrap();
+      console.log('✅ PIN Login successful!', result);
     } catch (err) {
-      // Error is handled by the slice and displayed below
+      console.log('❌ PIN Login failed:', err);
     }
   };
 
   const handleGuestLogin = () => {
+    console.log('📱 Guest Login Button Clicked');
     dispatch(setGuestMode({ name: 'Guest', phone: '0400000000' }));
   };
 
@@ -65,9 +75,9 @@ const LoginScreen = () => {
   };
 
   const switchMode = (mode: LoginMode) => {
+    console.log('📱 Switching to mode:', mode);
     setLoginMode(mode);
     clearErrors();
-    // Clear inputs when switching
     setUsername('');
     setPassword('');
     setPin('');
@@ -190,7 +200,7 @@ const LoginScreen = () => {
                 placeholderTextColor={colors.textLight}
                 value={pin}
                 onChangeText={(text) => {
-                  // Only allow numbers and max 4 digits
+                  console.log('📱 PIN input changed:', text);
                   if (/^\d{0,4}$/.test(text)) {
                     setPin(text);
                     clearErrors();
