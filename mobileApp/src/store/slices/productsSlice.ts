@@ -90,8 +90,9 @@ const productsSlice = createSlice({
       if (action.payload === null) {
         state.filteredProducts = state.products;
       } else {
+        // Products have subcategories, which belong to categories
         state.filteredProducts = state.products.filter(
-          (p) => p.categoryId === action.payload
+          (p) => p.category?.id === action.payload
         );
       }
     },

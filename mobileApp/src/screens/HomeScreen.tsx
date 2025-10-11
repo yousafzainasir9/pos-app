@@ -21,7 +21,7 @@ import {
   searchProducts,
   clearFilters,
 } from '../store/slices/productsSlice';
-import { addItem } from '../store/slices/cartSlice';
+import { addToCart } from '../store/slices/cartSlice';
 import ProductCard from '../components/products/ProductCard';
 import { Product } from '../types/product.types';
 
@@ -77,7 +77,7 @@ const HomeScreen = () => {
   };
 
   const handleAddToCart = (product: Product) => {
-    dispatch(addItem(product));
+    dispatch(addToCart(product));
   };
 
   const handleProductPress = (product: Product) => {
@@ -164,13 +164,19 @@ const HomeScreen = () => {
           contentContainerStyle={styles.categoriesScroll}
         >
           {/* All Categories */}
-          {renderCategoryChip({ item: { id: null, name: 'All' } })}
+          <View key="category-all">
+            {renderCategoryChip({ item: { id: null, name: 'All' } })}
+          </View>
           
           {/* Category List */}
           {categories
             .filter((cat) => cat.isActive)
             .sort((a, b) => a.displayOrder - b.displayOrder)
-            .map((category) => renderCategoryChip({ item: category }))}
+            .map((category) => (
+              <View key={`category-${category.id}`}>
+                {renderCategoryChip({ item: category })}
+              </View>
+            ))}
         </ScrollView>
       </View>
 

@@ -12,11 +12,12 @@ const GST_RATE = 0.1; // 10% GST
 
 const calculateTotals = (items: CartItem[]) => {
   const subtotal = items.reduce(
-    (sum, item) => sum + item.product.price * item.quantity,
+    (sum, item) => sum + (item.product.priceIncGst || 0) * item.quantity,
     0
   );
-  const gstAmount = subtotal * GST_RATE;
-  const totalAmount = subtotal + gstAmount;
+  // GST is already included in priceIncGst, so we calculate it backwards
+  const gstAmount = subtotal - (subtotal / 1.1); // Remove GST from total
+  const totalAmount = subtotal;
 
   return { subtotal, gstAmount, totalAmount };
 };
