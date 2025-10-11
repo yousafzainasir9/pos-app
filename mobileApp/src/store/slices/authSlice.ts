@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { authApi, LoginRequest } from '../../api/auth.api';
+import { authApi, LoginRequest, PinLoginRequest } from '../../api/auth.api';
 import { User, Customer } from '../../types/auth.types';
 
 interface AuthState {
@@ -42,6 +42,27 @@ export const loginUser = createAsyncThunk(
     } catch (error: any) {
       return rejectWithValue(
         error.response?.data?.message || 'Login failed. Please check your credentials.'
+      );
+    }
+  }
+);
+
+// Async thunk for PIN login
+export const pinLoginUser = createAsyncThunk(
+  'auth/pinLoginUser',
+  async (credentials: PinLoginRequest, { rejectWithValue }) => {
+    try {
+      const response = await authApi.pinLogin(credentials);
+      
+      // Save tokens to AsyncStorage
+      await AsyncStorage.setItem('authToken', response.data.token);
+      await AsyncStorage.setItem('refreshToken', response.data.refreshToken);
+      await AsyncStorage.setItem('user', JSON.stringify(response.data.user));
+      
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.message || 'PIN login failed. Please check your PIN and store selection.'
       );
     }
   }
@@ -128,6 +149,31 @@ const authSlice = createSlice({
         };
       })
       .addCase(loginUser.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+      })
+      // PIN Login
+      .addCase(pinLoginUser.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(pinLoginUser.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.user = action.payload.user;
+        state.token = action.payload.token;
+        state.refreshToken = action.payload.refreshToken;
+        state.isAuthenticated = true;
+        state.isGuest = false;
+        state.error = null;
+        
+        // Set customer for backward compatibility
+        state.customer = {
+          id: action.payload.user.customerId,
+          name: `${action.payload.user.firstName} ${action.payload.user.lastName}`,
+          phone: action.payload.user.phone || '',
+        };
+      })
+      .addCase(pinLoginUser.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload as string;
       })

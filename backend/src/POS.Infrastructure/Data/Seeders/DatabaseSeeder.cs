@@ -1072,7 +1072,7 @@ public class DatabaseSeeder
 
         var customerUsers = new List<User>();
 
-        // Create a test customer account for easy mobile app testing
+        // Create a test customer account for easy mobile app testing with PIN
         var testCustomer = customers.First();
         customerUsers.Add(new User
         {
@@ -1085,10 +1085,11 @@ public class DatabaseSeeder
             IsActive = true,
             CustomerId = testCustomer.Id,
             Phone = testCustomer.Phone ?? "+61 400 000 100",
+            Pin = "1234", // Easy test PIN for customers
             StoreId = null // Customers can order from any store
         });
 
-        // Create user accounts for remaining customers
+        // Create user accounts for remaining customers with PINs
         for (int i = 1; i < customers.Count; i++)
         {
             var customer = customers[i];
@@ -1105,13 +1106,14 @@ public class DatabaseSeeder
                 IsActive = true,
                 CustomerId = customer.Id,
                 Phone = customer.Phone,
+                Pin = $"{3000 + i:D4}", // Customer PINs start from 3001
                 StoreId = null // Customers can order from any store
             });
         }
 
         await _context.Users.AddRangeAsync(customerUsers);
         await _context.SaveChangesAsync();
-        _logger.LogInformation("Seeded {Count} customer user accounts", customerUsers.Count);
+        _logger.LogInformation("Seeded {Count} customer user accounts with PINs", customerUsers.Count);
     }
 
     private string GenerateUsernameFromEmail(string email)

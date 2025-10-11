@@ -5,6 +5,11 @@ export interface LoginRequest {
   password: string;
 }
 
+export interface PinLoginRequest {
+  pin: string;
+  storeId: number;
+}
+
 export interface LoginResponse {
   success: boolean;
   data: {
@@ -30,6 +35,11 @@ export interface LoginResponse {
 export const authApi = {
   login: async (credentials: LoginRequest): Promise<LoginResponse> => {
     const response = await apiClient.post<LoginResponse>('/auth/login', credentials);
+    return response.data;
+  },
+
+  pinLogin: async (credentials: PinLoginRequest): Promise<LoginResponse> => {
+    const response = await apiClient.post<LoginResponse>('/auth/pin-login', credentials);
     return response.data;
   },
 

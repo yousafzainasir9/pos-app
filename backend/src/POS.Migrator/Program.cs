@@ -131,7 +131,8 @@ using (var scope = host.Services.CreateScope())
         Console.WriteLine("  Manager:  manager1 / Manager123!");
         Console.WriteLine("  Cashier:  cashier2 / Cashier123!");
         Console.WriteLine("\n📱 Mobile App (Customers):");
-        Console.WriteLine("  Customer: customer / Customer123!");
+        Console.WriteLine("  Username: customer / Customer123!");
+        Console.WriteLine("  PIN:      1234");
     }
     catch (Exception ex)
     {

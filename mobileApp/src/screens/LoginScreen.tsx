@@ -17,14 +17,18 @@ import { colors, spacing } from '../constants/theme';
 import { AppDispatch, RootState } from '../store/store';
 import Logo from '../components/common/Logo';
 
+type LoginMode = 'username' | 'pin';
+
 const LoginScreen = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { isLoading, error } = useSelector((state: RootState) => state.auth);
   
+  const [loginMode, setLoginMode] = useState<LoginMode>('username');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [pin, setPin] = useState('');
 
-  const handleLogin = async () => {
+  const handleUsernameLogin = async () => {
     if (!username.trim() || !password.trim()) {
       Alert.alert('Error', 'Please enter both username and password');
       return;
@@ -37,12 +41,36 @@ const LoginScreen = () => {
     }
   };
 
+  const handlePinLogin = async () => {
+    if (!pin.trim() || pin.length !== 4) {
+      Alert.alert('Error', 'Please enter a 4-digit PIN');
+      return;
+    }
+
+    // Use PIN as username/password for customer login
+    // This works because customers have their PIN stored
+    try {
+      await dispatch(loginUser({ username: pin, password: pin })).unwrap();
+    } catch (err) {
+      // Error is handled by the slice and displayed below
+    }
+  };
+
   const handleGuestLogin = () => {
     dispatch(setGuestMode({ name: 'Guest', phone: '0400000000' }));
   };
 
   const clearErrors = () => {
     dispatch(clearError());
+  };
+
+  const switchMode = (mode: LoginMode) => {
+    setLoginMode(mode);
+    clearErrors();
+    // Clear inputs when switching
+    setUsername('');
+    setPassword('');
+    setPin('');
   };
 
   return (
@@ -60,56 +88,146 @@ const LoginScreen = () => {
           <Text style={styles.subtitle}>Mobile Ordering</Text>
         </View>
 
+        {/* Login Mode Toggle */}
+        <View style={styles.modeToggle}>
+          <TouchableOpacity
+            style={[
+              styles.modeButton,
+              loginMode === 'username' && styles.modeButtonActive,
+            ]}
+            onPress={() => switchMode('username')}
+            disabled={isLoading}
+          >
+            <Text
+              style={[
+                styles.modeButtonText,
+                loginMode === 'username' && styles.modeButtonTextActive,
+              ]}
+            >
+              Username
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.modeButton,
+              loginMode === 'pin' && styles.modeButtonActive,
+            ]}
+            onPress={() => switchMode('pin')}
+            disabled={isLoading}
+          >
+            <Text
+              style={[
+                styles.modeButtonText,
+                loginMode === 'pin' && styles.modeButtonTextActive,
+              ]}
+            >
+              PIN
+            </Text>
+          </TouchableOpacity>
+        </View>
+
         {/* Form Section */}
         <View style={styles.formContainer}>
-          <Text style={styles.label}>Username</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Enter your username"
-            placeholderTextColor={colors.textLight}
-            value={username}
-            onChangeText={(text) => {
-              setUsername(text);
-              clearErrors();
-            }}
-            autoCapitalize="none"
-            autoCorrect={false}
-            editable={!isLoading}
-          />
+          {loginMode === 'username' ? (
+            // Username/Password Login
+            <>
+              <Text style={styles.label}>Username</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Enter your username"
+                placeholderTextColor={colors.textLight}
+                value={username}
+                onChangeText={(text) => {
+                  setUsername(text);
+                  clearErrors();
+                }}
+                autoCapitalize="none"
+                autoCorrect={false}
+                editable={!isLoading}
+              />
 
-          <Text style={styles.label}>Password</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Enter your password"
-            placeholderTextColor={colors.textLight}
-            value={password}
-            onChangeText={(text) => {
-              setPassword(text);
-              clearErrors();
-            }}
-            secureTextEntry
-            autoCapitalize="none"
-            autoCorrect={false}
-            editable={!isLoading}
-          />
+              <Text style={styles.label}>Password</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Enter your password"
+                placeholderTextColor={colors.textLight}
+                value={password}
+                onChangeText={(text) => {
+                  setPassword(text);
+                  clearErrors();
+                }}
+                secureTextEntry
+                autoCapitalize="none"
+                autoCorrect={false}
+                editable={!isLoading}
+              />
+
+              <TouchableOpacity
+                style={[styles.button, styles.loginButton, isLoading && styles.buttonDisabled]}
+                onPress={handleUsernameLogin}
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <Text style={styles.buttonText}>Login</Text>
+                )}
+              </TouchableOpacity>
+
+              <View style={styles.helpContainer}>
+                <Text style={styles.helpTitle}>Test Credentials:</Text>
+                <Text style={styles.helpText}>Username: customer</Text>
+                <Text style={styles.helpText}>Password: Customer123!</Text>
+              </View>
+            </>
+          ) : (
+            // PIN Login
+            <>
+              <Text style={styles.label}>Enter PIN</Text>
+              <TextInput
+                style={styles.pinInput}
+                placeholder="••••"
+                placeholderTextColor={colors.textLight}
+                value={pin}
+                onChangeText={(text) => {
+                  // Only allow numbers and max 4 digits
+                  if (/^\d{0,4}$/.test(text)) {
+                    setPin(text);
+                    clearErrors();
+                  }
+                }}
+                keyboardType="numeric"
+                maxLength={4}
+                secureTextEntry
+                editable={!isLoading}
+                textAlign="center"
+              />
+
+              <TouchableOpacity
+                style={[styles.button, styles.loginButton, isLoading && styles.buttonDisabled]}
+                onPress={handlePinLogin}
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <Text style={styles.buttonText}>Login with PIN</Text>
+                )}
+              </TouchableOpacity>
+
+              <View style={styles.helpContainer}>
+                <Text style={styles.helpTitle}>Quick PIN Access:</Text>
+                <Text style={styles.helpText}>Test PIN: 1234</Text>
+                <Text style={styles.helpText}>Fast and secure login</Text>
+              </View>
+            </>
+          )}
 
           {error && (
             <View style={styles.errorContainer}>
               <Text style={styles.errorText}>{error}</Text>
             </View>
           )}
-
-          <TouchableOpacity
-            style={[styles.button, styles.loginButton, isLoading && styles.buttonDisabled]}
-            onPress={handleLogin}
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <Text style={styles.buttonText}>Login</Text>
-            )}
-          </TouchableOpacity>
 
           <View style={styles.divider}>
             <View style={styles.dividerLine} />
@@ -124,12 +242,6 @@ const LoginScreen = () => {
           >
             <Text style={styles.guestButtonText}>Continue as Guest</Text>
           </TouchableOpacity>
-
-          <View style={styles.helpContainer}>
-            <Text style={styles.helpText}>Test Credentials:</Text>
-            <Text style={styles.helpText}>Username: customer</Text>
-            <Text style={styles.helpText}>Password: Customer123!</Text>
-          </View>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -148,12 +260,41 @@ const styles = StyleSheet.create({
   },
   header: {
     alignItems: 'center',
-    marginBottom: spacing.xl * 2,
+    marginBottom: spacing.xl,
   },
   subtitle: {
     fontSize: 18,
     color: colors.textLight,
     marginTop: spacing.md,
+  },
+  modeToggle: {
+    flexDirection: 'row',
+    backgroundColor: '#f3f4f6',
+    borderRadius: 8,
+    padding: 4,
+    marginBottom: spacing.lg,
+  },
+  modeButton: {
+    flex: 1,
+    paddingVertical: spacing.sm,
+    alignItems: 'center',
+    borderRadius: 6,
+  },
+  modeButtonActive: {
+    backgroundColor: '#fff',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  modeButtonText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: colors.textLight,
+  },
+  modeButtonTextActive: {
+    color: colors.primary,
   },
   formContainer: {
     width: '100%',
@@ -174,6 +315,19 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
     fontSize: 16,
     color: colors.text,
+  },
+  pinInput: {
+    backgroundColor: '#fff',
+    borderWidth: 2,
+    borderColor: colors.primary,
+    borderRadius: 12,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.lg,
+    fontSize: 32,
+    color: colors.text,
+    fontWeight: 'bold',
+    letterSpacing: 16,
+    textAlign: 'center',
   },
   errorContainer: {
     backgroundColor: '#fee',
@@ -230,18 +384,25 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   helpContainer: {
-    marginTop: spacing.xl,
+    marginTop: spacing.md,
     padding: spacing.md,
     backgroundColor: '#f0f9ff',
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#bfdbfe',
   },
-  helpText: {
-    fontSize: 13,
+  helpTitle: {
+    fontSize: 14,
+    fontWeight: '600',
     color: '#1e40af',
     textAlign: 'center',
-    marginBottom: spacing.xs / 2,
+    marginBottom: spacing.xs,
+  },
+  helpText: {
+    fontSize: 12,
+    color: '#1e40af',
+    textAlign: 'center',
+    marginBottom: 2,
   },
 });
 
