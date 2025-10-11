@@ -1,6 +1,5 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { colors } from '../constants/theme';
 
 interface LogoProps {
   size?: number;
@@ -26,7 +25,7 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     borderRadius: 50,
-    backgroundColor: colors.primary,
+    backgroundColor: '#D97706', // Cookie Barrel orange
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#000',
@@ -48,7 +47,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
     fontSize: 14,
     fontWeight: '600',
-    color: colors.primary,
+    color: '#D97706',
     letterSpacing: 1,
   },
 });
