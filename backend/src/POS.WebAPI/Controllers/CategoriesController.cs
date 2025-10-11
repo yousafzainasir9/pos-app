@@ -10,7 +10,6 @@ namespace POS.WebAPI.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-[Authorize]
 public class CategoriesController : ControllerBase
 {
     private readonly IUnitOfWork _unitOfWork;
@@ -25,6 +24,7 @@ public class CategoriesController : ControllerBase
     }
 
     [HttpGet]
+    [AllowAnonymous]  // Allow anonymous access to view categories
     public async Task<ActionResult<ApiResponse<List<CategoryDto>>>> GetAll()
     {
         try
@@ -65,6 +65,7 @@ public class CategoriesController : ControllerBase
     }
 
     [HttpGet("{id}")]
+    [AllowAnonymous]  // Allow anonymous access to view category details
     public async Task<ActionResult<ApiResponse<CategoryDetailDto>>> GetById(long id)
     {
         try

@@ -12,7 +12,6 @@ namespace POS.WebAPI.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-[Authorize]
 public class ProductsController : ControllerBase
 {
     private readonly IUnitOfWork _unitOfWork;
@@ -25,6 +24,7 @@ public class ProductsController : ControllerBase
     }
 
     [HttpGet]
+    [AllowAnonymous]  // Allow anonymous access to view products
     public async Task<ActionResult<ApiResponse<List<ProductListDto>>>> GetProducts(
         [FromQuery] string? search,
         [FromQuery] long? categoryId,
@@ -120,6 +120,7 @@ public class ProductsController : ControllerBase
     }
 
     [HttpGet("{id}")]
+    [AllowAnonymous]  // Allow anonymous access to view product details
     public async Task<ActionResult<ApiResponse<ProductDto>>> GetProduct(long id)
     {
         try
@@ -339,6 +340,7 @@ public class ProductsController : ControllerBase
     }
 
     [HttpGet("by-barcode/{barcode}")]
+    [AllowAnonymous]  // Allow anonymous access for barcode lookup
     public async Task<ActionResult<ApiResponse<ProductDto>>> GetProductByBarcode(string barcode)
     {
         try
