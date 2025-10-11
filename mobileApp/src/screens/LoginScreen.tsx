@@ -15,6 +15,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { loginUser, setGuestMode, clearError } from '../store/slices/authSlice';
 import { colors, spacing } from '../constants/theme';
 import { AppDispatch, RootState } from '../store/store';
+import Logo from '../components/common/Logo';
 
 const LoginScreen = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -53,11 +54,13 @@ const LoginScreen = () => {
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
       >
+        {/* Logo Section */}
         <View style={styles.header}>
-          <Text style={styles.title}>Cookie Barrel</Text>
+          <Logo size={140} />
           <Text style={styles.subtitle}>Mobile Ordering</Text>
         </View>
 
+        {/* Form Section */}
         <View style={styles.formContainer}>
           <Text style={styles.label}>Username</Text>
           <TextInput
@@ -147,15 +150,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: spacing.xl * 2,
   },
-  title: {
-    fontSize: 36,
-    fontWeight: 'bold',
-    color: colors.primary,
-    marginBottom: spacing.xs,
-  },
   subtitle: {
     fontSize: 18,
     color: colors.textLight,
+    marginTop: spacing.md,
   },
   formContainer: {
     width: '100%',
