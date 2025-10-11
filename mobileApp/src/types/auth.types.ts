@@ -5,13 +5,28 @@ export interface Customer {
   phone: string;
 }
 
+export interface User {
+  id: number;
+  username: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  role: string;
+  customerId?: number;
+  phone?: string;
+}
+
 export interface LoginRequest {
-  phone: string;
-  name: string;
+  username: string;
+  password: string;
 }
 
 export interface AuthState {
-  customer: Customer | null;
+  user: User | null;
+  token: string | null;
+  refreshToken: string | null;
   isAuthenticated: boolean;
   isGuest: boolean;
+  // Legacy support
+  customer: Customer | null;
 }

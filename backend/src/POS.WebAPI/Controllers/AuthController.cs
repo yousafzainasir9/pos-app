@@ -119,7 +119,9 @@ public class AuthController : ControllerBase
                     LastName = user.LastName,
                     Role = user.Role.ToString(),
                     StoreId = user.StoreId,
-                    StoreName = user.Store?.Name
+                    StoreName = user.Store?.Name,
+                    CustomerId = user.CustomerId,
+                    Phone = user.Phone
                 }
             };
 
@@ -217,7 +219,9 @@ public class AuthController : ControllerBase
                     StoreId = user.StoreId,
                     StoreName = user.Store?.Name,
                     HasActiveShift = activeShift != null,
-                    ActiveShiftId = activeShift?.Id
+                    ActiveShiftId = activeShift?.Id,
+                    CustomerId = user.CustomerId,
+                    Phone = user.Phone
                 }
             };
 
@@ -297,7 +301,9 @@ public class AuthController : ControllerBase
                     LastName = user.LastName,
                     Role = user.Role.ToString(),
                     StoreId = user.StoreId,
-                    StoreName = user.Store?.Name
+                    StoreName = user.Store?.Name,
+                    CustomerId = user.CustomerId,
+                    Phone = user.Phone
                 }
             };
 

@@ -37,4 +37,8 @@ public class AuthUserDto
     public string? StoreName { get; set; }
     public bool HasActiveShift { get; set; }
     public long? ActiveShiftId { get; set; }
+    
+    // Customer-specific fields
+    public long? CustomerId { get; set; }
+    public string? Phone { get; set; }
 }

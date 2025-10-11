@@ -46,7 +46,8 @@ public enum UserRole
     Manager = 2,
     Cashier = 3,
     Staff = 4,
-    ReadOnly = 5
+    ReadOnly = 5,
+    Customer = 6
 }
 
 public enum ShiftStatus

@@ -2,6 +2,22 @@
 
 ## Default Users After Database Migration
 
+### 📱 Mobile App (Customers)
+
+| Username | Password | Email | Role | Description |
+|----------|----------|-------|------|-------------|
+| **customer** | Customer123! | customer@test.com | Customer | Test customer account for mobile app |
+
+**Additional Customer Accounts:**
+- 9 more customer accounts are created from existing customer data
+- Username format: email prefix (e.g., john.smith@example.com → johnsmith)
+- Default password for all: Customer123!
+- Customers can order from any store (StoreId is null)
+
+---
+
+## Default Staff/Admin Users After Database Migration
+
 ### Username/Password Login
 
 | Role | Username | Password | Store | Description |

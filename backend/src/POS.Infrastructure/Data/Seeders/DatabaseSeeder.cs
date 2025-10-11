@@ -127,6 +127,7 @@ public class DatabaseSeeder
             await SeedSuppliersAsync();
             await SeedUsersAsync();
             await SeedCustomersAsync();
+            await SeedCustomerUsersAsync(); // Create user accounts for customers
             await SeedCategoriesAndProductsAsync();
             await SeedShiftsAsync();
             await SeedOrdersAsync();
@@ -1050,6 +1051,74 @@ public class DatabaseSeeder
         await _context.InventoryTransactions.AddRangeAsync(transactions);
         await _context.SaveChangesAsync();
         _logger.LogInformation("Seeded {Count} inventory transactions", transactions.Count);
+    }
+
+    private async Task SeedCustomerUsersAsync()
+    {
+        // Only seed customer users if they don't exist
+        if (await _context.Users.AnyAsync(u => u.Role == UserRole.Customer)) return;
+
+        // Get some customers to create user accounts for
+        var customers = await _context.Customers
+            .Where(c => c.Email != null && c.Email != "walkin@system.local")
+            .Take(10) // Create accounts for first 10 customers
+            .ToListAsync();
+
+        if (!customers.Any())
+        {
+            _logger.LogWarning("No customers available to create user accounts");
+            return;
+        }
+
+        var customerUsers = new List<User>();
+
+        // Create a test customer account for easy mobile app testing
+        var testCustomer = customers.First();
+        customerUsers.Add(new User
+        {
+            Username = "customer",
+            Email = "customer@test.com",
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword("Customer123!"),
+            FirstName = "Test",
+            LastName = "Customer",
+            Role = UserRole.Customer,
+            IsActive = true,
+            CustomerId = testCustomer.Id,
+            Phone = testCustomer.Phone ?? "+61 400 000 100",
+            StoreId = null // Customers can order from any store
+        });
+
+        // Create user accounts for remaining customers
+        for (int i = 1; i < customers.Count; i++)
+        {
+            var customer = customers[i];
+            var username = GenerateUsernameFromEmail(customer.Email!);
+            
+            customerUsers.Add(new User
+            {
+                Username = username,
+                Email = customer.Email!,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword("Customer123!"), // Default password
+                FirstName = customer.FirstName,
+                LastName = customer.LastName,
+                Role = UserRole.Customer,
+                IsActive = true,
+                CustomerId = customer.Id,
+                Phone = customer.Phone,
+                StoreId = null // Customers can order from any store
+            });
+        }
+
+        await _context.Users.AddRangeAsync(customerUsers);
+        await _context.SaveChangesAsync();
+        _logger.LogInformation("Seeded {Count} customer user accounts", customerUsers.Count);
+    }
+
+    private string GenerateUsernameFromEmail(string email)
+    {
+        // Extract username part before @ and make it unique
+        var username = email.Split('@')[0].ToLower().Replace(".", "");
+        return username;
     }
 
     // Helper methods

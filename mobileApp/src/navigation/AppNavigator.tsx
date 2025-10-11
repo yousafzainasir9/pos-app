@@ -1,11 +1,13 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { useSelector } from 'react-redux';
-import { RootState } from '../store/store';
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState, AppDispatch } from '../store/store';
+import { restoreSession } from '../store/slices/authSlice';
 import { colors } from '../constants/theme';
+import { ActivityIndicator, View, StyleSheet } from 'react-native';
 
 // Import screens
 import HomeScreen from '../screens/HomeScreen';
@@ -93,9 +95,24 @@ const TabNavigator = () => {
 };
 
 const AppNavigator = () => {
-  const isAuthenticated = useSelector(
-    (state: RootState) => state.auth.isAuthenticated || state.auth.isGuest
+  const dispatch = useDispatch<AppDispatch>();
+  const { isAuthenticated, isGuest, isLoading } = useSelector(
+    (state: RootState) => state.auth
   );
+
+  useEffect(() => {
+    // Restore session on app start
+    dispatch(restoreSession());
+  }, [dispatch]);
+
+  // Show loading screen while checking authentication
+  if (isLoading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={colors.primary} />
+      </View>
+    );
+  }
 
   return (
     <NavigationContainer>
@@ -109,7 +126,7 @@ const AppNavigator = () => {
             fontWeight: 'bold',
           },
         }}>
-        {!isAuthenticated ? (
+        {!isAuthenticated && !isGuest ? (
           <Stack.Screen
             name="Login"
             component={LoginScreen}
@@ -138,5 +155,14 @@ const AppNavigator = () => {
     </NavigationContainer>
   );
 };
+
+const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: colors.background,
+  },
+});
 
 export default AppNavigator;

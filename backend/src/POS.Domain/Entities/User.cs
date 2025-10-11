@@ -11,6 +11,9 @@ public class User : BaseEntity
     public required string FirstName { get; set; }
     public required string LastName { get; set; }
     public string FullName => $"{FirstName} {LastName}";
+    
+    // Customer-specific fields (nullable for non-customer roles)
+    public long? CustomerId { get; set; } // Link to Customer entity for mobile app users
     public string? Phone { get; set; }
     public string? Pin { get; set; } // For quick POS access
     public UserRole Role { get; set; }
@@ -29,6 +32,7 @@ public class User : BaseEntity
     
     // Navigation properties
     public virtual Store? Store { get; set; }
+    public virtual Customer? Customer { get; set; }
     public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
     public virtual ICollection<Shift> Shifts { get; set; } = new List<Shift>();
 }

@@ -126,9 +126,12 @@ using (var scope = host.Services.CreateScope())
         Console.WriteLine("   DATABASE SETUP COMPLETED ✅");
         Console.WriteLine("========================================");
         Console.WriteLine("\nDefault Credentials:");
+        Console.WriteLine("\n📱 Web App (Admin/Staff):");
         Console.WriteLine("  Admin:    admin / Admin123!");
-        Console.WriteLine("  Manager:  manager / Manager123!");
-        Console.WriteLine("  Cashier:  cashier1 / Cashier123!");
+        Console.WriteLine("  Manager:  manager1 / Manager123!");
+        Console.WriteLine("  Cashier:  cashier2 / Cashier123!");
+        Console.WriteLine("\n📱 Mobile App (Customers):");
+        Console.WriteLine("  Customer: customer / Customer123!");
     }
     catch (Exception ex)
     {
