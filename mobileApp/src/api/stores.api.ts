@@ -9,6 +9,14 @@ export interface Store {
 }
 
 export const storesApi = {
+  // Get all stores
+  getStores: async () => {
+    const response = await apiClient.get('/stores');
+    // Backend returns { success, data, message }
+    // We need response.data.data to get the actual stores array
+    return response.data;
+  },
+
   // Get all active stores
   getAll: async (): Promise<Store[]> => {
     const response = await apiClient.get<{ success: boolean; data: Store[] }>(

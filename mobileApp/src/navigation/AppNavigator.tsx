@@ -6,6 +6,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '../store/store';
 import { restoreSession } from '../store/slices/authSlice';
+import { restoreSelectedStore } from '../store/slices/storeSlice';
 import { colors } from '../constants/theme';
 import { ActivityIndicator, View, StyleSheet } from 'react-native';
 
@@ -15,11 +16,13 @@ import CartScreen from '../screens/CartScreen';
 import OrdersScreen from '../screens/OrdersScreen';
 import CheckoutScreen from '../screens/CheckoutScreen';
 import LoginScreen from '../screens/LoginScreen';
+import StoreSelectionScreen from '../screens/StoreSelectionScreen';
 import OrderDetailScreen from '../screens/OrderDetailScreen';
 
 export type RootStackParamList = {
   MainTabs: undefined;
   Login: undefined;
+  StoreSelection: undefined;
   Checkout: undefined;
   OrderDetail: { orderId: number };
 };
@@ -99,10 +102,12 @@ const AppNavigator = () => {
   const { isAuthenticated, isGuest, isLoading } = useSelector(
     (state: RootState) => state.auth
   );
+  const { selectedStoreId } = useSelector((state: RootState) => state.store);
 
   useEffect(() => {
-    // Restore session on app start
+    // Restore session and store selection on app start
     dispatch(restoreSession());
+    dispatch(restoreSelectedStore());
   }, [dispatch]);
 
   // Show loading screen while checking authentication
@@ -127,12 +132,25 @@ const AppNavigator = () => {
           },
         }}>
         {!isAuthenticated && !isGuest ? (
+          // Not logged in - show login screen
           <Stack.Screen
             name="Login"
             component={LoginScreen}
             options={{ headerShown: false }}
           />
+        ) : !selectedStoreId && !isGuest ? (
+          // Logged in but no store selected - show store selection
+          <Stack.Screen
+            name="StoreSelection"
+            component={StoreSelectionScreen}
+            options={{ 
+              title: 'Select Store',
+              headerShown: true,
+              headerLeft: () => null, // Prevent going back
+            }}
+          />
         ) : (
+          // Logged in with store selected OR guest - show main app
           <>
             <Stack.Screen
               name="MainTabs"

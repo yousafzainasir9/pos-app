@@ -6,10 +6,12 @@ interface LogoProps {
 }
 
 const Logo: React.FC<LogoProps> = ({ size = 120 }) => {
+  const logoCircleSize = size * 0.83; // 83% of container size
+  
   return (
-    <View style={[styles.container, { width: size, height: size }]}>
-      <View style={styles.logoCircle}>
-        <Text style={styles.logoText}>CB</Text>
+    <View style={[styles.container, { width: size * 1.2 }]}>
+      <View style={[styles.logoCircle, { width: logoCircleSize, height: logoCircleSize, borderRadius: logoCircleSize / 2 }]}>
+        <Text style={[styles.logoText, { fontSize: logoCircleSize * 0.48 }]}>CB</Text>
       </View>
       <Text style={styles.companyName}>Cookie Barrel</Text>
     </View>
@@ -20,11 +22,9 @@ const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
     justifyContent: 'center',
+    marginBottom: 8,
   },
   logoCircle: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
     backgroundColor: '#D97706', // Cookie Barrel orange
     alignItems: 'center',
     justifyContent: 'center',
@@ -38,17 +38,17 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   logoText: {
-    fontSize: 48,
     fontWeight: 'bold',
     color: '#fff',
     fontFamily: 'serif',
   },
   companyName: {
-    marginTop: 8,
+    marginTop: 10,
     fontSize: 14,
     fontWeight: '600',
     color: '#D97706',
     letterSpacing: 1,
+    textAlign: 'center',
   },
 });
 

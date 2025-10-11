@@ -86,6 +86,7 @@ export const logoutUser = createAsyncThunk(
       await AsyncStorage.removeItem('authToken');
       await AsyncStorage.removeItem('refreshToken');
       await AsyncStorage.removeItem('user');
+      await AsyncStorage.removeItem('selectedStoreId');
     }
   }
 );

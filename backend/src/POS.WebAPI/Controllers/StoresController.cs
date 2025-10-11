@@ -9,7 +9,6 @@ namespace POS.WebAPI.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize(Roles = "Admin,Manager")]
 public class StoresController : ControllerBase
 {
     private readonly IApplicationDbContext _context;
