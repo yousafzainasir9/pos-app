@@ -55,6 +55,11 @@ react {
 }
 
 /**
+ * Set this to true to use Hermes engine instead of JSC
+ */
+def enableHermes = true
+
+/**
  * Set this to true to Run Proguard on Release builds to minify the Java bytecode.
  */
 def enableProguardInReleaseBuilds = false
@@ -73,11 +78,23 @@ def enableProguardInReleaseBuilds = false
 def jscFlavor = 'io.github.react-native-community:jsc-android:2026004.+'
 
 android {
-    ndkVersion rootProject.ext.ndkVersion
+    // ndkVersion rootProject.ext.ndkVersion - commented out, will use default
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
     namespace "com.mobileapp"
+    
+    // Disable NDK/native builds
+    packagingOptions {
+        pickFirst 'lib/x86/libc++_shared.so'
+        pickFirst 'lib/x86_64/libc++_shared.so'
+        pickFirst 'lib/armeabi-v7a/libc++_shared.so'
+        pickFirst 'lib/arm64-v8a/libc++_shared.so'
+        exclude 'lib/arm64-v8a/libreactnativejni.so'
+        exclude 'lib/armeabi-v7a/libreactnativejni.so'
+        exclude 'lib/x86/libreactnativejni.so'
+        exclude 'lib/x86_64/libreactnativejni.so'
+    }
     defaultConfig {
         applicationId "com.mobileapp"
         minSdkVersion rootProject.ext.minSdkVersion
@@ -111,9 +128,12 @@ dependencies {
     // The version of react-native is set by the React Native Gradle Plugin
     implementation("com.facebook.react:react-android")
 
-    if (hermesEnabled.toBoolean()) {
+    if (enableHermes) {
         implementation("com.facebook.react:hermes-android")
     } else {
         implementation jscFlavor
     }
 }
+
+// Add vector icons fonts
+apply from: "../../node_modules/react-native-vector-icons/fonts.gradle"
