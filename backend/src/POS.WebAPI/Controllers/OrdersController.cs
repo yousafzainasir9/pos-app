@@ -20,7 +20,7 @@ public class OrdersController : ControllerBase
     private readonly ICurrentUserService _currentUserService;
 
     public OrdersController(
-        IUnitOfWork unitOfWork, 
+        IUnitOfWork unitOfWork,
         ILogger<OrdersController> logger,
         ICurrentUserService currentUserService)
     {
@@ -302,7 +302,7 @@ public class OrdersController : ControllerBase
                     return BadRequest("Store ID is required for mobile orders");
                 }
                 storeId = createOrderDto.StoreId.Value;
-                
+
                 // Validate that the store exists and is active
                 var store = await _unitOfWork.Repository<Store>().GetByIdAsync(storeId);
                 if (store == null || !store.IsActive)
@@ -332,7 +332,7 @@ public class OrdersController : ControllerBase
                 Notes = createOrderDto.Notes,
                 UserId = currentUserId,
                 StoreId = storeId,
-                ShiftId = activeShift?.Id,
+                ShiftId = currentUser.Role == UserRole.Customer ? null : activeShift?.Id,
                 DiscountAmount = createOrderDto.DiscountAmount ?? 0
             };
 
@@ -467,7 +467,7 @@ public class OrdersController : ControllerBase
 
             // Update order payment totals
             order.PaidAmount += payment.Amount;
-            
+
             if (order.PaidAmount >= order.TotalAmount)
             {
                 order.Status = OrderStatus.Completed;
@@ -482,8 +482,9 @@ public class OrdersController : ControllerBase
             _unitOfWork.Repository<Order>().Update(order);
             await _unitOfWork.SaveChangesAsync();
 
-            return Ok(new { 
-                message = "Payment processed successfully", 
+            return Ok(new
+            {
+                message = "Payment processed successfully",
                 orderStatus = order.Status.ToString(),
                 paidAmount = order.PaidAmount,
                 remainingAmount = Math.Max(0, order.TotalAmount - order.PaidAmount),
@@ -574,7 +575,7 @@ public class OrdersController : ControllerBase
         try
         {
             var currentUserId = _currentUserService.UserId ?? throw new UnauthorizedAccessException("User not authenticated");
-            
+
             var activeShift = await _unitOfWork.Repository<Shift>().Query()
                 .Include(s => s.Orders)
                 .Where(s => s.UserId == currentUserId && s.Status == ShiftStatus.Open)
