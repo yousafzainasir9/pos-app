@@ -45,6 +45,7 @@ public class OrderItemDto
 public class CreateOrderDto
 {
     public OrderType OrderType { get; set; } = OrderType.DineIn;
+    public long? StoreId { get; set; }  // Added for mobile app orders
     public string? TableNumber { get; set; }
     public long? CustomerId { get; set; }
     public string? Notes { get; set; }

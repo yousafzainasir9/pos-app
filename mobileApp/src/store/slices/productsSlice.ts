@@ -10,6 +10,7 @@ interface ProductsState {
   searchQuery: string;
   isLoading: boolean;
   error: string | null;
+  reservedStock: { [productId: number]: number }; // Track reserved stock
 }
 
 const initialState: ProductsState = {
@@ -20,6 +21,7 @@ const initialState: ProductsState = {
   searchQuery: '',
   isLoading: false,
   error: null,
+  reservedStock: {},
 };
 
 // Async thunks
@@ -104,6 +106,18 @@ const productsSlice = createSlice({
       state.searchQuery = '';
       state.filteredProducts = state.products;
     },
+    reserveStock: (state, action: PayloadAction<{ productId: number; quantity: number }>) => {
+      const { productId, quantity } = action.payload;
+      state.reservedStock[productId] = (state.reservedStock[productId] || 0) + quantity;
+    },
+    releaseStock: (state, action: PayloadAction<{ productId: number; quantity: number }>) => {
+      const { productId, quantity } = action.payload;
+      const current = state.reservedStock[productId] || 0;
+      state.reservedStock[productId] = Math.max(0, current - quantity);
+    },
+    clearReservedStock: (state) => {
+      state.reservedStock = {};
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -157,5 +171,5 @@ const productsSlice = createSlice({
   },
 });
 
-export const { setSelectedCategory, setSearchQuery, clearFilters } = productsSlice.actions;
+export const { setSelectedCategory, setSearchQuery, clearFilters, reserveStock, releaseStock, clearReservedStock } = productsSlice.actions;
 export default productsSlice.reducer;

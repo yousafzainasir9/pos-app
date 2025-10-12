@@ -13,6 +13,7 @@ interface Store {
 
 interface StoreState {
   stores: Store[];
+  selectedStore: Store | null;
   selectedStoreId: number | null;
   isLoading: boolean;
   error: string | null;
@@ -20,6 +21,7 @@ interface StoreState {
 
 const initialState: StoreState = {
   stores: [],
+  selectedStore: null,
   selectedStoreId: null,
   isLoading: false,
   error: null,
@@ -58,11 +60,14 @@ const storeSlice = createSlice({
   reducers: {
     setSelectedStore: (state, action: PayloadAction<number>) => {
       state.selectedStoreId = action.payload;
+      // Find and set the selected store object
+      state.selectedStore = state.stores.find(s => s.id === action.payload) || null;
       // Save to AsyncStorage
       AsyncStorage.setItem('selectedStoreId', action.payload.toString());
     },
     clearSelectedStore: (state) => {
       state.selectedStoreId = null;
+      state.selectedStore = null;
       AsyncStorage.removeItem('selectedStoreId');
     },
   },

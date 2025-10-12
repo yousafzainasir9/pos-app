@@ -265,12 +265,38 @@ public class OrdersController : ControllerBase
         {
             await _unitOfWork.BeginTransactionAsync();
 
-            // Get current user and store
+            // Get current user
             var currentUserId = _currentUserService.UserId ?? throw new UnauthorizedAccessException("User not authenticated");
             var currentUser = await _unitOfWork.Repository<User>().GetByIdAsync(currentUserId);
-            if (currentUser == null || currentUser.StoreId == null)
+            if (currentUser == null)
             {
-                throw new InvalidOperationException("User not associated with a store");
+                throw new InvalidOperationException("User not found");
+            }
+
+            // Determine store ID
+            long storeId;
+            if (currentUser.StoreId.HasValue)
+            {
+                // POS user - use their assigned store
+                storeId = currentUser.StoreId.Value;
+            }
+            else
+            {
+                // Mobile app user - they must provide storeId
+                if (!createOrderDto.StoreId.HasValue)
+                {
+                    await _unitOfWork.RollbackTransactionAsync();
+                    return BadRequest("Store ID is required for mobile orders");
+                }
+                storeId = createOrderDto.StoreId.Value;
+                
+                // Validate that the store exists and is active
+                var store = await _unitOfWork.Repository<Store>().GetByIdAsync(storeId);
+                if (store == null || !store.IsActive)
+                {
+                    await _unitOfWork.RollbackTransactionAsync();
+                    return BadRequest("Invalid or inactive store");
+                }
             }
 
             // Get active shift for the user
@@ -292,7 +318,7 @@ public class OrdersController : ControllerBase
                 CustomerId = createOrderDto.CustomerId,
                 Notes = createOrderDto.Notes,
                 UserId = currentUserId,
-                StoreId = currentUser.StoreId.Value,
+                StoreId = storeId,
                 ShiftId = activeShift?.Id,
                 DiscountAmount = createOrderDto.DiscountAmount ?? 0
             };

@@ -56,7 +56,8 @@ export enum UserRole {
   Manager = 2,
   Cashier = 3,
   Staff = 4,
-  ReadOnly = 5
+  ReadOnly = 5,
+  Customer = 6
 }
 
 // Entity types
@@ -246,6 +247,7 @@ export interface CreateOrderRequest {
   orderType: OrderType;
   tableNumber?: string;
   customerId?: number;
+  customerName?: string;
   notes?: string;
   items: CreateOrderItem[];
   discountAmount?: number;

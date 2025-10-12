@@ -13,7 +13,7 @@ import { toast } from 'react-toastify';
 
 const CartPage: React.FC = () => {
   const navigate = useNavigate();
-  const { items, totalAmount, taxAmount, subTotal, updateQuantity, removeItem, clearCart } = useCart();
+  const { items, totalAmount, taxAmount, subTotal, customerName, updateQuantity, removeItem, clearCart } = useCart();
   const { isShiftOpen } = useShift();
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -57,7 +57,8 @@ const CartPage: React.FC = () => {
           discountAmount: item.discountAmount,
           notes: item.notes
         })),
-        discountAmount: 0
+        discountAmount: 0,
+        ...(customerName && { customerName }) // Include customer name if set
       };
 
       const response = await orderService.createOrder(orderData);
@@ -124,7 +125,14 @@ const CartPage: React.FC = () => {
         <Col lg={8}>
           <Card>
             <Card.Header className="d-flex justify-content-between align-items-center">
-              <h4 className="mb-0">Shopping Cart ({items.length} items)</h4>
+              <div>
+                <h4 className="mb-0">Shopping Cart ({items.length} items)</h4>
+                {customerName && (
+                  <div className="text-muted small mt-1">
+                    Customer: <strong>{customerName}</strong>
+                  </div>
+                )}
+              </div>
               <Button variant="outline-danger" size="sm" onClick={clearCart}>
                 Clear Cart
               </Button>

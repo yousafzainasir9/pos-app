@@ -11,6 +11,8 @@ import {
   RefreshControl,
 } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { colors, spacing } from '../constants/theme';
 import { AppDispatch, RootState } from '../store/store';
@@ -24,9 +26,13 @@ import {
 import { addToCart } from '../store/slices/cartSlice';
 import ProductCard from '../components/products/ProductCard';
 import { Product } from '../types/product.types';
+import { RootStackParamList } from '../navigation/AppNavigator';
+
+type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 const HomeScreen = () => {
   const dispatch = useDispatch<AppDispatch>();
+  const navigation = useNavigation<NavigationProp>();
   const {
     filteredProducts,
     categories,
@@ -81,9 +87,8 @@ const HomeScreen = () => {
   };
 
   const handleProductPress = (product: Product) => {
-    // TODO: Navigate to product detail screen
-    console.log('Product pressed:', product.name);
-    handleAddToCart(product);
+    // Navigate to product detail screen
+    navigation.navigate('ProductDetail', { productId: product.id });
   };
 
   const renderCategoryChip = ({ item }: { item: any }) => {

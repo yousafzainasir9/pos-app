@@ -18,6 +18,8 @@ import { colors, spacing } from '../constants/theme';
 import { RootState, AppDispatch } from '../store/store';
 import { clearCart } from '../store/slices/cartSlice';
 import { RootStackParamList } from '../navigation/AppNavigator';
+import { ordersApi } from '../api/orders.api';
+import { CreateOrderDto, OrderType, OrderTypeEnum, PaymentMethodEnum } from '../types/order.types';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -30,20 +32,17 @@ const CheckoutScreen = () => {
   const { user, isGuest } = useSelector((state: RootState) => state.auth);
   const { selectedStoreId } = useSelector((state: RootState) => state.store);
 
-  // Customer info state
   const [customerName, setCustomerName] = useState(
-    user ? `${user.firstName} ${user.lastName}` : ''
+    user ? user.firstName + ' ' + user.lastName : ''
   );
   const [customerPhone, setCustomerPhone] = useState(user?.phone || '');
   const [customerEmail, setCustomerEmail] = useState(user?.email || '');
   const [notes, setNotes] = useState('');
-
-  // Payment state
-  const [paymentMethod, setPaymentMethod] = useState<'cash' | 'card'>('card');
+  const [paymentMethod, setPaymentMethod] = useState<'cash' | 'card'>('cash');
   const [isProcessing, setIsProcessing] = useState(false);
 
   const formatPrice = (price: number) => {
-    return `$${price.toFixed(2)}`;
+    return '$' + price.toFixed(2);
   };
 
   const validateForm = () => {
@@ -67,30 +66,88 @@ const CheckoutScreen = () => {
       return;
     }
 
+    if (!selectedStoreId) {
+      Alert.alert('Error', 'Please select a store first');
+      return;
+    }
+
+    if (items.length === 0) {
+      Alert.alert('Error', 'Your cart is empty');
+      return;
+    }
+
     setIsProcessing(true);
 
-    // Simulate order placement
-    setTimeout(() => {
+    try {
+      const orderData: CreateOrderDto = {
+        orderType: OrderTypeEnum.TakeAway,
+        storeId: selectedStoreId,  // Send the selected store ID
+        tableNumber: undefined,
+        customerId: user?.id || undefined,
+        notes: notes.trim() || 'Customer: ' + customerName + ' | Phone: ' + customerPhone,
+        items: items.map(item => ({
+          productId: item.product.id,
+          quantity: item.quantity,
+          discountAmount: 0,
+          notes: undefined,
+        })),
+        discountAmount: 0,
+      };
+
+      console.log('Creating order with data:', JSON.stringify(orderData, null, 2));
+
+      const response = await ordersApi.create(orderData);
+
+      console.log('Order created successfully:', response);
+
+      try {
+        await ordersApi.processPayment(response.orderId, {
+          orderId: response.orderId,
+          amount: totalAmount,
+          paymentMethod: PaymentMethodEnum.Cash,
+          referenceNumber: undefined,
+          cardLastFourDigits: undefined,
+          cardType: undefined,
+          notes: 'Mobile app payment - ' + customerName,
+        });
+
+        console.log('Payment processed successfully');
+      } catch (paymentError: any) {
+        console.warn('Payment processing failed:', paymentError);
+      }
+
       setIsProcessing(false);
       
-      // Clear cart
       dispatch(clearCart());
 
-      // Show success message
+      const successMessage = 'Thank you ' + customerName + '! Your order has been placed successfully.\n\nOrder Number: ' + response.orderNumber + '\nOrder Total: ' + formatPrice(totalAmount) + '\n\nYou will receive a confirmation SMS shortly.';
+
       Alert.alert(
-        'Order Placed! 🎉',
-        `Thank you ${customerName}! Your order has been placed successfully.\n\nOrder Total: ${formatPrice(totalAmount)}\n\nYou'll receive a confirmation SMS shortly.`,
+        'Order Placed',
+        successMessage,
         [
           {
             text: 'OK',
             onPress: () => {
-              // Navigate back to home
               navigation.navigate('MainTabs');
             },
           },
         ]
       );
-    }, 1500);
+    } catch (error: any) {
+      setIsProcessing(false);
+      console.error('Order placement error:', error);
+      console.error('Error response:', error.response?.data);
+      
+      const errorMessage = error.response?.data?.message || 
+                          error.response?.data?.errors?.[0]?.message ||
+                          error.message || 
+                          'Failed to place order. Please try again.';
+      
+      const failMessage = 'Unable to place order: ' + errorMessage + '\n\nPlease check your connection and try again.';
+      
+      Alert.alert('Order Failed', failMessage, [{ text: 'OK' }]);
+    }
   };
 
   return (
@@ -100,7 +157,6 @@ const CheckoutScreen = () => {
       keyboardVerticalOffset={100}
     >
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-        {/* Order Summary Section */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Icon name="receipt-outline" size={24} color={colors.primary} />
@@ -129,7 +185,6 @@ const CheckoutScreen = () => {
           </View>
         </View>
 
-        {/* Customer Information Section */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Icon name="person-outline" size={24} color={colors.primary} />
@@ -186,48 +241,18 @@ const CheckoutScreen = () => {
           </View>
         </View>
 
-        {/* Payment Method Section */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Icon name="card-outline" size={24} color={colors.primary} />
+            <Icon name="cash-outline" size={24} color={colors.primary} />
             <Text style={styles.sectionTitle}>Payment Method</Text>
           </View>
           
           <View style={styles.card}>
-            <TouchableOpacity
-              style={[
-                styles.paymentOption,
-                paymentMethod === 'card' && styles.paymentOptionSelected,
-              ]}
-              onPress={() => setPaymentMethod('card')}
-              disabled={isProcessing}
-            >
+            <View style={styles.paymentOption}>
               <Icon
-                name={paymentMethod === 'card' ? 'radio-button-on' : 'radio-button-off'}
-                size={24}
-                color={paymentMethod === 'card' ? colors.primary : colors.textLight}
-              />
-              <View style={styles.paymentInfo}>
-                <Text style={styles.paymentTitle}>Card Payment</Text>
-                <Text style={styles.paymentSubtitle}>
-                  Pay with credit or debit card
-                </Text>
-              </View>
-              <Icon name="card" size={24} color={colors.textLight} />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[
-                styles.paymentOption,
-                paymentMethod === 'cash' && styles.paymentOptionSelected,
-              ]}
-              onPress={() => setPaymentMethod('cash')}
-              disabled={isProcessing}
-            >
-              <Icon
-                name={paymentMethod === 'cash' ? 'radio-button-on' : 'radio-button-off'}
-                size={24}
-                color={paymentMethod === 'cash' ? colors.primary : colors.textLight}
+                name="cash"
+                size={32}
+                color={colors.primary}
               />
               <View style={styles.paymentInfo}>
                 <Text style={styles.paymentTitle}>Cash on Pickup</Text>
@@ -235,22 +260,18 @@ const CheckoutScreen = () => {
                   Pay when you collect your order
                 </Text>
               </View>
-              <Icon name="cash" size={24} color={colors.textLight} />
-            </TouchableOpacity>
+            </View>
           </View>
         </View>
 
-        {/* Info Box */}
         <View style={styles.infoBox}>
           <Icon name="information-circle" size={20} color="#3b82f6" />
           <Text style={styles.infoText}>
-            Your order will be ready for pickup in 15-20 minutes. You'll receive a
-            confirmation SMS.
+            Your order will be ready for pickup in 15-20 minutes. You will receive a confirmation SMS.
           </Text>
         </View>
       </ScrollView>
 
-      {/* Bottom Button */}
       <View style={styles.bottomContainer}>
         <TouchableOpacity
           style={[styles.placeOrderButton, isProcessing && styles.buttonDisabled]}
@@ -362,12 +383,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: spacing.md,
     borderWidth: 2,
-    borderColor: colors.border,
-    borderRadius: 8,
-    marginBottom: spacing.sm,
-  },
-  paymentOptionSelected: {
     borderColor: colors.primary,
+    borderRadius: 8,
     backgroundColor: '#fef3f2',
   },
   paymentInfo: {

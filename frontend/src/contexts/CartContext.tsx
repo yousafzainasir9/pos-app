@@ -8,6 +8,8 @@ interface CartContextType {
   totalAmount: number;
   taxAmount: number;
   subTotal: number;
+  customerName: string;
+  setCustomerName: (name: string) => void;
   addItem: (product: Product, quantity?: number, notes?: string) => void;
   removeItem: (productId: number) => void;
   updateQuantity: (productId: number, quantity: number) => void;
@@ -19,10 +21,12 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [items, setItems] = useState<CartItem[]>([]);
+  const [customerName, setCustomerName] = useState<string>('');
 
   // Load cart from localStorage on mount
   useEffect(() => {
     const savedCart = localStorage.getItem('cart');
+    const savedCustomerName = localStorage.getItem('customerName');
     if (savedCart) {
       try {
         setItems(JSON.parse(savedCart));
@@ -30,12 +34,24 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         console.error('Failed to load cart:', error);
       }
     }
+    if (savedCustomerName) {
+      setCustomerName(savedCustomerName);
+    }
   }, []);
 
   // Save cart to localStorage whenever it changes
   useEffect(() => {
     localStorage.setItem('cart', JSON.stringify(items));
   }, [items]);
+
+  // Save customer name to localStorage whenever it changes
+  useEffect(() => {
+    if (customerName) {
+      localStorage.setItem('customerName', customerName);
+    } else {
+      localStorage.removeItem('customerName');
+    }
+  }, [customerName]);
 
   const addItem = (product: Product, quantity: number = 1, notes?: string) => {
     setItems(prevItems => {
@@ -102,7 +118,9 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const clearCart = () => {
     setItems([]);
+    setCustomerName('');
     localStorage.removeItem('cart');
+    localStorage.removeItem('customerName');
     toast.info('Cart cleared');
   };
 
@@ -126,6 +144,8 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     totalAmount,
     taxAmount,
     subTotal: afterDiscounts - taxAmount, // Excluding GST
+    customerName,
+    setCustomerName,
     addItem,
     removeItem,
     updateQuantity,

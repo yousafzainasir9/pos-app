@@ -159,7 +159,8 @@ const LoginPage: React.FC = () => {
                     Demo Accounts:<br />
                     Admin: admin / Admin123!<br />
                     Manager: manager1 / Manager123!<br />
-                    Cashier: cashier2 / Cashier123!
+                    Cashier: cashier2 / Cashier123!<br />
+                    Customer: customer / Customer123!
                   </div>
                 </Tab>
 

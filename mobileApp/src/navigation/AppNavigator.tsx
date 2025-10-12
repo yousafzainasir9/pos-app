@@ -5,10 +5,10 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '../store/store';
-import { restoreSession } from '../store/slices/authSlice';
-import { restoreSelectedStore } from '../store/slices/storeSlice';
+import { restoreSession, logoutUser } from '../store/slices/authSlice';
+import { restoreSelectedStore, clearSelectedStore } from '../store/slices/storeSlice';
 import { colors } from '../constants/theme';
-import { ActivityIndicator, View, StyleSheet } from 'react-native';
+import { ActivityIndicator, View, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 
 // Import screens
 import HomeScreen from '../screens/HomeScreen';
@@ -18,11 +18,13 @@ import CheckoutScreen from '../screens/CheckoutScreen';
 import LoginScreen from '../screens/LoginScreen';
 import StoreSelectionScreen from '../screens/StoreSelectionScreen';
 import OrderDetailScreen from '../screens/OrderDetailScreen';
+import ProductDetailScreen from '../screens/ProductDetailScreen';
 
 export type RootStackParamList = {
   MainTabs: undefined;
   Login: undefined;
   StoreSelection: undefined;
+  ProductDetail: { productId: number };
   Checkout: undefined;
   OrderDetail: { orderId: number };
 };
@@ -37,9 +39,34 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<TabParamList>();
 
 const TabNavigator = () => {
+  const dispatch = useDispatch<AppDispatch>();
+  const { user } = useSelector((state: RootState) => state.auth);
+  const { selectedStore } = useSelector((state: RootState) => state.store);
+  
   const cartItemsCount = useSelector((state: RootState) => 
     state.cart.items.reduce((sum, item) => sum + item.quantity, 0)
   );
+
+  const handleLogout = () => {
+    Alert.alert(
+      'Logout',
+      'Are you sure you want to logout?',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Logout',
+          style: 'destructive',
+          onPress: () => {
+            dispatch(logoutUser());
+            dispatch(clearSelectedStore());
+          },
+        },
+      ]
+    );
+  };
 
   return (
     <Tab.Navigator
@@ -67,6 +94,16 @@ const TabNavigator = () => {
           tabBarLabel: 'Shop',
           tabBarIcon: ({ color, size }) => (
             <Icon name="home-outline" size={size} color={color} />
+          ),
+          headerRight: () => (
+            <View style={{ flexDirection: 'row', marginRight: 15 }}>
+              <TouchableOpacity
+                onPress={handleLogout}
+                style={{ padding: 8 }}
+              >
+                <Icon name="log-out-outline" size={24} color="#fff" />
+              </TouchableOpacity>
+            </View>
           ),
         }}
       />
@@ -156,6 +193,11 @@ const AppNavigator = () => {
               name="MainTabs"
               component={TabNavigator}
               options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="ProductDetail"
+              component={ProductDetailScreen}
+              options={{ title: 'Product Details' }}
             />
             <Stack.Screen
               name="Checkout"

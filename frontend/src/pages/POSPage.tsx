@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Row, Col, Card, Button, Form, InputGroup, Badge } from 'react-bootstrap';
-import { FaSearch, FaBarcode, FaShoppingCart, FaTh, FaList, FaImage, FaInfoCircle } from 'react-icons/fa';
+import { Row, Col, Card, Button, Form, InputGroup, Badge, Modal } from 'react-bootstrap';
+import { FaSearch, FaBarcode, FaShoppingCart, FaTh, FaList, FaImage, FaInfoCircle, FaUser } from 'react-icons/fa';
 import { useCart } from '@/contexts/CartContext';
 import { useShift } from '@/contexts/ShiftContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { Product, Category } from '@/types';
 import productService from '@/services/product.service';
 import { toast } from 'react-toastify';
@@ -12,8 +13,9 @@ import './POSPage.css';
 
 const POSPage: React.FC = () => {
   const navigate = useNavigate();
-  const { addItem } = useCart();
+  const { addItem, customerName, setCustomerName } = useCart();
   const { isShiftOpen } = useShift();
+  const { user } = useAuth();
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
@@ -26,11 +28,27 @@ const POSPage: React.FC = () => {
   // Modal state
   const [showProductModal, setShowProductModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  
+  // Customer name modal state
+  const [showCustomerModal, setShowCustomerModal] = useState(false);
+  const [tempCustomerName, setTempCustomerName] = useState('');
 
   useEffect(() => {
     loadCategories();
     loadProducts();
+    
+    // Check if user is customer and no customer name is set
+    if (user?.role === 'Customer' && !customerName) {
+      setShowCustomerModal(true);
+    }
   }, []);
+  
+  // Show customer modal when user is customer and name is not set
+  useEffect(() => {
+    if (user?.role === 'Customer' && !customerName && !showCustomerModal) {
+      setShowCustomerModal(true);
+    }
+  }, [user, customerName]);
 
   useEffect(() => {
     if (!isShiftOpen) {
@@ -144,13 +162,42 @@ const POSPage: React.FC = () => {
   const getSelectedCategory = () => {
     return categories.find(c => c.id === selectedCategory);
   };
+  
+  const handleSaveCustomerName = () => {
+    if (!tempCustomerName.trim()) {
+      toast.error('Please enter your name');
+      return;
+    }
+    setCustomerName(tempCustomerName.trim());
+    setShowCustomerModal(false);
+    toast.success(`Welcome, ${tempCustomerName.trim()}!`);
+  };
 
   return (
     <div className="pos-page">
       <Row className="mb-3">
         <Col>
           <div className="d-flex justify-content-between align-items-center">
-            <h2>Point of Sale</h2>
+            <div>
+              <h2>Point of Sale</h2>
+              {user?.role === 'Customer' && customerName && (
+                <div className="text-muted small">
+                  <FaUser className="me-1" />
+                  Customer: <strong>{customerName}</strong>
+                  <Button
+                    variant="link"
+                    size="sm"
+                    className="p-0 ms-2"
+                    onClick={() => {
+                      setTempCustomerName(customerName);
+                      setShowCustomerModal(true);
+                    }}
+                  >
+                    (change)
+                  </Button>
+                </div>
+              )}
+            </div>
             <div className="d-flex gap-2">
               <Button
                 variant={viewMode === 'grid' ? 'primary' : 'outline-primary'}
@@ -498,6 +545,51 @@ const POSPage: React.FC = () => {
         product={selectedProduct}
         onAddToCart={handleAddToCartFromModal}
       />
+      
+      {/* Customer Name Modal */}
+      <Modal 
+        show={showCustomerModal} 
+        onHide={() => {}} 
+        backdrop="static" 
+        keyboard={false}
+        centered
+      >
+        <Modal.Header>
+          <Modal.Title>
+            <FaUser className="me-2" />
+            Enter Your Name
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p className="text-muted mb-3">
+            Please enter your name to continue with your order.
+          </p>
+          <Form.Group>
+            <Form.Label>Customer Name</Form.Label>
+            <Form.Control
+              type="text"
+              placeholder="Enter your name"
+              value={tempCustomerName}
+              onChange={(e) => setTempCustomerName(e.target.value)}
+              onKeyPress={(e) => {
+                if (e.key === 'Enter') {
+                  handleSaveCustomerName();
+                }
+              }}
+              autoFocus
+            />
+          </Form.Group>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button 
+            variant="primary" 
+            onClick={handleSaveCustomerName}
+            disabled={!tempCustomerName.trim()}
+          >
+            Continue
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 };
