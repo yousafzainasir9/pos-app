@@ -154,7 +154,20 @@ public class OrdersController : ControllerBase
                     CustomerName = o.Customer != null ? o.Customer.FullName : null,
                     CashierName = o.User.FullName,
                     StoreName = o.Store.Name,
-                    CompletedAt = o.CompletedAt
+                    CompletedAt = o.CompletedAt,
+                    Items = o.OrderItems.Select(oi => new OrderItemDto
+                    {
+                        Id = oi.Id,
+                        ProductId = oi.ProductId,
+                        ProductName = oi.Product.Name,
+                        ProductSKU = oi.Product.SKU,
+                        Quantity = oi.Quantity,
+                        UnitPriceIncGst = oi.UnitPriceIncGst,
+                        DiscountAmount = oi.DiscountAmount,
+                        TotalAmount = oi.TotalAmount,
+                        Notes = oi.Notes,
+                        IsVoided = oi.IsVoided
+                    }).ToList()
                 })
                 .ToListAsync();
 
