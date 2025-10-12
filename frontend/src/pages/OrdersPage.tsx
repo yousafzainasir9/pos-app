@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Table, Card, Badge, Button, Form, Row, Col, Pagination } from 'react-bootstrap';
-import { FaEye, FaPrint, FaFilter, FaReceipt, FaTimes, FaCheck } from 'react-icons/fa';
+import { FaEye, FaPrint, FaFilter, FaReceipt, FaTimes, FaCheck, FaCheckCircle } from 'react-icons/fa';
 import { format } from 'date-fns';
 import { Order, OrderStatus } from '@/types';
 import orderService from '@/services/order.service';
@@ -44,6 +44,14 @@ const OrdersPage: React.FC = () => {
     // Load both summary and orders on initial mount
     loadSummary();
     loadOrders();
+    
+    // Auto-refresh every 30 seconds
+    const interval = setInterval(() => {
+      loadOrders();
+      loadSummary();
+    }, 30000);
+    
+    return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
@@ -121,6 +129,19 @@ const OrdersPage: React.FC = () => {
     return <Badge bg={config.variant}>{config.label}</Badge>;
   };
 
+  const getOrderSourceBadge = (order: Order) => {
+    // If order has no shift, it's a mobile order
+    if (!order.shiftId) {
+      return <Badge bg="info" className="ms-1">📱 Mobile</Badge>;
+    }
+    return null;
+  };
+
+  const isRecentOrder = (orderDate: string) => {
+    const diff = new Date().getTime() - new Date(orderDate).getTime();
+    return diff < 10 * 60 * 1000; // Less than 10 minutes old
+  };
+
   const getOrderTypeBadge = (type: number) => {
     const typeMap: { [key: number]: { variant: string; label: string } } = {
       1: { variant: 'primary', label: 'Dine In' },
@@ -192,6 +213,34 @@ const OrdersPage: React.FC = () => {
     } catch (error) {
       console.error('Failed to print receipt:', error);
       toast.error('Failed to print receipt');
+    }
+  };
+
+  const handleQuickComplete = async (orderId: number, orderNumber: string) => {
+    if (!window.confirm(`Mark order ${orderNumber} as completed and paid?`)) {
+      return;
+    }
+
+    try {
+      // Get order details
+      const order = await orderService.getOrder(orderId);
+      
+      // Process payment for full amount
+      await orderService.processPayment({
+        orderId: order.id,
+        amount: order.totalAmount,
+        paymentMethod: 1, // Cash
+        notes: 'Quick complete from orders page'
+      });
+      
+      toast.success(`Order ${orderNumber} completed successfully!`);
+      
+      // Reload orders
+      loadOrders();
+      loadSummary();
+    } catch (error: any) {
+      console.error('Failed to complete order:', error);
+      toast.error(error.response?.data?.message || 'Failed to complete order');
     }
   };
 
@@ -341,13 +390,23 @@ const OrdersPage: React.FC = () => {
               </thead>
               <tbody>
                 {orders.map(order => (
-                  <tr key={order.id}>
+                  <tr 
+                    key={order.id}
+                    className={isRecentOrder(order.orderDate) ? 'table-warning' : ''}
+                    style={isRecentOrder(order.orderDate) ? { fontWeight: '500' } : {}}
+                  >
                     <td>
                       <strong>{order.orderNumber}</strong>
+                      {isRecentOrder(order.orderDate) && (
+                        <Badge bg="danger" className="ms-2" style={{ fontSize: '0.7em' }}>NEW</Badge>
+                      )}
                     </td>
                     <td>{format(new Date(order.orderDate), 'MM/dd/yyyy HH:mm')}</td>
                     <td>{order.customerName || 'Walk-in'}</td>
-                    <td>{getOrderTypeBadge(order.orderType)}</td>
+                    <td>
+                      {getOrderTypeBadge(order.orderType)}
+                      {getOrderSourceBadge(order)}
+                    </td>
                     <td>{getStatusBadge(order.status)}</td>
                     <td className="fw-bold">${order.totalAmount.toFixed(2)}</td>
                     <td>{getPaymentStatus(order)}</td>
@@ -361,6 +420,16 @@ const OrdersPage: React.FC = () => {
                         >
                           <FaEye />
                         </Button>
+                        {(order.status === OrderStatus.Pending || order.status === OrderStatus.Processing) && (
+                          <Button
+                            variant="outline-success"
+                            size="sm"
+                            onClick={() => handleQuickComplete(order.id, order.orderNumber)}
+                            title="Mark as Complete"
+                          >
+                            <FaCheckCircle />
+                          </Button>
+                        )}
                         <Button
                           variant="outline-secondary"
                           size="sm"

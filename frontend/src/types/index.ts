@@ -148,6 +148,7 @@ export interface Order {
   customerName?: string;
   cashierName: string;
   storeName: string;
+  shiftId?: number; // Added for mobile order detection
   items: OrderItem[];
   payments: Payment[];
 }

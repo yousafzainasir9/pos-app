@@ -9,6 +9,7 @@ import productService from '@/services/product.service';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import ProductDetailModal from '@/components/pos/ProductDetailModal';
+import PendingMobileOrders from '@/components/orders/PendingMobileOrders';
 import './POSPage.css';
 
 const POSPage: React.FC = () => {
@@ -175,6 +176,15 @@ const POSPage: React.FC = () => {
 
   return (
     <div className="pos-page">
+      {/* Pending Mobile Orders Widget */}
+      {user?.role !== 'Customer' && (
+        <Row className="mb-3">
+          <Col>
+            <PendingMobileOrders />
+          </Col>
+        </Row>
+      )}
+      
       <Row className="mb-3">
         <Col>
           <div className="d-flex justify-content-between align-items-center">
