@@ -175,6 +175,55 @@ class OrderService {
     }
   }
 
+  async getPendingMobileOrders(params?: {
+    page?: number;
+    pageSize?: number;
+  }): Promise<OrdersResponse> {
+    try {
+      const apiParams: any = {};
+      if (params?.page) apiParams.page = params.page;
+      if (params?.pageSize) apiParams.pageSize = params.pageSize;
+
+      const response = await apiService.get('/orders/pending-mobile', { params: apiParams });
+      
+      // Handle API response format
+      if (response.data?.data?.data && response.data?.data?.pagination) {
+        return {
+          data: response.data.data.data,
+          pagination: response.data.data.pagination
+        };
+      }
+      
+      // Fallback for unexpected format
+      console.warn('Unexpected API response format:', response);
+      return {
+        data: [],
+        pagination: {
+          currentPage: 1,
+          pageSize: 10,
+          totalCount: 0,
+          totalPages: 0,
+          hasNext: false,
+          hasPrevious: false
+        }
+      };
+    } catch (error: any) {
+      console.error('Failed to fetch pending mobile orders:', error.message);
+      toast.error('Failed to load pending mobile orders');
+      return {
+        data: [],
+        pagination: {
+          currentPage: 1,
+          pageSize: 10,
+          totalCount: 0,
+          totalPages: 0,
+          hasNext: false,
+          hasPrevious: false
+        }
+      };
+    }
+  }
+
   async getCurrentShiftOrders(): Promise<{
     shiftId?: number;
     shiftNumber?: string;

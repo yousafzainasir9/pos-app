@@ -28,23 +28,18 @@ const PendingMobileOrders: React.FC = () => {
   const loadPendingOrders = async () => {
     setIsLoading(true);
     try {
-      const response = await orderService.getOrders({
-        status: OrderStatus.Pending,
+      // Use the new dedicated API endpoint for pending mobile orders
+      const response = await orderService.getPendingMobileOrders({
         page: 1,
-        pageSize: 10
+        pageSize: 50
       });
       
-      // Filter mobile orders (those without shift)
-      const mobileOrders = response.data.filter(
-        (order: Order) => !order.shiftId
-      );
-      
-      setPendingCount(mobileOrders.length);
-      setRecentOrders(mobileOrders.slice(0, 5)); // Show max 5
+      setPendingCount(response.pagination.totalCount);
+      setRecentOrders(response.data.slice(0, 5)); // Show max 5
       setLastCheck(new Date());
       
       // Play sound if there are new orders (optional)
-      if (mobileOrders.length > 0 && pendingCount === 0) {
+      if (response.data.length > 0 && pendingCount === 0) {
         playNotificationSound();
       }
     } catch (error) {

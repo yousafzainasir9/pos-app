@@ -441,13 +441,19 @@ public class OrdersController : ControllerBase
                 return NotFound();
             }
 
-            if (order.Status != OrderStatus.Pending && order.Status != OrderStatus.Processing)
+            if (order.ShiftId != null && (order.Status != OrderStatus.Pending && order.Status != OrderStatus.Processing))
             {
                 return BadRequest("Order cannot accept payments in its current status");
             }
 
             var currentUserId = _currentUserService.UserId ?? throw new UnauthorizedAccessException("User not authenticated");
-
+            if (order.ShiftId == null)
+            {
+                var activeShift = await _unitOfWork.Repository<Shift>().Query()
+                        .Where(s => s.UserId == currentUserId && s.Status == ShiftStatus.Open)
+                        .FirstOrDefaultAsync();
+                order.ShiftId = activeShift.Id;
+            }
             // Create payment record
             var payment = new Payment
             {
@@ -566,6 +572,110 @@ public class OrdersController : ControllerBase
             await _unitOfWork.RollbackTransactionAsync();
             _logger.LogError(ex, "Error voiding order {OrderId}", id);
             return StatusCode(500, "An error occurred while voiding the order");
+        }
+    }
+
+    [HttpGet("pending-mobile")]
+    public async Task<ActionResult<ApiResponse<object>>> GetPendingMobileOrders(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10)
+    {
+        try
+        {
+            // Validate pagination parameters
+            if (page < 1) page = 1;
+            if (pageSize < 1) pageSize = 10;
+            if (pageSize > 50) pageSize = 50;
+
+            var currentUserId = _currentUserService.UserId ?? throw new UnauthorizedAccessException("User not authenticated");
+            var currentUser = await _unitOfWork.Repository<User>().GetByIdAsync(currentUserId);
+
+            if (currentUser == null)
+            {
+                return BadRequest(ApiResponse<object>.ErrorResponse(
+                    new ErrorResponse("USER_NOT_FOUND", "User not found")));
+            }
+
+            // Get mobile orders (no shift assigned) that are pending or processing
+            // Only for the current user's store
+            var query = _unitOfWork.Repository<Order>().Query()
+                .Include(o => o.Customer)
+                .Include(o => o.User)
+                .Include(o => o.Store)
+                .Include(o => o.OrderItems)
+                    .ThenInclude(oi => oi.Product)
+                .Where(o =>
+                    o.ShiftId == null &&  // Mobile orders (not assigned to any shift)
+                    o.StoreId == currentUser.StoreId  // Same store as current user
+                                                      //
+                                                         )  // Pending or Processing
+                .OrderByDescending(o => o.OrderDate)
+                .AsQueryable();
+
+            // Get total count
+            var totalCount = await query.CountAsync();
+
+            // Apply pagination
+            var orders = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Select(o => new OrderDto
+                {
+                    Id = o.Id,
+                    OrderNumber = o.OrderNumber,
+                    OrderDate = o.OrderDate,
+                    Status = o.Status,
+                    OrderType = o.OrderType,
+                    SubTotal = o.SubTotal,
+                    DiscountAmount = o.DiscountAmount,
+                    TaxAmount = o.TaxAmount,
+                    TotalAmount = o.TotalAmount,
+                    PaidAmount = o.PaidAmount,
+                    ChangeAmount = o.ChangeAmount,
+                    TableNumber = o.TableNumber,
+                    CustomerId = o.CustomerId,
+                    CustomerName = o.Customer != null ? o.Customer.FullName : null,
+                    CashierName = o.User.FullName,
+                    StoreName = o.Store.Name,
+                    CompletedAt = o.CompletedAt,
+                    Items = o.OrderItems.Select(oi => new OrderItemDto
+                    {
+                        Id = oi.Id,
+                        ProductId = oi.ProductId,
+                        ProductName = oi.Product.Name,
+                        ProductSKU = oi.Product.SKU,
+                        Quantity = oi.Quantity,
+                        UnitPriceIncGst = oi.UnitPriceIncGst,
+                        DiscountAmount = oi.DiscountAmount,
+                        TotalAmount = oi.TotalAmount,
+                        Notes = oi.Notes,
+                        IsVoided = oi.IsVoided
+                    }).ToList()
+                })
+                .ToListAsync();
+
+            // Calculate pagination metadata
+            var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+
+            return Ok(ApiResponse<object>.SuccessResponse(new
+            {
+                data = orders,
+                pagination = new
+                {
+                    currentPage = page,
+                    pageSize = pageSize,
+                    totalCount = totalCount,
+                    totalPages = totalPages,
+                    hasNext = page < totalPages,
+                    hasPrevious = page > 1
+                }
+            }));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving pending mobile orders");
+            return StatusCode(500, ApiResponse<object>.ErrorResponse(
+                new ErrorResponse("INTERNAL_ERROR", "An error occurred while retrieving pending mobile orders")));
         }
     }
 
