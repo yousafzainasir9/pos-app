@@ -83,7 +83,7 @@ const CheckoutScreen = () => {
         orderType: OrderTypeEnum.TakeAway,
         storeId: selectedStoreId,  // Send the selected store ID
         tableNumber: undefined,
-        customerId: user?.id || undefined,
+        customerId: user?.customerId || undefined,  // Send Customer ID, not User ID
         notes: notes.trim() || 'Customer: ' + customerName + ' | Phone: ' + customerPhone,
         items: items.map(item => ({
           productId: item.product.id,

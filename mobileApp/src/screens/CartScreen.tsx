@@ -11,14 +11,15 @@ import {
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { colors, spacing } from '../constants/theme';
 import { RootState, AppDispatch } from '../store/store';
 import { removeFromCart, updateQuantity, clearCart } from '../store/slices/cartSlice';
 import { CartItem } from '../types/product.types';
-import { RootStackParamList } from '../navigation/AppNavigator';
+import { RootStackParamList, TabParamList } from '../navigation/AppNavigator';
 
-type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
+type NavigationProp = BottomTabNavigationProp<TabParamList>;
 
 const CartScreen = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -148,7 +149,7 @@ const CartScreen = () => {
       <Text style={styles.emptyText}>Add some delicious items from our menu!</Text>
       <TouchableOpacity
         style={styles.shopButton}
-        onPress={() => navigation.navigate('MainTabs')}
+        onPress={() => navigation.navigate('Home')}
       >
         <Text style={styles.shopButtonText}>Start Shopping</Text>
       </TouchableOpacity>

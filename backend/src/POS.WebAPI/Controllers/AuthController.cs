@@ -105,6 +105,13 @@ public class AuthController : ControllerBase
                 StoreId = user.StoreId
             });
 
+            // Load Customer data if user is a customer
+            Customer? customer = null;
+            if (user.CustomerId.HasValue)
+            {
+                customer = await _unitOfWork.Repository<Customer>().GetByIdAsync(user.CustomerId.Value);
+            }
+
             var response = new LoginResponseDto
             {
                 Token = token,
@@ -115,13 +122,13 @@ public class AuthController : ControllerBase
                     Id = user.Id,
                     Username = user.Username,
                     Email = user.Email,
-                    FirstName = user.FirstName,
-                    LastName = user.LastName,
+                    FirstName = customer?.FirstName ?? user.FirstName,
+                    LastName = customer?.LastName ?? user.LastName,
                     Role = user.Role.ToString(),
                     StoreId = user.StoreId,
                     StoreName = user.Store?.Name,
                     CustomerId = user.CustomerId,
-                    Phone = user.Phone
+                    Phone = customer?.Phone ?? user.Phone
                 }
             };
 
@@ -217,6 +224,13 @@ public class AuthController : ControllerBase
                 StoreId = user.StoreId
             });
 
+            // Load Customer data if user is a customer
+            Customer? customer = null;
+            if (user.CustomerId.HasValue)
+            {
+                customer = await _unitOfWork.Repository<Customer>().GetByIdAsync(user.CustomerId.Value);
+            }
+
             var response = new LoginResponseDto
             {
                 Token = token,
@@ -227,15 +241,15 @@ public class AuthController : ControllerBase
                     Id = user.Id,
                     Username = user.Username,
                     Email = user.Email,
-                    FirstName = user.FirstName,
-                    LastName = user.LastName,
+                    FirstName = customer?.FirstName ?? user.FirstName,
+                    LastName = customer?.LastName ?? user.LastName,
                     Role = user.Role.ToString(),
                     StoreId = user.StoreId,
                     StoreName = user.Store?.Name,
                     HasActiveShift = activeShift != null,
                     ActiveShiftId = activeShift?.Id,
                     CustomerId = user.CustomerId,
-                    Phone = user.Phone
+                    Phone = customer?.Phone ?? user.Phone
                 }
             };
 
@@ -301,6 +315,13 @@ public class AuthController : ControllerBase
                 StoreId = user.StoreId
             });
 
+            // Load Customer data if user is a customer
+            Customer? customer = null;
+            if (user.CustomerId.HasValue)
+            {
+                customer = await _unitOfWork.Repository<Customer>().GetByIdAsync(user.CustomerId.Value);
+            }
+
             var response = new LoginResponseDto
             {
                 Token = token,
@@ -311,13 +332,13 @@ public class AuthController : ControllerBase
                     Id = user.Id,
                     Username = user.Username,
                     Email = user.Email,
-                    FirstName = user.FirstName,
-                    LastName = user.LastName,
+                    FirstName = customer?.FirstName ?? user.FirstName,
+                    LastName = customer?.LastName ?? user.LastName,
                     Role = user.Role.ToString(),
                     StoreId = user.StoreId,
                     StoreName = user.Store?.Name,
                     CustomerId = user.CustomerId,
-                    Phone = user.Phone
+                    Phone = customer?.Phone ?? user.Phone
                 }
             };
 
