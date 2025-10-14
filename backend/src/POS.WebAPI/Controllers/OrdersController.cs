@@ -452,7 +452,7 @@ public class OrdersController : ControllerBase
                 var activeShift = await _unitOfWork.Repository<Shift>().Query()
                         .Where(s => s.UserId == currentUserId && s.Status == ShiftStatus.Open)
                         .FirstOrDefaultAsync();
-                order.ShiftId = activeShift.Id;
+                order.ShiftId = activeShift?.Id;
             }
             // Create payment record
             var payment = new Payment
