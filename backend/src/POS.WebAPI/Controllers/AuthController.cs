@@ -447,8 +447,8 @@ public class AuthController : ControllerBase
         try
         {
             securityLog.Timestamp = DateTime.Now;
-            securityLog.IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
-            securityLog.UserAgent = HttpContext.Request.Headers["User-Agent"].ToString();
+            securityLog.IpAddress = HttpContext?.Connection?.RemoteIpAddress?.ToString();
+            securityLog.UserAgent = HttpContext?.Request?.Headers["User-Agent"].ToString();
             
             await _auditService.LogSecurityEventAsync(securityLog);
         }

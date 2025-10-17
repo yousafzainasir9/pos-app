@@ -441,12 +441,18 @@ public class OrdersController : ControllerBase
                 return NotFound();
             }
 
-            if (order.ShiftId != null && (order.Status != OrderStatus.Pending && order.Status != OrderStatus.Processing))
+            // FIXED: Check order status regardless of ShiftId
+            // Completed, Cancelled, and Refunded orders should not accept payments
+            if (order.Status == OrderStatus.Completed || 
+                order.Status == OrderStatus.Cancelled || 
+                order.Status == OrderStatus.Refunded)
             {
                 return BadRequest("Order cannot accept payments in its current status");
             }
 
             var currentUserId = _currentUserService.UserId ?? throw new UnauthorizedAccessException("User not authenticated");
+            
+            // Assign shift for mobile orders when first payment is made
             if (order.ShiftId == null)
             {
                 var activeShift = await _unitOfWork.Repository<Shift>().Query()
@@ -454,6 +460,7 @@ public class OrdersController : ControllerBase
                         .FirstOrDefaultAsync();
                 order.ShiftId = activeShift?.Id;
             }
+            
             // Create payment record
             var payment = new Payment
             {

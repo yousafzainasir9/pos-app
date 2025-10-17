@@ -373,6 +373,10 @@ namespace POS.Infrastructure.Services
                 .Take(50)
                 .ToList();
 
+            // Calculate totals from actual orders, not from shift properties
+            var totalOrders = shift.Orders?.Count ?? 0;
+            var totalSales = shift.Orders?.Sum(o => o.TotalAmount) ?? 0;
+
             return new ShiftReportDto
             {
                 ShiftId = (int)shift.Id,
@@ -382,8 +386,8 @@ namespace POS.Infrastructure.Services
                 EndTime = shift.EndTime,
                 StartingCash = shift.StartingCash,
                 EndingCash = shift.EndingCash,
-                TotalSales = shift.TotalSales ?? 0,
-                TotalOrders = shift.TotalOrders ?? 0,
+                TotalSales = totalSales,
+                TotalOrders = totalOrders,
                 CashSales = cashSales,
                 CardSales = cardSales,
                 OtherSales = otherSales,

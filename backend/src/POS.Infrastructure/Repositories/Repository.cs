@@ -17,7 +17,11 @@ public class Repository<T> : IRepository<T> where T : class
 
     public async Task<T?> GetByIdAsync(long id, CancellationToken cancellationToken = default)
     {
-        return await _dbSet.FindAsync(new object[] { id }, cancellationToken);
+        // Use FirstOrDefaultAsync instead of FindAsync to respect query filters (soft delete)
+        // FindAsync bypasses query filters which would return soft-deleted entities
+        return await _dbSet
+            .Where(e => EF.Property<long>(e, "Id") == id)
+            .FirstOrDefaultAsync(cancellationToken);
     }
 
     public async Task<IEnumerable<T>> GetAllAsync(CancellationToken cancellationToken = default)

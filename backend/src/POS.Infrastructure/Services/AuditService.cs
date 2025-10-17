@@ -118,6 +118,12 @@ public class AuditService : IAuditService
 
     public async Task LogSecurityEventAsync(SecurityLog securityLog, CancellationToken cancellationToken = default)
     {
+        // Set timestamp if not already set
+        if (securityLog.Timestamp == default)
+        {
+            securityLog.Timestamp = DateTime.Now;
+        }
+        
         await _context.SecurityLogs.AddAsync(securityLog, cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);
     }

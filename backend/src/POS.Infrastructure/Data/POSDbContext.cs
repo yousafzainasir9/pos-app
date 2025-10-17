@@ -90,6 +90,12 @@ public class POSDbContext : DbContext, IApplicationDbContext
         return Expression.Lambda(body, parameter);
     }
 
+    public override int SaveChanges()
+    {
+        HandleSoftDelete();
+        return base.SaveChanges();
+    }
+
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         HandleSoftDelete();

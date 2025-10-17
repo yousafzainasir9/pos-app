@@ -2,10 +2,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.33424.131
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{8961E156-7C5C-41AF-A865-33E10DBFBE5B}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{A961E156-7C5C-41AF-A865-33E10DBFBE5B}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "POS.Domain", "src\POS.Domain\POS.Domain.csproj", "{B37C7C76-8A5A-4741-9CBF-C4CAC496708E}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "POS.Application", "src\POS.Application\POS.Application.csproj", "{C37C7C76-8A5A-4741-9CBF-C4CAC496708E}"
@@ -16,16 +12,16 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "POS.WebAPI", "src\POS.WebAP
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "POS.Migrator", "src\POS.Migrator\POS.Migrator.csproj", "{F9D5A3ED-DC43-48F5-9B57-28722E8F495A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "POS.Infrastructure.Tests", "tests\POS.Infrastructure.Tests\POS.Infrastructure.Tests.csproj", "{665DBE61-8CDE-4E8C-B53B-24FCBF42F6CC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "POS.WebAPI.Tests", "tests\POS.WebAPI.Tests\POS.WebAPI.Tests.csproj", "{43E00425-AB0D-4FF7-BF42-724A842A4A22}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{F9D5A3ED-DC43-48F5-9B57-28722E8F495A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F9D5A3ED-DC43-48F5-9B57-28722E8F495A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F9D5A3ED-DC43-48F5-9B57-28722E8F495A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F9D5A3ED-DC43-48F5-9B57-28722E8F495A}.Release|Any CPU.Build.0 = Release|Any CPU
 		{B37C7C76-8A5A-4741-9CBF-C4CAC496708E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{B37C7C76-8A5A-4741-9CBF-C4CAC496708E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B37C7C76-8A5A-4741-9CBF-C4CAC496708E}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -42,6 +38,18 @@ Global
 		{BBF31BD3-0DFD-4D2D-A217-D6F2DEA80997}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BBF31BD3-0DFD-4D2D-A217-D6F2DEA80997}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BBF31BD3-0DFD-4D2D-A217-D6F2DEA80997}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F9D5A3ED-DC43-48F5-9B57-28722E8F495A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F9D5A3ED-DC43-48F5-9B57-28722E8F495A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F9D5A3ED-DC43-48F5-9B57-28722E8F495A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F9D5A3ED-DC43-48F5-9B57-28722E8F495A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{665DBE61-8CDE-4E8C-B53B-24FCBF42F6CC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{665DBE61-8CDE-4E8C-B53B-24FCBF42F6CC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{665DBE61-8CDE-4E8C-B53B-24FCBF42F6CC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{665DBE61-8CDE-4E8C-B53B-24FCBF42F6CC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{43E00425-AB0D-4FF7-BF42-724A842A4A22}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{43E00425-AB0D-4FF7-BF42-724A842A4A22}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{43E00425-AB0D-4FF7-BF42-724A842A4A22}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{43E00425-AB0D-4FF7-BF42-724A842A4A22}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
