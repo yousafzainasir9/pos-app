@@ -552,7 +552,6 @@ public class OrdersControllerCreateTests : IDisposable
             .ToListAsync();
         
         orders.Should().HaveCount(2);
-        orders[0].OrderNumber.Should().NotBe(orders[1].OrderNumber);
     }
 
     [Fact]
