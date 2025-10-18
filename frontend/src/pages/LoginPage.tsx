@@ -159,8 +159,10 @@ const LoginPage: React.FC = () => {
                     Demo Accounts:<br />
                     Admin: admin / Admin123!<br />
                     Manager: manager1 / Manager123!<br />
-                    Cashier: cashier2 / Cashier123!<br />
-                    Customer: customer / Customer123!
+                    Cashier: cashier2 / Cashier123!
+                  </div>
+                  <div className="mt-2 text-center text-muted small">
+                    <em>Note: Customers can only login via the mobile app</em>
                   </div>
                 </Tab>
 
