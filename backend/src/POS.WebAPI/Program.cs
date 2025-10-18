@@ -8,6 +8,8 @@ using POS.Infrastructure.Data;
 using POS.Infrastructure.Data.Interceptors;
 using POS.Infrastructure.Repositories;
 using POS.Infrastructure.Services;
+using POS.Infrastructure.Services.WhatsApp;
+using POS.Application.Common.Configuration;
 using POS.WebAPI.Services;
 using Serilog;
 using System.Text;
@@ -48,7 +50,7 @@ builder.Services.AddSwaggerGen(c =>
     { 
         Title = "Cookie Barrel POS API", 
         Version = "v1",
-        Description = "Point of Sale API for Cookie Barrel bakery chain",
+        Description = "Point of Sale API for Cookie Barrel bakery chain with WhatsApp Integration",
         Contact = new OpenApiContact
         {
             Name = "Cookie Barrel IT",
@@ -122,7 +124,7 @@ builder.Services.AddDbContext<POSDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"),
         b => b.MigrationsAssembly(typeof(POSDbContext).Assembly.FullName)));
 
-// Register services
+// Register core services
 builder.Services.AddScoped<AuditableEntitySaveChangesInterceptor>();
 builder.Services.AddScoped<IApplicationDbContext>(provider => provider.GetRequiredService<POSDbContext>());
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -134,6 +136,15 @@ builder.Services.AddScoped<IAuditService, AuditService>();
 builder.Services.AddScoped<IDataManagementService, DataManagementService>();
 builder.Services.AddScoped<ISystemSettingsService, SystemSettingsService>();
 builder.Services.AddHttpContextAccessor();
+
+// Configure WhatsApp settings
+builder.Services.Configure<WhatsAppSettings>(
+    builder.Configuration.GetSection("WhatsApp"));
+
+// Register WhatsApp services
+builder.Services.AddSingleton<ISessionStorage, InMemorySessionStorage>();
+builder.Services.AddHttpClient<IWhatsAppService, WhatsAppService>();
+builder.Services.AddScoped<IWhatsAppConversationService, WhatsAppConversationService>();
 
 // Configure AutoMapper
 builder.Services.AddAutoMapper(typeof(Program).Assembly);
@@ -262,7 +273,7 @@ app.MapHealthChecks("/health");
 app.MapControllers();
 
 // Log startup information
-Log.Information("Starting Cookie Barrel POS API");
+Log.Information("Starting Cookie Barrel POS API with WhatsApp Integration");
 Log.Information($"Environment: {app.Environment.EnvironmentName}");
 Log.Information($"URLs: {string.Join(", ", builder.Configuration["ASPNETCORE_URLS"]?.Split(';') ?? new[] { "Not configured" })}");
 
