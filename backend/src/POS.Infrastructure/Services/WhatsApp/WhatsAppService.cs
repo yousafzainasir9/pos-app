@@ -65,11 +65,11 @@ namespace POS.Infrastructure.Services.WhatsApp
             var menu =
                 "🍪 *Cookie Barrel Menu*\n\n" +
                 "*Available Items:*\n" +
-                "1. Chocolate Chip Cookie - ₹50\n" +
-                "2. Oatmeal Cookie - ₹45\n" +
-                "3. Brownie - ₹80\n" +
-                "4. Vanilla Cupcake - ₹60\n" +
-                "5. Red Velvet Cupcake - ₹70\n\n" +
+                "1. Chocolate Chip Cookie - $50\n" +
+                "2. Oatmeal Cookie - $45\n" +
+                "3. Brownie - $80\n" +
+                "4. Vanilla Cupcake - $60\n" +
+                "5. Red Velvet Cupcake - $70\n\n" +
                 "*How to Order:*\n" +
                 "Type: *1, 2* (item number, quantity)\n" +
                 "Example: *3, 2* (2 Brownies)\n\n" +
@@ -88,7 +88,7 @@ namespace POS.Infrastructure.Services.WhatsApp
             var message =
                 "✅ *Order Confirmed!*\n\n" +
                 $"Order Number: *{orderNumber}*\n" +
-                $"Total Amount: *₹{total:F2}*\n" +
+                $"Total Amount: *${total:F2}*\n" +
                 $"Estimated Delivery: *30-45 minutes*\n\n" +
                 "Your delicious treats are being prepared! 🍪\n\n" +
                 "Thank you for choosing Cookie Barrel!\n" +
@@ -153,7 +153,7 @@ namespace POS.Infrastructure.Services.WhatsApp
             {
                 var itemTotal = item.Price * item.Quantity;
                 message.AppendLine($"• {item.Quantity}x {item.Name}");
-                message.AppendLine($"  ₹{item.Price:F2} each = ₹{itemTotal:F2}");
+                message.AppendLine($"  ${item.Price:F2} each = ${itemTotal:F2}");
                 if (!string.IsNullOrEmpty(item.Notes))
                 {
                     message.AppendLine($"  Note: {item.Notes}");
@@ -161,7 +161,7 @@ namespace POS.Infrastructure.Services.WhatsApp
                 message.AppendLine();
             }
 
-            message.AppendLine($"*Total: ₹{total:F2}*\n");
+            message.AppendLine($"*Total: ${total:F2}*\n");
             message.AppendLine("Type *done* to proceed to checkout");
             message.AppendLine("Type *clear* to empty cart");
 
@@ -178,13 +178,13 @@ namespace POS.Infrastructure.Services.WhatsApp
             foreach (var item in items)
             {
                 var itemTotal = item.Price * item.Quantity;
-                message.AppendLine($"• {item.Quantity}x {item.Name} - ₹{itemTotal:F2}");
+                message.AppendLine($"• {item.Quantity}x {item.Name} - ${itemTotal:F2}");
             }
 
             message.AppendLine();
-            message.AppendLine($"*Subtotal:* ₹{total:F2}");
+            message.AppendLine($"*Subtotal:* ${total:F2}");
             message.AppendLine($"*Delivery:* Free");
-            message.AppendLine($"*Total:* ₹{total:F2}\n");
+            message.AppendLine($"*Total:* ${total:F2}\n");
             message.AppendLine("*Delivery Details:*");
             message.AppendLine($"Name: {customerName}");
             message.AppendLine($"Address: {address}\n");

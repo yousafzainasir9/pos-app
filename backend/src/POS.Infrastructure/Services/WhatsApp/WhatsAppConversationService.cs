@@ -218,8 +218,8 @@ namespace POS.Infrastructure.Services.WhatsApp
 
             await _whatsAppService.SendTextMessageAsync(from,
                 $"✅ Added {quantity}x {product.Name}\n\n" +
-                $"Item Total: ₹{itemTotal:F2}\n" +
-                $"Cart Total: ₹{cartTotal:F2}\n\n" +
+                $"Item Total: ${itemTotal:F2}\n" +
+                $"Cart Total: ${cartTotal:F2}\n\n" +
                 "Add more items or type *done* to checkout");
         }
 
