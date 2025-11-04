@@ -14,16 +14,16 @@ namespace POS.WebAPI.Controllers
     public class WhatsAppWebhookController : ControllerBase
     {
         private readonly WhatsAppSettings _settings;
-        private readonly IWhatsAppConversationService _conversationService;
+        private readonly IServiceScopeFactory _serviceScopeFactory;
         private readonly ILogger<WhatsAppWebhookController> _logger;
 
         public WhatsAppWebhookController(
             IOptions<WhatsAppSettings> settings,
-            IWhatsAppConversationService conversationService,
+            IServiceScopeFactory serviceScopeFactory,
             ILogger<WhatsAppWebhookController> logger)
         {
             _settings = settings.Value;
-            _conversationService = conversationService;
+            _serviceScopeFactory = serviceScopeFactory;
             _logger = logger;
         }
 
@@ -91,7 +91,11 @@ namespace POS.WebAPI.Controllers
                                 {
                                     try
                                     {
-                                        await _conversationService.HandleIncomingMessageAsync(
+                                        // Create a new scope for the background task
+                                        using var scope = _serviceScopeFactory.CreateScope();
+                                        var conversationService = scope.ServiceProvider.GetRequiredService<IWhatsAppConversationService>();
+                                        
+                                        await conversationService.HandleIncomingMessageAsync(
                                             message.From,
                                             message.Text.Body,
                                             message.Id);
@@ -125,7 +129,11 @@ namespace POS.WebAPI.Controllers
                                     {
                                         try
                                         {
-                                            await _conversationService.HandleIncomingMessageAsync(
+                                            // Create a new scope for the background task
+                                            using var scope = _serviceScopeFactory.CreateScope();
+                                            var conversationService = scope.ServiceProvider.GetRequiredService<IWhatsAppConversationService>();
+                                            
+                                            await conversationService.HandleIncomingMessageAsync(
                                                 message.From,
                                                 responseText,
                                                 message.Id);

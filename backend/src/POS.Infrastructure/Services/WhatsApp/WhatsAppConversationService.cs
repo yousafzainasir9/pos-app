@@ -315,8 +315,17 @@ namespace POS.Infrastructure.Services.WhatsApp
 
             // Send order summary
             var total = session.Cart.Sum(c => c.Price * c.Quantity);
-            await _whatsAppService.SendOrderSummaryAsync(from, session.CustomerName, 
+            var summaryResult = await _whatsAppService.SendOrderSummaryAsync(from, session.CustomerName, 
                 session.DeliveryAddress, session.Cart, total);
+
+            if (!summaryResult)
+            {
+                _logger.LogError("Failed to send order summary to {PhoneNumber}", from);
+                await _whatsAppService.SendTextMessageAsync(from,
+                    "Sorry, there was an error displaying your order summary. Please try again or type *cancel*.");
+                session.State = SessionState.AWAITING_ORDER;
+                await _sessionStorage.SaveSessionAsync(session);
+            }
         }
 
         private async Task HandleConfirmationAsync(string from, string message, CustomerSession session)
@@ -342,22 +351,29 @@ namespace POS.Infrastructure.Services.WhatsApp
         {
             try
             {
-                // Get store ID
+                // Get store ID with enhanced logging
                 var storeId = _settings.DefaultStoreId ?? 0;
                 if (storeId == 0)
                 {
                     _logger.LogWarning("Default store ID not configured for WhatsApp orders");
-                    // Try to get first store
                     var stores = await _unitOfWork.Repository<Store>().GetAllAsync();
                     var firstStore = stores.FirstOrDefault();
                     if (firstStore != null)
                     {
                         storeId = firstStore.Id;
+                        _logger.LogInformation("Using first available store: {StoreId}", storeId);
                     }
                     else
                     {
-                        throw new InvalidOperationException("No stores available in the system");
+                        throw new InvalidOperationException("No stores available in the system. Please create a store first.");
                     }
+                }
+
+                // Verify store exists
+                var store = await _unitOfWork.Repository<Store>().SingleOrDefaultAsync(s => s.Id == storeId);
+                if (store == null)
+                {
+                    throw new InvalidOperationException($"Configured store (ID: {storeId}) not found in database.");
                 }
 
                 // Find or create customer
@@ -366,22 +382,19 @@ namespace POS.Infrastructure.Services.WhatsApp
 
                 if (customer == null)
                 {
-                    // Parse name into first and last name
                     var nameParts = session.CustomerName.Trim().Split(new[] { ' ' }, 2);
-                    var firstName = nameParts[0];
-                    var lastName = nameParts.Length > 1 ? nameParts[1] : "";
-
                     customer = new Customer
                     {
-                        FirstName = firstName,
-                        LastName = lastName,
+                        FirstName = nameParts[0],
+                        LastName = nameParts.Length > 1 ? nameParts[1] : "",
                         Phone = from,
-                        Email = $"whatsapp-{from}@cookiebarrel.temp",
+                        Email = $"whatsapp-{from.Replace("+", "")}@cookiebarrel.temp",
                         Address = session.DeliveryAddress,
                         IsActive = true
                     };
                     await _unitOfWork.Repository<Customer>().AddAsync(customer);
                     await _unitOfWork.SaveChangesAsync();
+                    _logger.LogInformation("Created new customer for phone: {Phone}", from);
                 }
                 else
                 {
@@ -392,57 +405,92 @@ namespace POS.Infrastructure.Services.WhatsApp
                     customer.Address = session.DeliveryAddress;
                     _unitOfWork.Repository<Customer>().Update(customer);
                     await _unitOfWork.SaveChangesAsync();
+                    _logger.LogInformation("Updated existing customer: {CustomerId}", customer.Id);
                 }
 
-                // Get a default user ID for WhatsApp orders (system user)
+                // Get system user
                 var users = await _unitOfWork.Repository<User>().GetAllAsync();
                 var systemUser = users.FirstOrDefault();
                 if (systemUser == null)
                 {
-                    throw new InvalidOperationException("No users available in the system");
+                    throw new InvalidOperationException("No users available in the system. Please create at least one user first.");
                 }
 
-                // Create order
+                // Create order with more logging
+                var orderNumber = $"WA{DateTime.UtcNow:yyyyMMddHHmmss}";
+                _logger.LogInformation("Creating order {OrderNumber} for customer {CustomerId}", orderNumber, customer.Id);
+
                 var order = new Order
                 {
-                    OrderNumber = $"WA{DateTime.UtcNow:yyyyMMddHHmmss}",
+                    OrderNumber = orderNumber,
                     OrderDate = DateTime.UtcNow,
                     OrderType = OrderType.Delivery,
                     Status = OrderStatus.Pending,
                     CustomerId = customer.Id,
                     StoreId = storeId,
-                    UserId = systemUser.Id, // Use system user for WhatsApp orders
+                    UserId = systemUser.Id,
                     Notes = string.IsNullOrEmpty(session.SpecialInstructions) 
                         ? $"WhatsApp Order - {session.DeliveryAddress}"
                         : $"WhatsApp Order - {session.DeliveryAddress}\nInstructions: {session.SpecialInstructions}"
                 };
 
-                // Add order items
+                // Add order items with validation
                 foreach (var cartItem in session.Cart)
                 {
                     var product = await _unitOfWork.Repository<Product>().SingleOrDefaultAsync(p => p.Id == cartItem.ProductId);
-                    if (product != null)
+                    if (product == null)
                     {
-                        order.OrderItems.Add(new OrderItem
-                        {
-                            ProductId = product.Id,
-                            Quantity = cartItem.Quantity,
-                            UnitPriceIncGst = product.PriceIncGst,
-                            DiscountAmount = 0,
-                            Notes = cartItem.Notes
-                        });
+                        _logger.LogWarning("Product {ProductId} not found for cart item", cartItem.ProductId);
+                        continue;
                     }
+
+                    // Check stock again before creating order
+                    if (product.TrackInventory && product.StockQuantity < cartItem.Quantity)
+                    {
+                        throw new InvalidOperationException($"Insufficient stock for {product.Name}. Available: {product.StockQuantity}, Required: {cartItem.Quantity}");
+                    }
+
+                    order.OrderItems.Add(new OrderItem
+                    {
+                        ProductId = product.Id,
+                        Quantity = cartItem.Quantity,
+                        UnitPriceIncGst = product.PriceIncGst,
+                        DiscountAmount = 0,
+                        Notes = cartItem.Notes
+                    });
+                }
+
+                if (order.OrderItems.Count == 0)
+                {
+                    throw new InvalidOperationException("No valid order items found in cart");
                 }
 
                 // Calculate totals
                 order.SubTotal = order.OrderItems.Sum(i => i.UnitPriceIncGst * i.Quantity);
-                order.TaxAmount = 0; // Tax already included in price
+                order.TaxAmount = 0;
                 order.DiscountAmount = 0;
                 order.TotalAmount = order.SubTotal;
 
+                // Save order
                 await _unitOfWork.Repository<Order>().AddAsync(order);
                 await _unitOfWork.SaveChangesAsync();
 
+                _logger.LogInformation("Order {OrderNumber} created successfully with {ItemCount} items, Total: ${Total}", 
+                    order.OrderNumber, order.OrderItems.Count, order.TotalAmount);
+
+                // Update inventory if tracking
+                foreach (var item in order.OrderItems)
+                {
+                    var product = await _unitOfWork.Repository<Product>().SingleOrDefaultAsync(p => p.Id == item.ProductId);
+                    if (product != null && product.TrackInventory)
+                    {
+                        product.StockQuantity -= item.Quantity;
+                        _unitOfWork.Repository<Product>().Update(product);
+                    }
+                }
+                await _unitOfWork.SaveChangesAsync();
+
+                // Update session
                 session.OrderNumber = order.OrderNumber;
                 session.State = SessionState.ORDER_PLACED;
                 await _sessionStorage.SaveSessionAsync(session);
@@ -450,21 +498,23 @@ namespace POS.Infrastructure.Services.WhatsApp
                 // Send confirmation
                 await _whatsAppService.SendOrderConfirmationAsync(from, order.OrderNumber, order.TotalAmount);
 
-                // Clear session after a delay
+                // Clear session after delay
                 _ = Task.Run(async () =>
                 {
                     await Task.Delay(TimeSpan.FromMinutes(5));
                     await _sessionStorage.ClearSessionAsync(from);
                 });
-
-                _logger.LogInformation("WhatsApp order created: {OrderNumber} for {PhoneNumber}", 
-                    order.OrderNumber, from);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error creating WhatsApp order for {PhoneNumber}", from);
-                await _whatsAppService.SendTextMessageAsync(from,
-                    "❌ Sorry, there was an error processing your order. Please try again or contact us directly.");
+                _logger.LogError(ex, "Error creating WhatsApp order for {PhoneNumber}. Error: {ErrorMessage}", from, ex.Message);
+                
+                // Send user-friendly error message
+                var errorMessage = ex.Message.Contains("store") || ex.Message.Contains("user")
+                    ? "❌ System configuration error. Please contact support."
+                    : "❌ Sorry, there was an error processing your order. Please try again or contact us directly.";
+                
+                await _whatsAppService.SendTextMessageAsync(from, errorMessage);
                 
                 session.State = SessionState.AWAITING_ORDER;
                 await _sessionStorage.SaveSessionAsync(session);
